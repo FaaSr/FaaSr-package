@@ -62,7 +62,7 @@ faasr_start <- function(faasr_payload) {
   # At this point, the Action has finished the invocation of the User Function
   # We flag this by uploading a file with name FunctionInvoke.done with contents TRUE to the S3 logs folder
   # Check if directory already exists. If not, create one
-  log_folder <- paste0(faasr$FaaSrLog,faasr$InvocationID)
+  log_folder <- paste0(faasr$FaaSrLog,"/",faasr$InvocationID)
   if (!dir.exists(log_folder)) {
     dir.create(log_folder, recursive=TRUE)
   }
@@ -74,6 +74,6 @@ faasr_start <- function(faasr_payload) {
   faasr_trigger(faasr)
 
   # Log to standard output
-  cat('{\"msg\":\"faasr_start: Finished execution of User Function',faasr$FunctionInvoke,'\"}', "\n")
-  cat('{\"msg\":\"faasr_start: With Action Invocation ID is',faasr$InvocationID,'\"}', "\n")
+  cat('{\"msg\":\"faasr_start: Finished execution of User Function ',faasr$FunctionInvoke,'\"}', "\n")
+  cat('{\"msg\":\"faasr_start: With Action Invocation ID is ',faasr$InvocationID,'\"}', "\n")
 }

@@ -26,32 +26,36 @@ faasr_trigger <- function(faasr) {
   } else {
     # Iterate through invoke_next and use FaaS-specific mechanisms to send trigger
     # use "for" loop to iteratively check functions in invoke_next list
-    for (invoke_next_function in invoke_next){
+    for (invoke_next_function in invoke_next) {
 
-       # Change the FunctionInvoke to next function name
-       faasr$FunctionInvoke <- invoke_next_function
+      # Change the FunctionInvoke to next function name
+      faasr$FunctionInvoke <- invoke_next_function
 
-       # Determine FaaS server name via faasr$FunctionList[[invoke_next_function]]$FaaSServer
-       next_server <- faasr$FunctionList[[invoke_next_function]]$FaaSServer
+      # Determine FaaS server name via faasr$FunctionList[[invoke_next_function]]$FaaSServer
+      next_server <- faasr$FunctionList[[invoke_next_function]]$FaaSServer
 
-       # Validate that FaaS server name exists in faasr$ComputeServers list
-       if (next_server %in% names(faasr$ComputeServers)) {
-         NULL
-       } else {
-         cat('{\"msg\":\"faasr_trigger: invalid server name\"}', "\n")
-         break
-       }
+      # Validate that FaaS server name exists in faasr$ComputeServers list
+      if (next_server %in% names(faasr$ComputeServers)) {
+        NULL
+      } else {
+        cat('{\"msg\":\"faasr_trigger: invalid server name\"}', "\n")
+        break
+      }
 
-       # check FaaSType from the named compute server
-       next_server_type <- faasr$ComputeServers[[next_server]]$FaaSType
+      # check FaaSType from the named compute server
+      next_server_type <- faasr$ComputeServers[[next_server]]$FaaSType
 
-       # if OpenWhisk - use OpenWhisk API to send trigger
-       if (next_server_type == "OpenWhisk"){
-	     # Set the env values for the openwhisk action.
-         api_key <- faasr$ComputeServers[[next_server]]$API.key
-	     region <- faasr$ComputeServers[[next_server]]$Region
-	     namespace <- faasr$ComputeServers[[next_server]]$Namespace
-	     actionname <- faasr$FunctionList[[invoke_next_function]]$Actionname
+      # if OpenWhisk - use OpenWhisk API to send trigger
+      if (next_server_type == "OpenWhisk") {
+        #
+        # OpenWhisk API handling
+        #
+        # TBD - need to differentiate from IBMcloud or plain OpenWhisk
+	    # Set the env values for the openwhisk action.
+        api_key <- faasr$ComputeServers[[next_server]]$API.key
+	    region <- faasr$ComputeServers[[next_server]]$Region
+	    namespace <- faasr$ComputeServers[[next_server]]$Namespace
+	    actionname <- faasr$FunctionList[[invoke_next_function]]$Actionname
 
 	    # Openwhisk with IBM cloud - Get a token by using the API key
 	    # URL is the ibmcloud's iam center.
@@ -61,7 +65,7 @@ faasr_trigger <- function(faasr) {
 	    body <- list(grant_type = "urn:ibm:params:oauth:grant-type:apikey",apikey=api_key)
 
 	    # Header is HTTR request's header.
-	     headers <- c("Content-Type"="application/x-www-form-urlencoded")
+	    headers <- c("Content-Type"="application/x-www-form-urlencoded")
 
 	    # Use httr::POST to send the POST request to the IBMcloud iam centers to get a token.
 	    response <- POST(url = url,body = body,encode = "form",add_headers(.headers = headers))
@@ -82,7 +86,6 @@ faasr_trigger <- function(faasr) {
 	    # Openwhisk - Invoke next action - action name should be described.
 	    # Reference: https://cloud.ibm.com/apidocs/functions
 	    # URL is a form of "https://region.functions.cloud.ibm.cloud/api/v1/namespaces/namespace/actions/actionname",
-
 	    # blocking=TRUE&result=TRUE is optional
 	    url_2 <- paste0("https://",region,".functions.cloud.ibm.com/api/v1/namespaces/",namespace,"/actions/",actionname,"?blocking=false&result=false")
 
@@ -100,43 +103,49 @@ faasr_trigger <- function(faasr) {
 
         # if next action's server is not Openwhisk, it returns a message about the next function.
         # TBD need to verify this else statement - unclear
-       } else {
-         cat('{\"msg\":\"faasr_trigger: success_',user_function,'_next_action_',invoke_next_function,'will_be_executed by_',next_server_type,'\"}', "\n")
-       }
+      } else {
+          cat('{\"msg\":\"faasr_trigger: success_',user_function,'_next_action_',invoke_next_function,'will_be_executed by_',next_server_type,'\"}', "\n")
+      }
 
        # if AWS Lambda - use Lambda API
-       if (next_server_type == "Lambda") {
-	     # get next function server
-         target_server <- faasr$ComputeServers[[next_server]]
+      if (next_server_type == "Lambda") {
+        #
+        # AWS Lambda API handling
+        #
+	    # get next function server
+        target_server <- faasr$ComputeServers[[next_server]]
 
-	     # prepare env variables for lambda
-         Sys.setenv("AWS_ACCESS_KEY_ID"=target_server$AccessKey, "AWS_SECRET_ACCESS_KEY"=target_server$SecretKey, "AWS_DEFAULT_REGION"=target_server$Region, "AWS_SESSION_TOKEN" = "")
+	    # prepare env variables for lambda
+        Sys.setenv("AWS_ACCESS_KEY_ID"=target_server$AccessKey, "AWS_SECRET_ACCESS_KEY"=target_server$SecretKey, "AWS_DEFAULT_REGION"=target_server$Region, "AWS_SESSION_TOKEN" = "")
 
-	     # set invoke request body, it should be a JSON. To pass the payload, toJSON is required.
-	     payload_json <- toJSON(faasr, auto_unbox = TRUE)
+	    # set invoke request body, it should be a JSON. To pass the payload, toJSON is required.
+	    payload_json <- toJSON(faasr, auto_unbox = TRUE)
 
-	     # Create a Lambda client using paws
-         lambda <- paws::lambda()
+	    # Create a Lambda client using paws
+        lambda <- paws::lambda()
 
-	     # Invoke next function with FunctionName and Payload, receive trigger response
-         response <- lambda$invoke(
-           FunctionName = faasr$FunctionInvoke,
-           Payload = payload_json
-         )
+	    # Invoke next function with FunctionName and Payload, receive trigger response
+        response <- lambda$invoke(
+          FunctionName = faasr$FunctionInvoke,
+          Payload = payload_json
+        )
 
-	     # Check if next function be invoked successfully
-         if (response$StatusCode == 200) {
-           cat("faasr_trigger: Successfully invoked:", faasr$FunctionInvoke, "\n")
-         } else {
-           cat("faasr_trigger: Error invoking: ",faasr$FunctionInvoke," reason:", response$StatusCode, "\n")
-         }
-       # TBD need to verify this else statement - unclear
-       } else {
-         cat('{\"msg\":\"faasr_trigger: success_',user_function,'_next_action_',invoke_next_function,'will_be_executed by_',next_server_type,'\"}', "\n")
+	    # Check if next function be invoked successfully
+        if (response$StatusCode == 200) {
+          cat("faasr_trigger: Successfully invoked:", faasr$FunctionInvoke, "\n")
+        } else {
+          cat("faasr_trigger: Error invoking: ",faasr$FunctionInvoke," reason:", response$StatusCode, "\n")
+        }
+      # TBD need to verify this else statement - unclear
+      } else {
+        cat('{\"msg\":\"faasr_trigger: success_',user_function,'_next_action_',invoke_next_function,'will_be_executed by_',next_server_type,'\"}', "\n")
       }
 
       # if GitHub Actions - use GH Actions
       if (next_server_type=="GitHubActions"){
+        #
+        # GitHub Actions API handling
+        #
         # Set env values for GitHub Actions event
         pat <- faasr$ComputeServers[[next_server]]$Token
         username <- faasr$ComputeServers[[next_server]]$UserName

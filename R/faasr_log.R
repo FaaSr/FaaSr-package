@@ -23,19 +23,19 @@ faasr_log <- function(faasr,log_message) {
   log_server <- faasr$DataStores[[log_server_name]]
 
   s3<-paws::s3(
-	  config=list(
-		  credentials=list(
-			  creds=list(
-				  access_key_id=log_server$AccessKey,
-				  secret_access_key=log_server$SecretKey
-			  )
-		  ),
-		  region=log_server$Region
-	  )
+    config=list(
+	  credentials=list(
+	    creds=list(
+		  access_key_id=log_server$AccessKey,
+		  secret_access_key=log_server$SecretKey
+		)
+	  ),
+	  region=log_server$Region
+	)
   )
 
-  # set file name to be "faasr_log_" + faasr$InvocationID + ".txt"
-  log_folder <- paste0("FaaSrLogs/", faasr$InvocationID)
+  # set file name to be "faasr_log_" + faasr$InvocationID + faasr$FunctionInvoke + ".txt"
+  log_folder <- paste0(faasr$FaaSrLog, "/", faasr$InvocationID)
   log_file <- paste0(log_folder, "/", faasr$FunctionInvoke,".txt")
   if (!dir.exists(log_folder)){dir.create(log_folder, recursive=TRUE)}
 

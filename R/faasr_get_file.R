@@ -27,15 +27,15 @@ faasr_get_file <- function(faasr, server_name, remote_folder, remote_file, local
   }
 
   s3 <- paws::s3(
-	  config=list(
-		  credentials=list(
-			  creds=list(
-				  access_key_id=target_s3$AccessKey,
-				  secret_access_key=target_s3$SecretKey
-			  )
-		  ),
-		  region=target_s3$Region
-	  )
+    config=list(
+	  credentials=list(
+	    creds=list(
+		  access_key_id=target_s3$AccessKey,
+		  secret_access_key=target_s3$SecretKey
+		)
+	  ),
+	  region=target_s3$Region
+	)
   )
 
   if (file.exists(get_file)) {
