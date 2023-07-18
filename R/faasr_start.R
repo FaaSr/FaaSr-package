@@ -23,6 +23,7 @@
 #' @param faasr_payload JSON Payload provided upon Action invocation by the FaaS platform
 
 library("paws")
+library("FaaSr")
 
 faasr_start <- function(faasr_payload) {
 
@@ -45,7 +46,7 @@ faasr_start <- function(faasr_payload) {
   # The log folder must be a unique name for each Action, such as a user-provided unique timestamp or UUID
   # If a log folder already exists, the Action aborts with stop() before executing the User Function
   if (length(pre) == 0) {
-    faasr_init_log_folder(faasr)
+    faasr <- faasr_init_log_folder(faasr)
   }
 
   # If a User Function has more than one predecessors, this Action may or may not invoke the User Function

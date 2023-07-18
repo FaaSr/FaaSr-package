@@ -41,4 +41,5 @@ faasr_init_log_folder <- function(faasr) {
   } else {
 	s3$put_object(Key=idfolder, Bucket=target_s3$Bucket)
   }
+  return(faasr)
 }
