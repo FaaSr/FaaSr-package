@@ -31,6 +31,11 @@ faasr_init_log_folder <- function(faasr) {
 	  region=target_s3$Region
 	)
   )
+  
+  #If user didn't set FaaSrLog name, set it as a default, "FaaSrLog" 
+  if (length(faasr$FaaSrLog)==0){
+    faasr$FaaSrLog <- "FaaSrLog"
+  } 
 
   idfolder <- paste0(faasr$FaaSrLog,"/" ,faasr$InvocationID, "/")
 
