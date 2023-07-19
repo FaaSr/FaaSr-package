@@ -23,7 +23,6 @@
 #' @param faasr_payload JSON Payload provided upon Action invocation by the FaaS platform
 
 library("paws")
-library("FaaSr")
 
 faasr_start <- function(faasr_payload) {
 
