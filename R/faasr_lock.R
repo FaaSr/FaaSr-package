@@ -41,11 +41,9 @@ faasr_rsm <- function(faasr) {
 	} else {
 	# if ".lock" exists in the bucket, return FALSE, and try all over again.
 	  check_lock <- s3$list_objects_v2(Prefix=lock_name, Bucket=target_s3$Bucket)
-	  if (length(check_lock$Contents) != 0) {
-	    return(FALSE)
+	  if (length(check_lock$Contents) == 0) {
 	  # if ".lock" does not exist, make a new lock with the content of flag_content
-	  } else {
-	    writeLines(flag_content, "lock.txt")
+		writeLines(flag_content, "lock.txt")
 		result <- s3$put_object(Body="lock.txt", Key=lock_name, Bucket=target_s3$Bucket)
 		file.remove("lock.txt")
 
