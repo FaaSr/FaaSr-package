@@ -112,7 +112,7 @@ faasr_anyone_else_interested <- function(faasr, target_s3, flag_path, flag_name)
 	pool <- lapply(check_pool$Contents, function(x) x$Key)
 
 	# if this function sets the flag and it is the only flag, return FALSE, if not, return TRUE
-	if (flag_name %in% pool$Key && length(pool$Key) == 1) {
+	if (flag_name %in% pool && length(pool) == 1) {
 		return(FALSE)
 	} else {
 		return(TRUE)
