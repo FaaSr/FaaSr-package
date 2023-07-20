@@ -26,7 +26,7 @@ faasr_abort_on_multiple_invocations <- function(faasr, pre) {
 	)
   )
 
-  idfolder <- paste0(faasr$FaaSrLog,"/",faasr$InvocationID, "/")
+  idfolder <- paste0(faasr$FaaSrLog,"/",faasr$InvocationID)
 
   # Step 1: First, we check if all possible predecessor Actions are marked "done"
   # This is done by checking if a file named "func.done" exists in S3, where func is the name of the predecessor
@@ -68,7 +68,7 @@ faasr_abort_on_multiple_invocations <- function(faasr, pre) {
 
   # if file named "$FunctionInvoke.candidate" exists on the S3 server, download it to the local folder
   check_fn_candidate <- s3$list_objects_v2(Bucket=log_server$Bucket, Prefix=file_names)
-  if (length(check_fn_candidate) != 0) {
+  if (length(check_fn_candidate$Contents) != 0) {
 	if (file.exists(file_names)) {
 	  file.remove(file_names)
 	}
