@@ -16,14 +16,14 @@ faasr_abort_on_multiple_invocations <- function(faasr, pre) {
   #Sys.setenv("AWS_ACCESS_KEY_ID"=log_server$AccessKey, "AWS_SECRET_ACCESS_KEY"=log_server$SecretKey, "AWS_DEFAULT_REGION"=log_server$Region, "AWS_SESSION_TOKEN" = "")
   s3<-paws::s3(
     config=list(
-	  credentials=list(
-	    creds=list(
-		  access_key_id=log_server$AccessKey,
-		  secret_access_key=log_server$SecretKey
-		)
+      credentials=list(
+        creds=list(
+          access_key_id=log_server$AccessKey,
+          secret_access_key=log_server$SecretKey
+        )
       ),
-	  region=log_server$Region
-	)
+      region=log_server$Region
+    )
   )
 
   id_folder <- paste0(faasr$FaaSrLog,"/",faasr$InvocationID)
@@ -34,15 +34,15 @@ faasr_abort_on_multiple_invocations <- function(faasr, pre) {
   # If not all predecessors are done, it means there are still predecessors pending, and it's safe for this one to abort
   for (func in pre) {
     # check filename is "functionname.done"
-	func_done <- paste0(id_folder,"/",func,".done")
-	check_fn_done<-s3$list_objects_v2(Bucket=log_server$Bucket, Prefix=func_done)
-	# if object exists, do nothing.
-	# if object doesn't exist, leave a log that this function should wait and will be discarded
-	if (length(check_fn_done$Contents) == 0){
-	  cat('{\"msg\":\"faasr_abort_on_multiple_invocations: not the last trigger invoked - no flag\"}', "\n")
-	  faasr_log(faasr, "faasr_abort_on_multiple_invocations: not the last trigger invoked - no flag")
-	    stop()
-	}
+      func_done <- paste0(id_folder,"/",func,".done")
+      check_fn_done<-s3$list_objects_v2(Bucket=log_server$Bucket, Prefix=func_done)
+      # if object exists, do nothing.
+      # if object doesn't exist, leave a log that this function should wait and will be discarded
+      if (length(check_fn_done$Contents) == 0){
+        cat('{\"msg\":\"faasr_abort_on_multiple_invocations: not the last trigger invoked - no flag\"}', "\n")
+	faasr_log(faasr, "faasr_abort_on_multiple_invocations: not the last trigger invoked - no flag")
+	stop()
+      }
   }
 
   # generate random number to be appended to a file named "$FunctionInvoke.candidate"
@@ -71,10 +71,10 @@ faasr_abort_on_multiple_invocations <- function(faasr, pre) {
   # if file named "$FunctionInvoke.candidate" exists on the S3 server, download it to the local folder
   check_fn_candidate <- s3$list_objects_v2(Bucket=log_server$Bucket, Prefix=func_candidate)
   if (length(check_fn_candidate$Contents) != 0) {
-	if (file.exists(func_candidate)) {
-	  file.remove(func_candidate)
-	}
-	s3$download_file(Key=func_candidate, Filename=func_candidate, Bucket=log_server$Bucket)
+    if (file.exists(func_candidate)) {
+      file.remove(func_candidate)
+    }
+    s3$download_file(Key=func_candidate, Filename=func_candidate, Bucket=log_server$Bucket)
   }
 
   # append random number to the file, and upload it back to the s3 bucket
@@ -97,7 +97,7 @@ faasr_abort_on_multiple_invocations <- function(faasr, pre) {
     NULL
   } else {
     cat('{\"msg\":\"faasr_abort_on_multiple_invocations: not the last trigger invoked - random number does not match\"}', "\n")
-	stop()
+    stop()
   }
 
 }
