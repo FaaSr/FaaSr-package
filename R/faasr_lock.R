@@ -33,20 +33,22 @@ faasr_rsm <- function(faasr) {
   while(TRUE) {
     # Put a object named "functionname/flag" with the content "T" into the S3 bucket
 	result <- s3$put_object(Key=flag_name, Bucket=target_s3$Bucket)
-
+	cat('{\"msg\":\"Flag generated\"}', "\n")
 	# if someone has a flag i.e.,faasr_anyone_else_interested returns TRUE, delete_flag and try again.
 	if(faasr_anyone_else_interested(faasr, target_s3, flag_path, flag_name)) {
 	  s3$delete_object(Key=flag_name, Bucket=target_s3$Bucket)
+	  cat('{\"msg\":\"Flag duplicated\"}', "\n")
 	# if nobody has a flag i.e.,faasr_anyone_else_interested returns FALSE, check the lock condition.
 	} else {
 	# if ".lock" exists in the bucket, return FALSE, and try all over again.
 	  check_lock <- s3$list_objects_v2(Prefix=lock_name, Bucket=target_s3$Bucket)
 	  if (length(check_lock$Contents) == 0) {
 	  # if ".lock" does not exist, make a new lock with the content of flag_content
+		cat('{\"msg\":\"writing locks\"}', "\n")
 		writeLines(flag_content, "lock.txt")
 		result <- s3$put_object(Body="lock.txt", Key=lock_name, Bucket=target_s3$Bucket)
 		file.remove("lock.txt")
-
+		cat('{\"msg\":\"Lock created\"}', "\n")
 		# release the flag and get out of the while loop
 		 #delete_object(flag_name, target_s3$Bucket)
 		s3$delete_object(Key=flag_name, Bucket=target_s3$Bucket)
