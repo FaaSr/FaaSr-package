@@ -23,7 +23,9 @@ faasr_check_workflow_cycle <- function(faasr){
 
     # find target in the graph's successor. If it matches, there's a loop
     if (target %in% graph[[start]]) {
-	  cat('{\"msg\":\"faasr_check_workflow_cycle: function loop found\"}', "\n")
+	  err_msg <- paste0('{\"msg\":\"faasr_check_workflow_cycle: function loop found in ',target,'\"}', "\n")
+	  cat(err_msg)
+	  faasr_log(faasr, err_msg)
 	  stop()
 	}
 

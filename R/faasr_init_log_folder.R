@@ -41,7 +41,7 @@ faasr_init_log_folder <- function(faasr) {
 
   check_UUIDfolder<-s3$list_objects_v2(Prefix=idfolder, Bucket=target_s3$Bucket)
   if (length(check_UUIDfolder$Contents)!=0){
-    cat('{\"msg\":\"faasr_init_log_folder: InvocationID already exists\"}', "\n")
+    cat('{\"msg\":\"faasr_init_log_folder: InvocationID already exists: ', faasr$InvocationID,'\"}', "\n")
 	stop()
   } else {
 	s3$put_object(Key=idfolder, Bucket=target_s3$Bucket)
