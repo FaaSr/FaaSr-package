@@ -7,7 +7,7 @@
 #'              Docker containers also declared in the workflow
 #' @param payload_file name of the JSON payload file
 
-faasr_register_workflow_github-actions <- function(payload_file) {
+faasr_register_workflow_github_actions <- function(payload_file) {
   faasr<-jsonlite::fromJSON(payload_file)
 
   # get repository list
