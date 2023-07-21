@@ -76,8 +76,8 @@ faasr_start <- function(faasr_payload) {
   # Log to standard output
   msg_1 <- paste0('{\"msg\":\"faasr_start: Finished execution of User Function ',faasr$FunctionInvoke,'\"}', "\n")
   cat(msg_1)
-  faasr_log(msg_1)
+  faasr_log(faasr, msg_1)
   msg_2 <- paste0('{\"msg\":\"faasr_start: With Action Invocation ID is ',faasr$InvocationID,'\"}', "\n")
   cat(msg_2)
-  faasr_log(msg_2)
+  faasr_log(faasr, msg_2)
 }
