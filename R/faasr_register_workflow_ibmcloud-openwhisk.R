@@ -201,7 +201,7 @@ faasr_register_workflow_ibmcloud_create_action <- function(actionname, faasr) {
 }
 
 # update the payload: there could be new API keys, Namespaces
-faasr_register_workflow_ibmcloud_update_payload <- function(faasr){
+faasr_register_workflow_ibmcloud_update_payload <- function(faasr) {
   # Update the payload
   cat("updating a payload\n")
   payload <- jsonlite::toJSON(faasr, auto_unbox=TRUE)
