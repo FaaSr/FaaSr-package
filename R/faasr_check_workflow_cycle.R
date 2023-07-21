@@ -4,7 +4,6 @@
 #' @return graph a graph representation of the Workflow
 
 # workflow implementation - check loop iteratively, predecessors.
-# TBD check unreachable
 faasr_check_workflow_cycle <- function(faasr){
 
   # build empty lists for the graph and predecessors.

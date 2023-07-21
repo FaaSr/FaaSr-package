@@ -13,7 +13,6 @@ faasr_abort_on_multiple_invocations <- function(faasr, pre) {
   # Set env for checking
   log_server_name = faasr$LoggingServer
   log_server <- faasr$DataStores[[log_server_name]]
-  #Sys.setenv("AWS_ACCESS_KEY_ID"=log_server$AccessKey, "AWS_SECRET_ACCESS_KEY"=log_server$SecretKey, "AWS_DEFAULT_REGION"=log_server$Region, "AWS_SESSION_TOKEN" = "")
   s3<-paws::s3(
     config=list(
 	  credentials=list(
@@ -46,7 +45,6 @@ faasr_abort_on_multiple_invocations <- function(faasr, pre) {
   }
 
   # generate random number to be appended to a file named "$FunctionInvoke.candidate"
-  # TBD - increase range to draw random nunber from
   random_number <- sample(1:10000, 1)
 
   # Check whether local directory exists, if not, create one.
