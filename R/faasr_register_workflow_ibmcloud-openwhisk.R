@@ -1,14 +1,38 @@
-#' @title Interactive script to register a workflow with IBM Cloud Functions OpenWhisk
-#' @description This script automates the process of using IBM Cloud command-line interface tools to register
+#' @title Interactive function to register a workflow with IBM Cloud Functions OpenWhisk
+#' @description This function automates the process of using IBM Cloud command-line interface tools to register
 #'              the various actions that are part of a user's workflow with IBM Cloud Functions / OpenWhisk
-#'              The script depends on the user having the ibmcloud command-line tool installed in their computer:
+#'              The function depends on the user having the ibmcloud command-line tool installed in their computer:
 #'              https://cloud.ibm.com/docs/cli?topic=cli-install-ibmcloud-cli
 #'              as well as the cloud-functions plugin:
 #'              https://cloud.ibm.com/docs/openwhisk?topic=openwhisk-cli_install
 #'              The script expects a command-line argument that is the name of a FaaSr-compliant JSON configuration
 #'              If successful, the script registers all the actions declared in the workflow bound to the
 #'              Docker containers also declared in the workflow
+#' @param payload_file name of the JSON payload file
 
+faasr_register_workflow_ibmcloud-openwhisk <- function(payload_file) {
+  # receive the user's json file as an argument
+  faasr <- jsonlite::fromJSON(payload_file)
+
+  # create a server-action set
+  action_list <- faasr_register_workflow_ibmcloud_action_lists(faasr)
+
+  # check servers and actions, create actions
+  for (server in names(action_list)) {
+    # login_ibm(server, faasr)
+    api_key <- faasr_register_workflow_ibmcloud_create_api_key()
+    if (api_key!=FALSE) {
+      faasr$ComputeServers[[server]]$API.key <- api_key
+    }
+    name_id <- faasr_register_workflow_ibmcloud_target_namespace(server, faasr)
+    faasr$ComputeServers[[server]]$Namespace <- name_id
+    for (act in action_list[[server]]) {
+      faasr_register_workflow_ibmcloud_create_action(act, faasr)
+    }
+  }
+  # update payload
+  faasr_register_workflow_ibmcloud_update_payload(faasr)
+}
 
 faasr_register_workflow_ibmcloud_action_lists <- function(faasr) {
   # empty list
@@ -185,26 +209,3 @@ faasr_register_workflow_ibmcloud_update_payload <- function(faasr){
   writeLines(payload, args[1])
 }
 
-# Body
-# receive the user's json file as an argument
-args <- commandArgs(trailingOnly = TRUE)
-faasr <- jsonlite::fromJSON(args[1])
-
-# create a server-action set
-action_list <- faasr_register_workflow_ibmcloud_action_lists(faasr)
-
-# check servers and actions, create actions
-for (server in names(action_list)) {
-  # login_ibm(server, faasr)
-  api_key <- faasr_register_workflow_ibmcloud_create_api_key()
-  if (api_key!=FALSE) {
-    faasr$ComputeServers[[server]]$API.key <- api_key
-  }
-  name_id <- faasr_register_workflow_ibmcloud_target_namespace(server, faasr)
-  faasr$ComputeServers[[server]]$Namespace <- name_id
-  for (act in action_list[[server]]) {
-    faasr_register_workflow_ibmcloud_create_action(act, faasr)
-  }
-}
-# update payload
-faasr_register_workflow_ibmcloud_update_payload(faasr)
