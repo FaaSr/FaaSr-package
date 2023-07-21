@@ -10,7 +10,7 @@
 #'              Docker containers also declared in the workflow
 #' @param payload_file name of the JSON payload file
 
-faasr_register_workflow_ibmcloud-openwhisk <- function(payload_file) {
+faasr_register_workflow_ibmcloud_openwhisk <- function(payload_file) {
   # receive the user's json file as an argument
   faasr <- jsonlite::fromJSON(payload_file)
 
