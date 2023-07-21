@@ -4,7 +4,6 @@
 #' @return graph a graph representation of the Workflow
 
 # workflow implementation - check loop iteratively, predecessors.
-# TBD check unreachable
 faasr_check_workflow_cycle <- function(faasr){
 
   # build empty lists for the graph and predecessors.
@@ -23,7 +22,9 @@ faasr_check_workflow_cycle <- function(faasr){
 
     # find target in the graph's successor. If it matches, there's a loop
     if (target %in% graph[[start]]) {
-	  cat('{\"msg\":\"faasr_check_workflow_cycle: function loop found\"}', "\n")
+	  err_msg <- paste0('{\"msg\":\"faasr_check_workflow_cycle: function loop found in ',target,'\"}', "\n")
+	  cat(err_msg)
+	  faasr_log(faasr, err_msg)
 	  stop()
 	}
 

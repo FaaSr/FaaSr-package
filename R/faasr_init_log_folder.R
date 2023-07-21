@@ -18,8 +18,6 @@ faasr_init_log_folder <- function(faasr) {
 
   target_s3 <- faasr$LoggingServer
   target_s3 <- faasr$DataStores[[target_s3]]
-  # TBD - is this setenv needed?
-  Sys.setenv("AWS_ACCESS_KEY_ID"=target_s3$AccessKey, "AWS_SECRET_ACCESS_KEY"=target_s3$SecretKey, "AWS_DEFAULT_REGION"=target_s3$Region, "AWS_SESSION_TOKEN" = "")
   s3<-paws::s3(
     config=list(
 	  credentials=list(
@@ -41,7 +39,7 @@ faasr_init_log_folder <- function(faasr) {
 
   check_UUIDfolder<-s3$list_objects_v2(Prefix=idfolder, Bucket=target_s3$Bucket)
   if (length(check_UUIDfolder$Contents)!=0){
-    cat('{\"msg\":\"faasr_init_log_folder: InvocationID already exists\"}', "\n")
+    cat('{\"msg\":\"faasr_init_log_folder: InvocationID already exists: ', faasr$InvocationID,'\"}', "\n")
 	stop()
   } else {
 	s3$put_object(Key=idfolder, Bucket=target_s3$Bucket)

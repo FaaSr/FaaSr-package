@@ -22,7 +22,9 @@ faasr_trigger <- function(faasr) {
 
   # Check if the list is empty or not
   if (length(invoke_next) == 0) {
-    cat('{\"msg\":\"faasr_trigger: no triggers for ',user_function,'\"}', "\n")
+  	err_msg <- paste0('{\"msg\":\"faasr_trigger: no triggers for ',user_function,'\"}', "\n")
+    cat(err_msg)
+    faasr_log(faasr, err_msg)
   } else {
     # Iterate through invoke_next and use FaaS-specific mechanisms to send trigger
     # use "for" loop to iteratively check functions in invoke_next list
@@ -38,7 +40,9 @@ faasr_trigger <- function(faasr) {
       if (next_server %in% names(faasr$ComputeServers)) {
         NULL
       } else {
-        cat('{\"msg\":\"faasr_trigger: invalid server name\"}', "\n")
+      	err_msg <- paste0('{\"msg\":\"faasr_trigger: invalid server name: ',next_server,'\"}', "\n")
+        cat(err_msg)
+        faasr_log(faasr, err_msg)
         break
       }
 
@@ -104,7 +108,9 @@ faasr_trigger <- function(faasr) {
         # if next action's server is not Openwhisk, it returns a message about the next function.
         # TBD need to verify this else statement - unclear
       } else {
-          cat('{\"msg\":\"faasr_trigger: success_',user_function,'_next_action_',invoke_next_function,'will_be_executed by_',next_server_type,'\"}', "\n")
+      	  succ_msg <- paste0('{\"msg\":\"faasr_trigger: success_',user_function,'_next_action_',invoke_next_function,'will_be_executed by_',next_server_type,'\"}', "\n")
+          cat(succ_msg)
+          faasr_log(faasr, succ_msg)
       }
 
        # if AWS Lambda - use Lambda API
@@ -132,13 +138,18 @@ faasr_trigger <- function(faasr) {
 
 	    # Check if next function be invoked successfully
         if (response$StatusCode == 200) {
-          cat("faasr_trigger: Successfully invoked:", faasr$FunctionInvoke, "\n")
+          succ_msg <- paste0("faasr_trigger: Successfully invoked:", faasr$FunctionInvoke, "\n")
+          cat(succ_msg)
+          faasr_log(faasr, succ_msg)
         } else {
+          faasr_log(faasr, response$StatusCode)
           cat("faasr_trigger: Error invoking: ",faasr$FunctionInvoke," reason:", response$StatusCode, "\n")
         }
       # TBD need to verify this else statement - unclear
       } else {
-        cat('{\"msg\":\"faasr_trigger: success_',user_function,'_next_action_',invoke_next_function,'will_be_executed by_',next_server_type,'\"}', "\n")
+      	succ_msg <- paste0('{\"msg\":\"faasr_trigger: success_',user_function,'_next_action_',invoke_next_function,'will_be_executed by_',next_server_type,'\"}', "\n")
+        cat(succ_msg)
+        faasr_log(faasr, succ_msg)
       }
 
       # if GitHub Actions - use GH Actions
@@ -187,13 +198,18 @@ faasr_trigger <- function(faasr) {
 
 	    # Check if next action be invoked successfully
         if (status_code(response) == 204) {
-          cat("faasr_trigger: GitHub Action: Successfully invoked:", faasr$FunctionInvoke, "\n")
+          succ_msg <- paste0("faasr_trigger: GitHub Action: Successfully invoked:", faasr$FunctionInvoke, "\n")
+          cat(succ_msg)
+          faasr_log(faasr,succ_msg)
         } else {
           cat("faasr_trigger: GitHub Action: error happens when invoke next function\n")
+          faasr_log(faasr, "faasr_trigger: GitHub Action: error happens when invoke next function\n")
         }
       # TBD need to verify this else statement - unclear
       } else {
-        cat('{\"msg\":\"faasr_trigger: success_',user_function,'_next_action_',invoke_next_function,'will_be_executed by_',next_server_type,'\"}', "\n")
+      	succ_msg <- paste0('{\"msg\":\"faasr_trigger: success_',user_function,'_next_action_',invoke_next_function,'will_be_executed by_',next_server_type,'\"}', "\n")
+        cat(succ_msg)
+        faasr_log(faasr, succ_msg)
       }
 
     }
