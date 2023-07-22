@@ -16,7 +16,8 @@ faasr_put_file <- function(faasr, server_name, local_folder, local_file, remote_
   if (server_name %in% names(faasr$DataStores)) {
     NULL
   } else {
-    cat('{\"msg\":\"faasr_put_file: Invalid data server name: ',server_name,'\"}', "\n")
+    err_msg <- paste0('{\"faasr_put_file\":\"Invalid data server name: ',server_name,'\"}', "\n")
+    cat(err_msg)
     stop()
   }
 
