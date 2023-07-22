@@ -38,14 +38,15 @@ faasr_abort_on_multiple_invocations <- function(faasr, pre) {
     # if object exists, do nothing.
     # if object doesn't exist, leave a log that this function should wait and will be discarded
     if (length(check_fn_done$Contents) == 0){
-      cat('{\"msg\":\"faasr_abort_on_multiple_invocations: not the last trigger invoked - no flag\"}', "\n")
-      faasr_log(faasr, "faasr_abort_on_multiple_invocations: not the last trigger invoked - no flag")
+      res_msg <- paste0('{\"faasr_abort_on_multiple_invocations\":\"not the last trigger invoked - no flag\"}', "\n")
+      cat(res_msg)
+      faasr_log(faasr, res_msg)
       stop()
     }
   }
 
   # generate random number to be appended to a file named "$FunctionInvoke.candidate"
-  random_number <- sample(1:10000, 1)
+  random_number <- sample(1:10000000, 1)
 
   # Check whether local directory exists, if not, create one.
   if (!dir.exists(id_folder)) {
@@ -94,8 +95,9 @@ faasr_abort_on_multiple_invocations <- function(faasr, pre) {
   if (as.character(random_number) == readLines(func_candidate,1)) {
     NULL
   } else {
-    cat('{\"msg\":\"faasr_abort_on_multiple_invocations: not the last trigger invoked - random number does not match\"}', "\n")
-    faasr_log(faasr, "faasr_abort_on_multiple_invocations: not the last trigger invoked - random number does not match")
+    res_msg <- paste0('{\"faasr_abort_on_multiple_invocations\":\"not the last trigger invoked - random number does not match\"}', "\n"
+    cat(res_msg)
+    faasr_log(faasr, res_msg)
     stop()
   }
 }

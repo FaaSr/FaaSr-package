@@ -16,7 +16,8 @@ faasr_log <- function(faasr,log_message) {
   if (log_server_name %in% names(faasr$DataStores)) {
     NULL
    } else {
-     cat('{\"msg\":\"faasr_log: Invalid logging server name: ',log_server_name,'\"}', "\n")
+     err_msg <- paste0('{\"faasr_log\":\"Invalid logging server name: ',log_server_name,'\"}', "\n")
+     cat(err_msg)
      stop()
    }
 

@@ -8,7 +8,7 @@ library("paws")
 # Read-Set Memory implementation
 faasr_rsm <- function(faasr) {
   # Set env for flag and lock
-  flag_content <- as.character(sample(1:1000,1))
+  flag_content <- as.character(sample(1:10000000,1))
   flag_path <- paste0(faasr$FaaSrLog,"/", faasr$InvocationID,"/",faasr$FunctionInvoke,"/flag/")
   flag_name <- paste0(flag_path,flag_content)
   lock_name <- paste0(faasr$FaaSrLog,"/", faasr$InvocationID,"/",faasr$FunctionInvoke,"./lock")
