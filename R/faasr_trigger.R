@@ -22,7 +22,7 @@ faasr_trigger <- function(faasr) {
 
   # Check if the list is empty or not
   if (length(invoke_next) == 0) {
-  	err_msg <- paste0('{\"msg\":\"faasr_trigger: no triggers for ',user_function,'\"}', "\n")
+    err_msg <- paste0('{\"faasr_trigger\":\"no triggers for ',user_function,'\"}', "\n")
     cat(err_msg)
     faasr_log(faasr, err_msg)
   } else {
@@ -40,7 +40,7 @@ faasr_trigger <- function(faasr) {
       if (next_server %in% names(faasr$ComputeServers)) {
         NULL
       } else {
-      	err_msg <- paste0('{\"msg\":\"faasr_trigger: invalid server name: ',next_server,'\"}', "\n")
+      	err_msg <- paste0('{\"faasr_trigger\":\"invalid server name: ',next_server,'\"}', "\n")
         cat(err_msg)
         faasr_log(faasr, err_msg)
         break
@@ -82,9 +82,10 @@ faasr_trigger <- function(faasr) {
 	      token <- paste("Bearer",result$access_token)
 	    # if result returns an error, return an error message and stop.
 	    } else {
+	      err_msg <- paste0('{\"faasr_trigger\":\"unable to invoke next action, authentication error\"}', "\n")
+	      cat(err_msg)
 	      faasr_log(faasr, result$errorMessage)
-		  cat('{\"msg\":\"faasr_trigger: unable to invoke next action, authentication error\"}', "\n")
-		  break
+	      break
 		}
 
 	    # Openwhisk - Invoke next action - action name should be described.
@@ -108,7 +109,7 @@ faasr_trigger <- function(faasr) {
         # if next action's server is not Openwhisk, it returns a message about the next function.
         # TBD need to verify this else statement - unclear
       } else {
-      	  succ_msg <- paste0('{\"msg\":\"faasr_trigger: success_',user_function,'_next_action_',invoke_next_function,'will_be_executed by_',next_server_type,'\"}', "\n")
+      	  succ_msg <- paste0('{\"faasr_trigger\":\"success_',user_function,'_next_action_',invoke_next_function,'_will_be_executed by_',next_server_type,'\"}', "\n")
           cat(succ_msg)
           faasr_log(faasr, succ_msg)
       }
@@ -142,12 +143,13 @@ faasr_trigger <- function(faasr) {
           cat(succ_msg)
           faasr_log(faasr, succ_msg)
         } else {
-          faasr_log(faasr, response$StatusCode)
-          cat("faasr_trigger: Error invoking: ",faasr$FunctionInvoke," reason:", response$StatusCode, "\n")
+	  err_msg <- paste0("faasr_trigger: Error invoking: ",faasr$FunctionInvoke," reason:", response$StatusCode, "\n")
+          cat(err_msg)
+	  faasr_log(faasr, response$StatusCode)
         }
       # TBD need to verify this else statement - unclear
       } else {
-      	succ_msg <- paste0('{\"msg\":\"faasr_trigger: success_',user_function,'_next_action_',invoke_next_function,'will_be_executed by_',next_server_type,'\"}', "\n")
+      	succ_msg <- paste0('{\"faasr_trigger\":\"success_',user_function,'_next_action_',invoke_next_function,'_will_be_executed by_',next_server_type,'\"}', "\n")
         cat(succ_msg)
         faasr_log(faasr, succ_msg)
       }
@@ -202,16 +204,16 @@ faasr_trigger <- function(faasr) {
           cat(succ_msg)
           faasr_log(faasr,succ_msg)
         } else {
-          cat("faasr_trigger: GitHub Action: error happens when invoke next function\n")
-          faasr_log(faasr, "faasr_trigger: GitHub Action: error happens when invoke next function\n")
+	  err_msg <- paste0("faasr_trigger: GitHub Action: error happens when invoke next function\n")
+          cat(err_msg)
+          faasr_log(faasr, err_msg)
         }
       # TBD need to verify this else statement - unclear
       } else {
-      	succ_msg <- paste0('{\"msg\":\"faasr_trigger: success_',user_function,'_next_action_',invoke_next_function,'will_be_executed by_',next_server_type,'\"}', "\n")
+      	succ_msg <- paste0('{\"faasr_trigger\":\"success_',user_function,'_next_action_',invoke_next_function,'will_be_executed by_',next_server_type,'\"}', "\n")
         cat(succ_msg)
         faasr_log(faasr, succ_msg)
       }
-
     }
   }
 }
