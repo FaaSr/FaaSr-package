@@ -15,7 +15,7 @@ faasr_get_file <- function(faasr, server_name, remote_folder, remote_file, local
   if (server_name %in% names(faasr$DataStores)) {
     NULL
    } else {
-     cat('{\"msg\":\"faasr_get_file: Invalid data server name: ',server_name,'\"}', "\n")
+     cat('{\"faasr_get_file\":\"Invalid data server name: ',server_name,'\"}', "\n")
      stop()
    }
 
