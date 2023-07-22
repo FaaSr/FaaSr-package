@@ -18,22 +18,30 @@ faasr_register_workflow_github_actions <- function(payload_file) {
     # login server with the given server's token
     file_name <- paste0(server,"_token.txt")
     writeLines(faasr$ComputeServers[[server]]$Token, file_name)
-    system(paste0("gh auth login --with-token < ",file_name))
+    check <- system(paste0("gh auth login --with-token < ",file_name))
     file.remove(file_name)
+    if (check == 0){
+      cat("login success")
+    }else{
+      cat("login failed: please check faasr-Computeservers-server_name-Token")
+      stop()
+    }
     for (repo in repo_list[[server]]) {
       # check the repository
       response <- faasr_register_workflow_github_repo_exists(repo)
       faasr_register_workflow_github_create_env(server,repo,faasr)
       faasr_register_workflow_github_set_payload(faasr)
       if (length(faasr$Actioncontainer[[repo]]) == 0) {
-        faasr_register_workflow_github_create_yml_file("faasr/base-tidyverse-github",faasr)
+        faasr_register_workflow_github_create_yml_file("faasr/github-actions-tidyverse",faasr)
       } else {
         container_name <- faasr$Actioncontainer[[repo]]
         faasr_register_workflow_github_create_yml_file(container_name,faasr)
       }
       faasr_register_workflow_github_gh_setup(response, repo)
+      cat("successfully registed action: ", repo)
     }
   }
+  cat("successfully registed all actions")
 }
 
 # make a repo list
@@ -67,10 +75,11 @@ faasr_register_workflow_github_create_env <- function(server_name, repo_name, fa
     cat("Directory for the repository already exists\n")
     cat("Update?[y/n]")
     while(TRUE) {
-      check <- readLines(con="stdin", 1)
+      check <- readline()
       if (check == "y") {
         break
       } else if(check == "n") {
+        cat("stop the function\n")
         stop()
       } else {
         cat("Enter \"y\" or \"n\": ")
@@ -86,7 +95,7 @@ faasr_register_workflow_github_create_env <- function(server_name, repo_name, fa
   secrets$GITHUB_S3_ACCESS_KEY<-faasr$DataStores[[faasr$LoggingServer]]$AccessKey
   secrets$GITHUB_S3_SECRET_KEY<-faasr$DataStores[[faasr$LoggingServer]]$SecretKey
   secrets_json <- jsonlite::toJSON(secrets, auto_unbox=TRUE)
-  contents <- paste0(docker_id,"\n",docker_pw,"\n","SECRET_PAYLOAD=",secrets_json)
+  contents <- paste0("SECRET_PAYLOAD=",secrets_json)
   # create a file ".env"
   writeLines(contents, ".env")
   # create a file ".gitignore"
@@ -137,6 +146,7 @@ on:
 jobs:
   run_docker_image:
     runs-on: ubuntu-latest
+    container: ",containername,"
     env:
       SECRET_PAYLOAD: ${{ secrets.SECRET_PAYLOAD }}
       INPUT_ID: ${{ github.event.inputs.ID }}
@@ -144,15 +154,10 @@ jobs:
       PAYLOAD_REPO: ${{ vars.PAYLOAD_REPO }}
     steps:
     - name: Login to DockerHub
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_SECRET }}
-
-    - name: Pull and run Docker image pass env
+    - name: run Rscript
       run: |
-        docker pull ",containername,"\n",
-        "        docker run -e SECRET_PAYLOAD -e INPUT_ID -e INPUT_INVOKENAME -e PAYLOAD_REPO ",containername)
+        cd /action
+        Rscript faasr_start_invoke_github-actions.R")
   workflow_name<-faasr$ComputeServers[[faasr$FunctionList[[faasr$FunctionInvoke]]$FaaSServer]]$WorkflowName
   path <- paste0(".github/workflows/",workflow_name)
   writeLines(contents, path)
@@ -177,7 +182,7 @@ faasr_register_workflow_github_gh_setup <- function(check, repo) {
     # Ask user for the repository to be private or public
     cat("[private/public]")
     while(TRUE) {
-      check <- readLines(con="stdin", 1)
+      check <- readine()
       if (check == "private") {
         auth <- "private"
         break
@@ -194,7 +199,7 @@ faasr_register_workflow_github_gh_setup <- function(check, repo) {
     cat("Repository already exists\n")
     cat("Update the repository?[y/n]")
     while(TRUE) {
-      check1 <- readLines(con="stdin", 1)
+      check1 <- readline()
       if (check1=="y") {
         system("git commit -m \'update repo\'")
         command <- paste0("git push -f http://github.com/",repo," main")
