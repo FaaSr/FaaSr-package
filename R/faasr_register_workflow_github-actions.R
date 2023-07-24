@@ -182,7 +182,7 @@ faasr_register_workflow_github_gh_setup <- function(check, repo) {
     # Ask user for the repository to be private or public
     cat("[private/public]")
     while(TRUE) {
-      check <- readine()
+      check <- readline()
       if (check == "private") {
         auth <- "private"
         break
