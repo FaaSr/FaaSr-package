@@ -95,7 +95,7 @@ faasr_abort_on_multiple_invocations <- function(faasr, pre) {
   if (as.character(random_number) == readLines(func_candidate,1)) {
     NULL
   } else {
-    res_msg <- paste0('{\"faasr_abort_on_multiple_invocations\":\"not the last trigger invoked - random number does not match\"}', "\n"
+    res_msg <- paste0('{\"faasr_abort_on_multiple_invocations\":\"not the last trigger invoked - random number does not match\"}', "\n")
     cat(res_msg)
     faasr_log(faasr, res_msg)
     stop()
