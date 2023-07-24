@@ -153,7 +153,6 @@ jobs:
       INPUT_INVOKENAME: ${{ github.event.inputs.InvokeName }}
       PAYLOAD_REPO: ${{ vars.PAYLOAD_REPO }}
     steps:
-    - name: Login to DockerHub
     - name: run Rscript
       run: |
         cd /action
