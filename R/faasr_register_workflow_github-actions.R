@@ -21,7 +21,7 @@ faasr_register_workflow_github_actions <- function(payload_file) {
     check <- system(paste0("gh auth login --with-token < ",file_name))
     file.remove(file_name)
     if (check == 0){
-      cat("login success")
+      cat("login success\n")
     }else{
       cat("login failed: please check faasr-Computeservers-server_name-Token")
       stop()
@@ -38,10 +38,10 @@ faasr_register_workflow_github_actions <- function(payload_file) {
         faasr_register_workflow_github_create_yml_file(container_name,faasr)
       }
       faasr_register_workflow_github_gh_setup(response, repo)
-      cat("successfully registed action: ", repo)
+      cat("successfully registed action: ", repo,"\n")
     }
   }
-  cat("successfully registed all actions")
+  cat("successfully registed all actions\n")
 }
 
 # make a repo list
