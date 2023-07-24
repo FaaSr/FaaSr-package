@@ -84,7 +84,7 @@ faasr_trigger <- function(faasr) {
 	    } else {
 	      err_msg <- paste0('{\"faasr_trigger\":\"unable to invoke next action, authentication error\"}', "\n")
 	      cat(err_msg)
-	      faasr_log(faasr, result$errorMessage)
+	      faasr_log(faasr, err_msg)
 	      break
 		}
 
@@ -145,7 +145,7 @@ faasr_trigger <- function(faasr) {
         } else {
 	  err_msg <- paste0("faasr_trigger: Error invoking: ",faasr$FunctionInvoke," reason:", response$StatusCode, "\n")
           cat(err_msg)
-	  faasr_log(faasr, response$StatusCode)
+	  faasr_log(faasr, err_msg)
         }
       # TBD need to verify this else statement - unclear
       } else {
