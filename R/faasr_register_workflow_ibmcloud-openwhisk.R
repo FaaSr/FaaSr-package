@@ -31,7 +31,7 @@ faasr_register_workflow_ibmcloud_openwhisk <- function(payload_file) {
     }
   }
   # update payload
-  faasr_register_workflow_ibmcloud_update_payload(faasr)
+  faasr_register_workflow_ibmcloud_update_payload(faasr, payload_file)
 }
 
 faasr_register_workflow_ibmcloud_action_lists <- function(faasr) {
@@ -54,15 +54,19 @@ faasr_register_workflow_ibmcloud_create_api_key <- function() {
   cat("Create a new api-key?[y/n]")
   # Create an API key
   while(TRUE) {
-    check <- readLines(con="stdin", 1)
+    check <- readline()
     if (check=="y") {
       cat("type api-key name: ")
       # receive the user's input for the namespace name
-      name <- readLines(con="stdin", 1)
+      name <- readline()
       # create a new api key
       command <- paste0("ibmcloud iam api-key-create ",name)
       cat("creating a new api-key\n")
-      response <- system(command, intern=TRUE,ignore.stdout=TRUE, ignore.stderr=TRUE)
+      response <- system(command, intern=TRUE,ignore.stderr=TRUE)
+      if (length(response)==0){
+        cat("error: check the login status")
+	stop()
+      }
       # save the result to the json file
       cat("successful", "\n")
       # parse only api key from the response
@@ -109,11 +113,11 @@ faasr_register_workflow_ibmcloud_target_namespace <- function(server,faasr) {
     cat("Invalid Namespace\n")
     cat("Create a new Namespace?[y/n]")
     while(TRUE) {
-      check <- readLines(con="stdin", 1)
+      check <- readline()
       if (check=="y") {
         cat("type Namespace name: ")
         # receive the user's input for the namespace name
-        name <- readLines(con="stdin", 1)
+        name <- readline()
         # create a new namespace
         namespace <- create_namespace(name)
         # save the result to the json file
@@ -121,6 +125,7 @@ faasr_register_workflow_ibmcloud_target_namespace <- function(server,faasr) {
         cat("successful", "\n")
         break
       } else if(check=="n") {
+	cat("stop the function")
         stop()
       } else {
         cat("Enter \"y\" or \"n\": ")
@@ -147,16 +152,17 @@ login_ibm <- function(server,faasr) {
     stop()
 		#cat("Create a new API.key?[y/n]")
 		#while(TRUE){
-		#		check <- readLines(con="stdin", 1)
+		#		check <- readline()
 		#		if (check=="y"){
 		#			cat("type API key name: ")
-		#			name <- readLines(con="stdin", 1)
+		#			name <- readline()
 		#			# create a new api key with user-provided name
 		#			api_key <- create_api_key(name)
 		#			faasr$ComputeServers[[server]]$API.key <- api_key
 		#			cat("successful", "\n")
 		#			break
 		#		}else if(check=="n"){
+	  	#			cat("stop the function")
 		#			stop()
 		#		}else{cat("Enter \"y\" or \"n\": ")}
 		#	}
@@ -183,7 +189,7 @@ faasr_register_workflow_ibmcloud_create_action <- function(actionname, faasr) {
     print("error: action name already exists")
     cat("Do you want to update the action?[y/n]")
     while(TRUE) {
-      check <- readLines(con="stdin", 1)
+      check <- readlines()
       if (check=="y") {
         # update the action
         command <- paste("ibmcloud fn action update",actionname,"--docker",actioncontainer,"--timeout 600000 --memory 2048")
@@ -201,11 +207,11 @@ faasr_register_workflow_ibmcloud_create_action <- function(actionname, faasr) {
 }
 
 # update the payload: there could be new API keys, Namespaces
-faasr_register_workflow_ibmcloud_update_payload <- function(faasr) {
+faasr_register_workflow_ibmcloud_update_payload <- function(faasr, payload_file) {
   # Update the payload
   cat("updating a payload\n")
   payload <- jsonlite::toJSON(faasr, auto_unbox=TRUE)
   payload <- jsonlite::prettify(payload)
-  writeLines(payload, args[1])
+  writeLines(payload, payload_file)
 }
 
