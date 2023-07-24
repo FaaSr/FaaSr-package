@@ -32,7 +32,7 @@ faasr_parse <- function(faasr_payload) {
     return(faasr)
   } else {
 	err_msg <- paste0('{\"faasr_parse\":\"JSON Payload not compliant with FaaSr schema\"}', "\n")
-	cat()
+	cat(err_msg)
     stop()
 
 	# Room for improvement: it can return 1. error msg, 2. logs from jsonvalidate.
