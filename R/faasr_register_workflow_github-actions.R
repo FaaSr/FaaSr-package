@@ -31,10 +31,10 @@ faasr_register_workflow_github_actions <- function(payload_file) {
       response <- faasr_register_workflow_github_repo_exists(repo)
       faasr_register_workflow_github_create_env(server,repo,faasr)
       faasr_register_workflow_github_set_payload(faasr)
-      if (length(faasr$Actioncontainer[[repo]]) == 0) {
+      if (length(faasr$ActionContainers[[repo]]) == 0) {
         faasr_register_workflow_github_create_yml_file("faasr/github-actions-tidyverse",faasr)
       } else {
-        container_name <- faasr$Actioncontainer[[repo]]
+        container_name <- faasr$ActionContainers[[repo]]
         faasr_register_workflow_github_create_yml_file(container_name,faasr)
       }
       faasr_register_workflow_github_gh_setup(response, repo)
@@ -126,12 +126,13 @@ faasr_register_workflow_github_set_payload <- function(faasr){
   }
   # create a file named "payload.json"
   faasr_gh <- jsonlite::toJSON(faasr_gh, auto_unbox=TRUE)
-  write(faasr_gh, "payload.json")
+  faasr_gh_pt <- jsonlite::prettify(faasr_gh)
+  write(faasr_gh_pt, "payload.json")
 }
 
 # Create a yaml workflow file with the container name
 faasr_register_workflow_github_create_yml_file <- function(containername, faasr){
-  contents <- paste0("name: Run Docker Image from Docker Hub
+  contents <- paste0("name: Running Function- ",faasr$FunctionInvoke,"
 
 on:
   workflow_dispatch:
@@ -142,6 +143,9 @@ on:
       InvokeName:
         description: 'FunctionInvoke'
         required: true
+      FaaSrLog:
+        description: 'FaaSrLog'
+        required: false
 
 jobs:
   run_docker_image:
@@ -152,6 +156,7 @@ jobs:
       INPUT_ID: ${{ github.event.inputs.ID }}
       INPUT_INVOKENAME: ${{ github.event.inputs.InvokeName }}
       PAYLOAD_REPO: ${{ vars.PAYLOAD_REPO }}
+      INPUT_FAASRLOG: ${{ github.event.inputs.FaaSrLog }}
     steps:
     - name: run Rscript
       run: |

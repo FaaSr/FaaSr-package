@@ -161,23 +161,26 @@ faasr_trigger <- function(faasr) {
         #
         # Set env values for GitHub Actions event
         pat <- faasr$ComputeServers[[next_server]]$Token
-        username <- faasr$ComputeServers[[next_server]]$UserName
-        repo <- faasr$ComputeServers[[next_server]]$RepoName
-        workflow_file <- faasr$ComputeServers[[next_server]]$WorkflowName
+        #username <- faasr$ComputeServers[[next_server]]$UserName
+        #repo <- faasr$ComputeServers[[next_server]]$RepoName
+        repo <- faasr$FunctionList[[invoke_next_function]]$Actionname
+	workflow_file <- faasr$ComputeServers[[next_server]]$WorkflowName
         git_ref <- faasr$ComputeServers[[next_server]]$Ref
 
 	    # Set inputs for the workflow trigger event with InvocationID and Next_Invoke_Function_Name
         input_id <- faasr$InvocationID
         input_invokename <- faasr$FunctionInvoke
+	input_faasr_log <- faasr$FaaSrLog
 
         # The inputs for the workflow
         inputs <- list(
           ID = input_id,
-          InvokeName = input_invokename
+          InvokeName = input_invokename,
+	  FaaSrLog = input_faasr_log
         )
 
         # Set the URL for the REST API endpoint of next action
-        url <- paste0("https://api.github.com/repos/", username, "/", repo, "/actions/workflows/", workflow_file, "/dispatches")
+        url <- paste0("https://api.github.com/repos/", repo, "/actions/workflows/", workflow_file, "/dispatches")
 
         # Set the body of the POST request with github ref and inputs
         body <- list(
