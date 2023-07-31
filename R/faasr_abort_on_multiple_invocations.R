@@ -21,6 +21,7 @@ faasr_abort_on_multiple_invocations <- function(faasr, pre) {
           secret_access_key=log_server$SecretKey
         )
       ),
+      endpoint=log_server$Endpoint,
       region=log_server$Region
     )
   )
