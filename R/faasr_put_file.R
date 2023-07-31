@@ -33,7 +33,7 @@ faasr_put_file <- function(faasr, server_name, local_folder, local_file, remote_
 				  secret_access_key=target_s3$SecretKey
 		      )
 		  ),
-		  endpoint=target_s3$Endpoint
+		  endpoint=target_s3$Endpoint,
 		  region=target_s3$Region
 	  )
   )
