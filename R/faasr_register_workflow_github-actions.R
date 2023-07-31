@@ -131,7 +131,7 @@ faasr_register_workflow_github_set_payload <- function(faasr){
 
 # Create a yaml workflow file with the container name
 faasr_register_workflow_github_create_yml_file <- function(containername, faasr){
-  contents <- paste0("name: Run Docker Image from Docker Hub
+  contents <- paste0("name: Running Function- ",faasr$FunctionInvoke,"
 
 on:
   workflow_dispatch:
@@ -142,6 +142,9 @@ on:
       InvokeName:
         description: 'FunctionInvoke'
         required: true
+      FaaSrLog:
+        description: 'FaaSrLog'
+        required: false
 
 jobs:
   run_docker_image:
@@ -152,6 +155,7 @@ jobs:
       INPUT_ID: ${{ github.event.inputs.ID }}
       INPUT_INVOKENAME: ${{ github.event.inputs.InvokeName }}
       PAYLOAD_REPO: ${{ vars.PAYLOAD_REPO }}
+      INPUT_FAASRLOG: ${{ github.event.inputs.FaaSrLog }}
     steps:
     - name: run Rscript
       run: |
