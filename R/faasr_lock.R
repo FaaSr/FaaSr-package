@@ -86,7 +86,7 @@ faasr_release<-function(faasr) {
 				secret_access_key=target_s3$SecretKey
 			)
 		),
-	  endpoint=target_s3$Endpoint
+	  endpoint=target_s3$Endpoint,
 	  region=target_s3$Region
 	  )
 	)
@@ -106,7 +106,7 @@ faasr_anyone_else_interested <- function(faasr, target_s3, flag_path, flag_name)
 		    secret_access_key=target_s3$SecretKey
 		  )
 	    ),
-	    endpoint=target_s3$Endpoint
+	    endpoint=target_s3$Endpoint,
 	    region=target_s3$Region
 	  )
     )
