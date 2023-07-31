@@ -77,8 +77,6 @@
             {
             "properties":{
                   "FaaSType":{"enum":["GitHubActions"]},
-                  "UserName":{"type":"string","minLength": 1},
-                  "RepoName":{"type":"string","minLength": 1},
                   "WorkflowName":{"type":"string","minLength": 1},
                   "Token":{"type":"string","minLength": 1},
                   "Ref":{"type":"string","minLength": 1}
