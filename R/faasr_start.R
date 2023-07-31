@@ -54,6 +54,24 @@ faasr_start <- function(faasr_payload) {
     faasr_abort_on_multiple_invocations(faasr, pre)
   }
 
+  endpoint_check <- faasr$DataStores[[faasr$LoggingServer]]$Endpoint
+  region_check <- faasr$DataStores[[faasr$LoggingServer]]$Region
+  if (length(endpoint_check)==0) || endpoint_check=="") {
+    faasr$DataStores[[faasr$LoggingServer]]$Endpoint <- ""
+  }else{
+    if (startsWith(endpoint_check, "http")){
+      msg <- paste0('{\"faasr_start\":\"Invalid Logging server endpoint ',endpoint_check,'\"}', "\n")
+      cat(msg)
+      result <- faasr_log(faasr, msg_1)
+      stop()
+    }
+  }
+
+  if (length(region_check)==0 || region_check==""){
+    faasr$DataStores[[faasr$LoggingServer]]$Region <- "NA"
+  }
+  
+  
   # If the Action reaches this point without aborting, it is ready to invoke the User Function
   # Extract the name of the User Function from the Payload, and invoke it, passing the parsed Payload as arg
   user_function = get(faasr$FunctionInvoke)
