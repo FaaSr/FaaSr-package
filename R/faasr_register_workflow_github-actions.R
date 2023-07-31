@@ -126,7 +126,8 @@ faasr_register_workflow_github_set_payload <- function(faasr){
   }
   # create a file named "payload.json"
   faasr_gh <- jsonlite::toJSON(faasr_gh, auto_unbox=TRUE)
-  write(faasr_gh, "payload.json")
+  faasr_gh_pt <- jsonlite::prettify(faasr_gh)
+  write(faasr_gh_pt, "payload.json")
 }
 
 # Create a yaml workflow file with the container name
