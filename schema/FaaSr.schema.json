@@ -81,7 +81,7 @@
                   "Token":{"type":"string","minLength": 1},
                   "Ref":{"type":"string","minLength": 1}
                   },
-            "required":["FaaSType", "UserName", "RepoName", "WorkflowName", "Token", "Ref"],
+            "required":["FaaSType", "WorkflowName", "Token", "Ref"],
             "additionalProperties": false
             }
             ]
