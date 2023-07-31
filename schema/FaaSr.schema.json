@@ -99,15 +99,14 @@
         "":{
             "type":"object",
             "properties":{
-                  "Endpoint":{"type":"string","minLength": 1},
-                  "Protocol":{"type":"string","minLength": 1},
+                  "Endpoint":{"type":"string"},
                   "AccessKey":{"type":"string","minLength": 1},
                   "SecretKey":{"type":"string","minLength": 1},
                   "Bucket":{"type":"string","minLength": 1},
                   "Region":{"type":"string","minLength": 1},
                   "Writable":{"type":"string","minLength": 1}
                   },
-            "required":["Endpoint", "Protocol", "AccessKey", "SecretKey", "Bucket", "Region"],
+            "required":["AccessKey", "SecretKey", "Bucket", "Region"],
             "additionalProperties": false
         }
       }
