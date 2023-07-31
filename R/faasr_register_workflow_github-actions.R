@@ -31,10 +31,10 @@ faasr_register_workflow_github_actions <- function(payload_file) {
       response <- faasr_register_workflow_github_repo_exists(repo)
       faasr_register_workflow_github_create_env(server,repo,faasr)
       faasr_register_workflow_github_set_payload(faasr)
-      if (length(faasr$Actioncontainers[[repo]]) == 0) {
+      if (length(faasr$ActionContainers[[repo]]) == 0) {
         faasr_register_workflow_github_create_yml_file("faasr/github-actions-tidyverse",faasr)
       } else {
-        container_name <- faasr$Actioncontainers[[repo]]
+        container_name <- faasr$ActionContainers[[repo]]
         faasr_register_workflow_github_create_yml_file(container_name,faasr)
       }
       faasr_register_workflow_github_gh_setup(response, repo)
