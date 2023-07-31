@@ -31,7 +31,7 @@ faasr_init_log_folder <- function(faasr) {
   )
   
   #If user didn't set FaaSrLog name, set it as a default, "FaaSrLog" 
-  if (length(faasr$FaaSrLog)==0){
+  if (length(faasr$FaaSrLog)==0 || faasr$FaaSrLog==""){
     faasr$FaaSrLog <- "FaaSrLog"
   } 
 
