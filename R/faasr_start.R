@@ -56,7 +56,7 @@ faasr_start <- function(faasr_payload) {
 
   endpoint_check <- faasr$DataStores[[faasr$LoggingServer]]$Endpoint
   region_check <- faasr$DataStores[[faasr$LoggingServer]]$Region
-  if (length(endpoint_check)==0) || endpoint_check=="") {
+  if (length(endpoint_check)==0 || endpoint_check=="") {
     faasr$DataStores[[faasr$LoggingServer]]$Endpoint <- ""
   }else{
     if (startsWith(endpoint_check, "http")){
