@@ -35,7 +35,7 @@ faasr_get_file <- function(faasr, server_name, remote_folder, remote_file, local
 		  secret_access_key=target_s3$SecretKey
 		)
 	  ),
-	  endpoint=log_server$Endpoint,
+	  endpoint=target_s3$Endpoint,
 	  region=target_s3$Region
 	)
   )
