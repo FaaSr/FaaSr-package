@@ -59,7 +59,7 @@ faasr_start <- function(faasr_payload) {
   if (length(endpoint_check)==0 || endpoint_check=="") {
     faasr$DataStores[[faasr$LoggingServer]]$Endpoint <- ""
   }else{
-    if (startsWith(endpoint_check, "http")){
+    if (!(startsWith(endpoint_check, "http"))){
       msg <- paste0('{\"faasr_start\":\"Invalid Logging server endpoint ',endpoint_check,'\"}', "\n")
       cat(msg)
       result <- faasr_log(faasr, msg_1)
