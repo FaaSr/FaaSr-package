@@ -175,7 +175,7 @@ faasr_trigger <- function(faasr) {
         # The inputs for the workflow
         inputs <- list(
           ID = input_id,
-          InvokeName = input_invokename
+          InvokeName = input_invokename,
 	  FaaSrLog = input_faasr_log
         )
 
