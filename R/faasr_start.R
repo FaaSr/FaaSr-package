@@ -68,7 +68,7 @@ faasr_start <- function(faasr_payload) {
   }
 
   if (length(region_check)==0 || region_check==""){
-    faasr$DataStores[[faasr$LoggingServer]]$Region <- "NA"
+    faasr$DataStores[[faasr$LoggingServer]]$Region <- "region"
   }
   
   
