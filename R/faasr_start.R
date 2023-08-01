@@ -36,6 +36,27 @@ faasr_start <- function(faasr_payload) {
   # If the User Workflow is not a DAG, the Action aborts with stop() before executing the User Function
   graph <- faasr_check_workflow_cycle(faasr)
 
+  # Check endpoint/region of the Logging server / TBD: Check all the DataStores servers
+  # If endpoint is not defined(length==0) or empty(=="", for else cases), set empty value ""
+  # If endpoint is not empty(not S3), check whether endpoint starts with http
+  # If region is not defined(length==0) or empty(==""), set any value("region" in this case).
+  endpoint_check <- faasr$DataStores[[faasr$LoggingServer]]$Endpoint
+  region_check <- faasr$DataStores[[faasr$LoggingServer]]$Region
+  if (length(endpoint_check)==0 || endpoint_check=="") {
+    faasr$DataStores[[faasr$LoggingServer]]$Endpoint <- ""
+  }else{
+    if (!(startsWith(endpoint_check, "http"))){
+      msg <- paste0('{\"faasr_start\":\"Invalid Logging server endpoint ',endpoint_check,'\"}', "\n")
+      cat(msg)
+      stop()
+    }
+  }
+
+  if (length(region_check)==0 || region_check==""){
+    faasr$DataStores[[faasr$LoggingServer]]$Region <- "region"
+  }
+
+  
   # Make a list of all User Functions that are the predecessors of this User Function, if any
   pre <- faasr_predecessors_list(faasr, graph)
 
@@ -53,7 +74,7 @@ faasr_start <- function(faasr_payload) {
   if (length(pre) > 1) {
     faasr_abort_on_multiple_invocations(faasr, pre)
   }
-
+  
   # If the Action reaches this point without aborting, it is ready to invoke the User Function
   # Extract the name of the User Function from the Payload, and invoke it, passing the parsed Payload as arg
   user_function = get(faasr$FunctionInvoke)

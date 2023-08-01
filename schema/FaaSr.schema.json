@@ -77,13 +77,11 @@
             {
             "properties":{
                   "FaaSType":{"enum":["GitHubActions"]},
-                  "UserName":{"type":"string","minLength": 1},
-                  "RepoName":{"type":"string","minLength": 1},
                   "WorkflowName":{"type":"string","minLength": 1},
                   "Token":{"type":"string","minLength": 1},
                   "Ref":{"type":"string","minLength": 1}
                   },
-            "required":["FaaSType", "UserName", "RepoName", "WorkflowName", "Token", "Ref"],
+            "required":["FaaSType", "WorkflowName", "Token", "Ref"],
             "additionalProperties": false
             }
             ]
@@ -99,15 +97,14 @@
         "":{
             "type":"object",
             "properties":{
-                  "Endpoint":{"type":"string","minLength": 1},
-                  "Protocol":{"type":"string","minLength": 1},
+                  "Endpoint":{"type":"string"},
                   "AccessKey":{"type":"string","minLength": 1},
                   "SecretKey":{"type":"string","minLength": 1},
                   "Bucket":{"type":"string","minLength": 1},
-                  "Region":{"type":"string","minLength": 1},
+                  "Region":{"type":"string"},
                   "Writable":{"type":"string","minLength": 1}
                   },
-            "required":["Endpoint", "Protocol", "AccessKey", "SecretKey", "Bucket", "Region"],
+            "required":["AccessKey", "SecretKey", "Bucket", "Region"],
             "additionalProperties": false
         }
       }

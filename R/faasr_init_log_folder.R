@@ -26,6 +26,7 @@ faasr_init_log_folder <- function(faasr) {
 		  secret_access_key=target_s3$SecretKey
 		)
 	  ),
+	  endpoint=target_s3$Endpoint,
 	  region=target_s3$Region
 	)
   )

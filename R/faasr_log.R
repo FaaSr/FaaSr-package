@@ -31,6 +31,7 @@ faasr_log <- function(faasr,log_message) {
 		  secret_access_key=log_server$SecretKey
 		)
 	  ),
+	  endpoint=log_server$Endpoint,
 	  region=log_server$Region
 	)
   )
