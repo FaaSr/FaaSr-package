@@ -36,6 +36,10 @@ faasr_start <- function(faasr_payload) {
   # If the User Workflow is not a DAG, the Action aborts with stop() before executing the User Function
   graph <- faasr_check_workflow_cycle(faasr)
 
+  # Check endpoint/region of the Logging server / TBD: Check all the DataStores servers
+  # If endpoint is not defined(length==0) or empty(=="", for else cases), set empty value ""
+  # If endpoint is not empty(not S3), check whether endpoint starts with http
+  # If region is not defined(length==0) or empty(==""), set any value("region" in this case).
   endpoint_check <- faasr$DataStores[[faasr$LoggingServer]]$Endpoint
   region_check <- faasr$DataStores[[faasr$LoggingServer]]$Region
   if (length(endpoint_check)==0 || endpoint_check=="") {
@@ -44,7 +48,6 @@ faasr_start <- function(faasr_payload) {
     if (!(startsWith(endpoint_check, "http"))){
       msg <- paste0('{\"faasr_start\":\"Invalid Logging server endpoint ',endpoint_check,'\"}', "\n")
       cat(msg)
-      result <- faasr_log(faasr, msg_1)
       stop()
     }
   }
