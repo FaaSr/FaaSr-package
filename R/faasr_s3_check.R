@@ -7,10 +7,23 @@ faasr_s3_check <- function(faasr){
       faasr$DataStores[[server]]$Endpoint <- ""
     }else{
       if (!(startsWith(endpoint_check, "http"))){
-        msg <- paste0('{\"faasr_start\":\"Invalid Logging server endpoint ',server,'\"}', "\n")
+        msg <- paste0('{\"faasr_s3_check\":\"Invalid Logging server endpoint ',server,'\"}', "\n")
         cat(msg)
         stop()
       }
+    }
+    check <- try(s3$list_buckets(), silent=TRUE)
+    if(class(check)==list){
+      bucket_names <- lapply(check$Buckets, function(bucket) bucket$Name)
+      if(!(faasr$DataStores[[server]]$Bucket %in% bucket_names)){
+        msg <- paste0('{\"faasr_s3_check\":\"S3 server ',server,' failed with message: No such bucket\"}', "\n")
+        cat(msg)
+        stop()
+      }
+    }else{
+      msg <- paste0('{\"faasr_s3_check\":\"S3 server ',server,' failed with message: Data store server unreachable\"}', "\n")
+      cat(msg)
+      stop()
     }
   }
   return(faasr)
