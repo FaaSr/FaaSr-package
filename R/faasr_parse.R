@@ -31,16 +31,17 @@ faasr_parse <- function(faasr_payload) {
   if (faasr_schema_valid(faasr_payload)) {
     return(faasr)
   } else {
-	err_msg <- paste0('{\"faasr_parse\":\"JSON Payload not compliant with FaaSr schema\"}', "\n")
+	#err_msg <- paste0('{\"faasr_parse\":\"JSON Payload not compliant with FaaSr schema\"}', "\n")
+	#cat(err_msg)
+	  
+	message_schema <- attr(faasr_schema_valid(faasr_payload, verbose=TRUE, greedy=TRUE),"errors")
+        tag <- c("schemaPath", "message")
+        log <- message_schema[,tag]
+        log_s <- paste(log$schemaPath, log$message, "\n", sep = " ")
+        cat(log_s)
+	err_msg <- paste0('{\"faasr_parse\":\"JSON Payload error - please check the logs for your FaaS provider for more information\"}', "\n")
 	cat(err_msg)
-    stop()
-
-	# Room for improvement: it can return 1. error msg, 2. logs from jsonvalidate.
-	# message_schema <- attr(faasr_schema_valid(faasr_payload, verbose=TRUE, greedy=TRUE),"errors")
-	# tag <- c("schemaPath", "message")
-	# log <- message_schema[,tag]
-	# log_json <- toJSON(log)
-	# cat('{\"msg\":\"',log_json,'\"}', "\n")
+        stop()
   }
 }
 
