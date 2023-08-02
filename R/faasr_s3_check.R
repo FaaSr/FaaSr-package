@@ -13,3 +13,5 @@ faasr_s3_check <- function(faasr){
       }
     }
   }
+  return(faasr)
+}
