@@ -39,7 +39,7 @@ faasr_parse <- function(faasr_payload) {
         log <- message_schema[,tag]
         log_s <- paste(log$schemaPath, log$message, "\n", sep = " ")
         cat(log_s)
-	err_msg <- paste0('{\"faasr_parse\":\"JSON Payload error-check openwhisk activation logs for more information\"}', "\n")
+	err_msg <- paste0('{\"faasr_parse\":\"JSON Payload error - please check the logs for your FaaS provider for more information\"}', "\n")
 	cat(err_msg)
         stop()
 
