@@ -42,7 +42,6 @@ faasr_parse <- function(faasr_payload) {
 	err_msg <- paste0('{\"faasr_parse\":\"JSON Payload error - please check the logs for your FaaS provider for more information\"}', "\n")
 	cat(err_msg)
         stop()
-
   }
 }
 
