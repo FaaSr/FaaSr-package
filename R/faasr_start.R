@@ -69,7 +69,8 @@ faasr_start <- function(faasr_payload) {
     stop()
     }
   )
-  faasr_result <- user_function(faasr)
+  user_args = faasr_get_user_function_args(faasr)
+  faasr_result <- do.call(user_function, user_args)
 
   # At this point, the Action has finished the invocation of the User Function
   # We flag this by uploading a file with name FunctionInvoke.done with contents TRUE to the S3 logs folder
