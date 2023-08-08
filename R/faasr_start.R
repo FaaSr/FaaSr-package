@@ -62,7 +62,13 @@ faasr_start <- function(faasr_payload) {
   
   # If the Action reaches this point without aborting, it is ready to invoke the User Function
   # Extract the name of the User Function from the Payload, and invoke it, passing the parsed Payload as arg
-  user_function = get(faasr$FunctionInvoke)
+  user_function = tryCatch(expr=get(faasr$FunctionInvoke), error=function(e){
+    err_msg <- paste0('{\"faasr_start\":\"Cannot find FunctionInvoke ',faasr$FunctionInvoke,', check the name and sources\"}', "\n")
+    cat(err_msg)
+    result <- faasr_log(faasr, err_msg)
+    stop()
+    }
+  )
   faasr_result <- user_function(faasr)
 
   # At this point, the Action has finished the invocation of the User Function
