@@ -206,8 +206,20 @@ faasr_trigger <- function(faasr) {
           succ_msg <- paste0("faasr_trigger: GitHub Action: Successfully invoked:", faasr$FunctionInvoke, "\n")
           cat(succ_msg)
           faasr_log(faasr,succ_msg)
-        } else {
-	  err_msg <- paste0("faasr_trigger: GitHub Action: error happens when invoke next function\n")
+        } else if (status_code(response) == 401) {
+	  err_msg <- paste0("faasr_trigger: GitHub Action: Authentication failed, check the credentials\n")
+          cat(err_msg)
+          faasr_log(faasr,err_msg)
+	} else if (status_code(response) == 404) {
+	  err_msg <- paste0("faasr_trigger: GitHub Action: Cannot find the destination, check the actionname: \"",repo,"\" and workflow name: \"",workflow_file,"\"\n")
+          cat(err_msg)
+          faasr_log(faasr,err_msg)
+	} else if (status_code(response) == 422) {
+	  err_msg <- paste0("faasr_trigger: GitHub Action: Cannot find the destination, check the ref: ", faasr$FunctionInvoke, "\n")
+          cat(err_msg)
+          faasr_log(faasr,err_msg)
+	} else {
+	  err_msg <- paste0("faasr_trigger: GitHub Action: unknown error happens when invoke next function\n")
           cat(err_msg)
           faasr_log(faasr, err_msg)
         }
