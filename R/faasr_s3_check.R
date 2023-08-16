@@ -1,6 +1,6 @@
 faasr_s3_check <- function(faasr){
 
-  for(server in names(faasr$DataStores){
+  for(server in names(faasr$DataStores)){
     endpoint_check <- faasr$DataStores[[server]]$Endpoint
     region_check <- faasr$DataStores[[server]]$Region
     if (length(endpoint_check)==0 || endpoint_check=="") {
