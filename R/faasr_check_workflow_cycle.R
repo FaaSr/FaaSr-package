@@ -17,7 +17,7 @@ faasr_check_workflow_cycle <- function(faasr){
   # check next functions of FunctionInvoke are in the function list
   for (func in graph[[faasr$FunctionInvoke]]){	
     if (!(func %in% names(faasr$FunctionList))){
-      err_msg <- paste0('{\"faasr_check_workflow_cycle\":\"function loop found in ',target,'\"}', "\n")
+      err_msg <- paste0('{\"faasr_check_workflow_cycle\":\"unreachable state or invalid function name is found in ',func,'\"}', "\n")
       cat(err_msg)
       faasr_log(faasr, err_msg)
       stop()
