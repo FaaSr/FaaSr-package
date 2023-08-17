@@ -12,6 +12,18 @@ faasr_s3_check <- function(faasr){
         stop()
       }
     }
+    s3<-paws::s3(
+      config=list(
+	      credentials=list(
+	        creds=list(
+		        access_key_id=faasr$DataStores[[server]]$AccessKey,
+		        secret_access_key=faasr$DataStores[[server]]$SecretKey
+		      )
+	      ),
+	    endpoint=faasr$DataStores[[server]]$Endpoint,
+	    region=faasr$DataStores[[server]]$Region
+	  )
+  )
     check <- try(s3$list_buckets(), silent=TRUE)
     if(class(check)==list){
       bucket_names <- lapply(check$Buckets, function(bucket) bucket$Name)
