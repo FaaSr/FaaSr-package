@@ -23,7 +23,7 @@ faasr_s3_check <- function(faasr){
 	    endpoint=faasr$DataStores[[server]]$Endpoint,
 	    region=faasr$DataStores[[server]]$Region
 	  )
-  )
+    )
     check <- try(s3$list_buckets(), silent=TRUE)
     if(class(check)==list){
       bucket_names <- lapply(check$Buckets, function(bucket) bucket$Name)
