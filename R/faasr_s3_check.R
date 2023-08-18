@@ -1,3 +1,10 @@
+#' @title Implements function for checking the s3 states.
+#' @description Check 1. server's Endpoint&Region and Endpoint has a valid form(http) 2. send a req for the list of buckets to check 
+#' @description the status of s3 stroage servers. 3. Check that the bucket name exists.
+#' @param faasr list with parsed and validated Payload
+
+library("paws")
+
 faasr_s3_check <- function(faasr){
 
   for(server in names(faasr$DataStores)){
