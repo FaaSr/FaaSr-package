@@ -62,7 +62,6 @@ faasr_start <- function(faasr_payload) {
   
   # If the Action reaches this point without aborting, it is ready to invoke the User Function
   # Extract the name of the User Function from the Payload, and invoke it, passing the parsed Payload as arg
-  # try get(faasr$FunctionInvoke) and if there's an error, return error message and stop the function
   user_function = get(faasr$FunctionInvoke)
   faasr_result <- user_function(faasr)
 
