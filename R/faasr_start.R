@@ -63,17 +63,8 @@ faasr_start <- function(faasr_payload) {
   # If the Action reaches this point without aborting, it is ready to invoke the User Function
   # Extract the name of the User Function from the Payload, and invoke it, passing the parsed Payload as arg
   # try get(faasr$FunctionInvoke) and if there's an error, return error message and stop the function
-  user_function = tryCatch(expr=get(faasr$FunctionInvoke), error=function(e){
-    err_msg <- paste0('{\"faasr_start\":\"Cannot find FunctionInvoke ',faasr$FunctionInvoke,', check the name and sources\"}', "\n")
-    cat(err_msg)
-    result <- faasr_log(faasr, err_msg)
-    stop()
-    }
-  )
-  # Get a list of the current function's arguments.
-  user_args = faasr_get_user_function_args(faasr)
-  # Use do.call to use user_function with arguments
-  faasr_result <- do.call(user_function, user_args)
+  user_function = get(faasr$FunctionInvoke)
+  faasr_result <- user_function(faasr)
 
   # At this point, the Action has finished the invocation of the User Function
   # We flag this by uploading a file with name FunctionInvoke.done with contents TRUE to the S3 logs folder
