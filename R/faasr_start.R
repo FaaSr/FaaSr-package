@@ -71,6 +71,9 @@ faasr_start <- function(faasr_payload) {
     }
   )
   
+  # Get a list of the current function's arguments.
+  user_args = faasr_get_user_function_args(faasr)
+  
   # Use do.call to use user_function with arguments
   # try do.call and if there's an error, return error message and stop the function
   faasr_result <- tryCatch(expr=do.call(user_function, user_args), error=function(e){
