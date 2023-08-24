@@ -79,6 +79,7 @@ faasr_start <- function(faasr_payload) {
   faasr_result <- tryCatch(expr=do.call(user_function, user_args), error=function(e){
     nat_err_msg <- paste0('\"faasr_start\": ', as.character(e))
     err_msg <- paste0('{\"faasr_start\":\"Errors in the user function: ',faasr$FunctionInvoke,', check the log for the detail \"}', "\n")
+    cat(nat_err_msg)
     cat(err_msg)
     result <- faasr_log(faasr, err_msg)
     result_2 <- faasr_log(faasr, nat_err_msg)
