@@ -1,7 +1,7 @@
 Package: FaaSr
 Type: Package
 Title: FaaS (Function as a Service) Package for R
-Version: 0.0.0.2
+Version: 0.0.0.3
 Authors@R: c(person("Figueiredo", "Renato", role = c("aut", "cre", "ths"),
                     email = "renatof@ufl.edu",
                     comment = c(ORCID = "0000-0001-9841-6060")),
@@ -9,7 +9,8 @@ Authors@R: c(person("Figueiredo", "Renato", role = c("aut", "cre", "ths"),
              person("Mu", "Nan", role = "ctb"),
              person("Ku", "Yun-Jung", role = "ctb"),
              person("Daneshmand", "Vahid", role = "ctb"),
-             person("Thomas", "R. Quinn", role = "aut")
+             person("Thomas", "R. Quinn", role = "aut"),
+             person("Carey", "Cayelan", role = "ctb")
 	     )
 Maintainer: Renato Figueiredo <renatof@ufl.edu>
 Description: A package that allows users to create and deploy workflows with multiple R functions
