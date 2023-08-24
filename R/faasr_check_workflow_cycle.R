@@ -14,6 +14,16 @@ faasr_check_workflow_cycle <- function(faasr){
     graph[[func]] <- faasr$FunctionList[[func]]$InvokeNext
   }
 
+  # check next functions of FunctionInvoke are in the function list
+  for (func in graph[[faasr$FunctionInvoke]]){	
+    if (!(func %in% names(faasr$FunctionList))){
+      err_msg <- paste0('{\"faasr_check_workflow_cycle\":\"unreachable state or invalid function name is found in ',func,'\"}', "\n")
+      cat(err_msg)
+      faasr_log(faasr, err_msg)
+      stop()
+    }
+  }
+
   # build an empty list of stacks - this will prevent the infinite loop
   stack <- list()
 
