@@ -19,6 +19,9 @@ faasr_s3_check <- function(faasr){
         stop()
       }
     }
+    if (length(region_check)==0 || region_check==""){
+      faasr$DataStores[[server]]$Region <- "region"
+    }
     s3<-paws::s3(
       config=list(
 	      credentials=list(
