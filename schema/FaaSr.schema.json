@@ -157,3 +157,4 @@
   },
   "required": [ "FunctionInvoke", "LoggingServer", "FunctionList", "ComputeServers", "DataStores"]
 }
+
