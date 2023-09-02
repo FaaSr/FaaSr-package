@@ -161,10 +161,10 @@ faasr_trigger <- function(faasr) {
         #
         # Set env values for GitHub Actions event
         pat <- faasr$ComputeServers[[next_server]]$Token
-        #username <- faasr$ComputeServers[[next_server]]$UserName
-        #repo <- faasr$ComputeServers[[next_server]]$RepoName
-        repo <- faasr$FunctionList[[invoke_next_function]]$Actionname
-	workflow_file <- faasr$ComputeServers[[next_server]]$WorkflowName
+        username <- faasr$ComputeServers[[next_server]]$UserName
+        reponame <- faasr$ComputeServers[[next_server]]$RepoName
+        repo <- paste0(username, "/", reponame)
+	workflow_file <- faasr$FunctionList[[invoke_next_function]]$Actionname
         git_ref <- faasr$ComputeServers[[next_server]]$Ref
 
 	    # Set inputs for the workflow trigger event with InvocationID and Next_Invoke_Function_Name
