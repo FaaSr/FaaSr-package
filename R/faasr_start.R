@@ -66,7 +66,7 @@ faasr_start <- function(faasr_payload) {
   user_function = tryCatch(expr=get(.faasr$FunctionInvoke), error=function(e){
     err_msg <- paste0('{\"faasr_start\":\"Cannot find FunctionInvoke ',.faasr$FunctionInvoke,', check the name and sources\"}', "\n")
     cat(err_msg)
-    result <- faasr_log(.faasr, err_msg)
+    result <- faasr_log(err_msg)
     stop()
     }
   )
@@ -81,8 +81,8 @@ faasr_start <- function(faasr_payload) {
     err_msg <- paste0('{\"faasr_start\":\"Errors in the user function: ',.faasr$FunctionInvoke,', check the log for the detail \"}', "\n")
     cat(nat_err_msg)
     cat(err_msg)
-    result <- faasr_log(.faasr, err_msg)
-    result_2 <- faasr_log(.faasr, nat_err_msg)
+    result <- faasr_log(err_msg)
+    result_2 <- faasr_log(nat_err_msg)
     stop()
     }
   )
@@ -104,8 +104,8 @@ faasr_start <- function(faasr_payload) {
   # Log to standard output
   msg_1 <- paste0('{\"faasr_start\":\"Finished execution of User Function ',.faasr$FunctionInvoke,'\"}', "\n")
   cat(msg_1)
-  result <- faasr_log(.faasr, msg_1)
+  result <- faasr_log(msg_1)
   msg_2 <- paste0('{\"faasr_start\":\"With Action Invocation ID is ',.faasr$InvocationID,'\"}', "\n")
   cat(msg_2)
-  result <- faasr_log(.faasr, msg_2)
+  result <- faasr_log(msg_2)
 }
