@@ -24,7 +24,7 @@ faasr_trigger <- function(faasr) {
   if (length(invoke_next) == 0) {
     err_msg <- paste0('{\"faasr_trigger\":\"no triggers for ',user_function,'\"}', "\n")
     cat(err_msg)
-    faasr_log(faasr, err_msg)
+    faasr_log(err_msg)
   } else {
     # Iterate through invoke_next and use FaaS-specific mechanisms to send trigger
     # use "for" loop to iteratively check functions in invoke_next list
@@ -42,7 +42,7 @@ faasr_trigger <- function(faasr) {
       } else {
       	err_msg <- paste0('{\"faasr_trigger\":\"invalid server name: ',next_server,'\"}', "\n")
         cat(err_msg)
-        faasr_log(faasr, err_msg)
+        faasr_log(err_msg)
         break
       }
 
@@ -84,7 +84,7 @@ faasr_trigger <- function(faasr) {
 	    } else {
 	      err_msg <- paste0('{\"faasr_trigger\":\"unable to invoke next action, authentication error\"}', "\n")
 	      cat(err_msg)
-	      faasr_log(faasr, err_msg)
+	      faasr_log(err_msg)
 	      break
 		}
 
@@ -111,7 +111,7 @@ faasr_trigger <- function(faasr) {
       } else {
       	  succ_msg <- paste0('{\"faasr_trigger\":\"success_',user_function,'_next_action_',invoke_next_function,'_will_be_executed by_',next_server_type,'\"}', "\n")
           cat(succ_msg)
-          faasr_log(faasr, succ_msg)
+          faasr_log(succ_msg)
       }
 
        # if AWS Lambda - use Lambda API
@@ -141,17 +141,17 @@ faasr_trigger <- function(faasr) {
         if (response$StatusCode == 200) {
           succ_msg <- paste0("faasr_trigger: Successfully invoked:", faasr$FunctionInvoke, "\n")
           cat(succ_msg)
-          faasr_log(faasr, succ_msg)
+          faasr_log(succ_msg)
         } else {
 	  err_msg <- paste0("faasr_trigger: Error invoking: ",faasr$FunctionInvoke," reason:", response$StatusCode, "\n")
           cat(err_msg)
-	  faasr_log(faasr, err_msg)
+	  faasr_log(err_msg)
         }
       # TBD need to verify this else statement - unclear
       } else {
       	succ_msg <- paste0('{\"faasr_trigger\":\"success_',user_function,'_next_action_',invoke_next_function,'_will_be_executed by_',next_server_type,'\"}', "\n")
         cat(succ_msg)
-        faasr_log(faasr, succ_msg)
+        faasr_log(succ_msg)
       }
 
       # if GitHub Actions - use GH Actions
@@ -205,29 +205,29 @@ faasr_trigger <- function(faasr) {
         if (status_code(response) == 204) {
           succ_msg <- paste0("faasr_trigger: GitHub Action: Successfully invoked:", faasr$FunctionInvoke, "\n")
           cat(succ_msg)
-          faasr_log(faasr,succ_msg)
+          faasr_log(succ_msg)
         } else if (status_code(response) == 401) {
 	  err_msg <- paste0("faasr_trigger: GitHub Action: Authentication failed, check the credentials\n")
           cat(err_msg)
-          faasr_log(faasr,err_msg)
+          faasr_log(err_msg)
 	} else if (status_code(response) == 404) {
 	  err_msg <- paste0("faasr_trigger: GitHub Action: Cannot find the destination, check the actionname: \"",repo,"\" and workflow name: \"",workflow_file,"\"\n")
           cat(err_msg)
-          faasr_log(faasr,err_msg)
+          faasr_log(err_msg)
 	} else if (status_code(response) == 422) {
 	  err_msg <- paste0("faasr_trigger: GitHub Action: Cannot find the destination, check the ref: ", faasr$FunctionInvoke, "\n")
           cat(err_msg)
-          faasr_log(faasr,err_msg)
+          faasr_log(err_msg)
 	} else {
 	  err_msg <- paste0("faasr_trigger: GitHub Action: unknown error happens when invoke next function\n")
           cat(err_msg)
-          faasr_log(faasr, err_msg)
+          faasr_log(err_msg)
         }
       # TBD need to verify this else statement - unclear
       } else {
       	succ_msg <- paste0('{\"faasr_trigger\":\"success_',user_function,'_next_action_',invoke_next_function,'will_be_executed by_',next_server_type,'\"}', "\n")
         cat(succ_msg)
-        faasr_log(faasr, succ_msg)
+        faasr_log(succ_msg)
       }
     }
   }
