@@ -11,13 +11,11 @@ library("paws")
 
 # Default server_name is Logging Server, default remote folder name is empty ("") and 
 # local folder name is current directory(".")
-faasr_get_file <- function(server_name=.faasr$LoggingServer, remote_folder="", remote_file, local_folder=".", local_file) {
-  # Define "faasr" by using global variable ".faasr" 
-  faasr <- .faasr
+faasr_get_file <- function(server_name=.faasr$LoggingServer, remote_folder="", remote_file, local_folder=".", local_file) { 
   # Check that an S3 server_name has been defined
   # If not, log an error and abort
   
-  if (server_name %in% names(faasr$DataStores)) {
+  if (server_name %in% names(.faasr$DataStores)) {
     NULL
    } else {
      err_msg <- paste0('{\"faasr_get_file\":\"Invalid data server name: ',server_name,'\"}', "\n")
@@ -25,7 +23,7 @@ faasr_get_file <- function(server_name=.faasr$LoggingServer, remote_folder="", r
      stop()	
    }
 
-  target_s3 <- faasr$DataStores[[server_name]]
+  target_s3 <- .faasr$DataStores[[server_name]]
 
   # Remove "/" in the folder & file name to avoid situations:
   # 1: duplicated "/" ("/remote/folder/", "/file_name") 
