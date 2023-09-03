@@ -54,8 +54,10 @@ faasr_register_workflow_github_repo_lists <- function(faasr) {
     server_name <- faasr$FunctionList[[fn]]$FaaSServer
     # if FaaStype is Githubactions, add it to the list
     if (faasr$ComputeServers[[server_name]]$FaaSType == "GitHubActions") {
-      repo_name <- faasr$FunctionList[[fn]]$Actionname
-      repo_list[[server_name]] <- unique(c(repo_list[[server_name]],repo_name))
+      user_name <- faasr$ComputeServers[[server_name]]$UserName
+      repo_name <- faasr$ComputeServers[[server_name]]$RepoName
+      repo <- paste0(user_name,"/",repo_name)
+      repo_list[[server_name]] <- unique(c(repo_list[[server_name]],repo))
     }
   }
   return(repo_list)
