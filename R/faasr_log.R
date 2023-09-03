@@ -54,5 +54,3 @@ faasr_log <- function(faasr,log_message) {
   write.table(logs, log_file, col.names=FALSE, row.names = FALSE, append=TRUE, quote=FALSE)
   s3$put_object(Body=log_file, Key=log_file, Bucket=log_server$Bucket)
 }
-
-
