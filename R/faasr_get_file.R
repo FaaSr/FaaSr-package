@@ -34,7 +34,7 @@ faasr_get_file <- function(server_name=.faasr$LoggingServer, remote_folder="", r
   get_file_s3 <- paste0(remote_folder, "/", remote_file)
 
   # Check the situation that local_path is not defined and local_folder is defined as an absoulte path.
-  if (local_folder="." && local_file == normalizePath(local_file)){
+  if (local_folder=="." && local_file == normalizePath(local_file)){
     local_folder <- dirname(local_file)
     get_file <- local_file
   # If not, takes same way with remote folder & file
