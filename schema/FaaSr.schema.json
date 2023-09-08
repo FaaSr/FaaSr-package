@@ -61,7 +61,7 @@
             "AccessKey":{"type":"string","minLength": 1},
             "SecretKey":{"type":"string","minLength": 1},
             "UserName":{"type":"string","minLength": 1},
-            "RepoName":{"type":"string","minLenght": 1},
+            "ActionRepoName":{"type":"string","minLenght": 1},
             "Token":{"type":"string","minLength": 1},
             "Ref":{"type":"string","minLength": 1}
           },
