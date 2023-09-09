@@ -91,7 +91,7 @@
                 "required":["FaaSType"]
               },
               "then": {
-                "required":["UserName", "RepoName", "Token", "Ref"]
+                "required":["UserName", "ActionRepoName", "Token", "Ref"]
               }
             }
           ]
