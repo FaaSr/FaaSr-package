@@ -60,8 +60,7 @@
             "API.key":{"type":"string","minLength": 1},
             "AccessKey":{"type":"string","minLength": 1},
             "SecretKey":{"type":"string","minLength": 1},
-            "UserName":{"type":"string","minLength": 1},
-            "ActionRepoName":{"type":"string","minLenght": 1},
+            "WorkflowName":{"type":"string","minLenght": 1},
             "Token":{"type":"string","minLength": 1},
             "Ref":{"type":"string","minLength": 1}
           },
@@ -91,7 +90,7 @@
                 "required":["FaaSType"]
               },
               "then": {
-                "required":["UserName", "ActionRepoName", "Token", "Ref"]
+                "required":["WorkflowName", "Token", "Ref"]
               }
             }
           ]
@@ -114,7 +113,7 @@
                   "Region":{"type":"string"},
                   "Writable":{"type":"string","minLength": 1}
                   },
-            "required":["AccessKey", "SecretKey", "Bucket", "Region"],
+            "required":["AccessKey", "SecretKey", "Bucket"],
             "additionalProperties": false
         }
       }
