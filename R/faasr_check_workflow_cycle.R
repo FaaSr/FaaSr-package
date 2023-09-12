@@ -19,7 +19,7 @@ faasr_check_workflow_cycle <- function(faasr){
     if (!(func %in% names(faasr$FunctionList))){
       err_msg <- paste0('{\"faasr_check_workflow_cycle\":\"unreachable state or invalid function name is found in ',func,'\"}', "\n")
       cat(err_msg)
-      faasr_log(faasr, err_msg)
+      faasr_log(err_msg)
       stop()
     }
   }
@@ -34,7 +34,7 @@ faasr_check_workflow_cycle <- function(faasr){
     if (target %in% graph[[start]]) {
 	  err_msg <- paste0('{\"faasr_check_workflow_cycle\":\"function loop found in ',target,'\"}', "\n")
 	  cat(err_msg)
-	  faasr_log(faasr, err_msg)
+	  faasr_log(err_msg)
 	  stop()
 	}
 

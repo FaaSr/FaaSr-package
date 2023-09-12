@@ -9,10 +9,13 @@
 
 library("paws")
 
-faasr_get_file <- function(faasr, server_name, remote_folder, remote_file, local_folder, local_file) {
+# Default server_name is Logging Server, default remote folder name is empty ("") and 
+# local folder name is current directory(".")
+faasr_get_file <- function(server_name=.faasr$LoggingServer, remote_folder="", remote_file, local_folder=".", local_file) { 
   # Check that an S3 server_name has been defined
   # If not, log an error and abort
-  if (server_name %in% names(faasr$DataStores)) {
+  
+  if (server_name %in% names(.faasr$DataStores)) {
     NULL
    } else {
      err_msg <- paste0('{\"faasr_get_file\":\"Invalid data server name: ',server_name,'\"}', "\n")
@@ -20,9 +23,27 @@ faasr_get_file <- function(faasr, server_name, remote_folder, remote_file, local
      stop()	
    }
 
-  target_s3 <- faasr$DataStores[[server_name]]
-  get_file <- paste0(local_folder,"/",local_file)
+  target_s3 <- .faasr$DataStores[[server_name]]
+
+  # Remove "/" in the folder & file name to avoid situations:
+  # 1: duplicated "/" ("/remote/folder/", "/file_name") 
+  # 2: multiple "/" by user mistakes ("//remote/folder//", "file_name")
+  # 3: file_name ended with "/" ("/remote/folder", "file_name/")
+  remote_folder <- sub("^/+", "", sub("/+$", "", remote_folder))
+  remote_file <- sub("^/+", "", sub("/+$", "", remote_file))
   get_file_s3 <- paste0(remote_folder, "/", remote_file)
+
+  # Check the situation that local_path is not defined and local_folder is defined as an absoulte path.
+  if (local_folder="." && local_file == normalizePath(local_file)){
+    local_folder <- dirname(local_file)
+    get_file <- local_file
+  # If not, takes same way with remote folder & file
+  } else{
+    local_folder <- sub("^/+", "", sub("/+$", "", local_folder))
+    local_file <- sub("^/+", "", sub("/+$", "", local_file))
+    get_file <- paste0(local_folder,"/",local_file)
+  }  
+  
   if (!dir.exists(local_folder)) {
     dir.create(local_folder, recursive=TRUE)
   }
