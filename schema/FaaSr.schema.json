@@ -32,15 +32,15 @@
       "minProperties": 1,
       "patternProperties": {
         "":{
-            "type":"object",
-            "properties":{
-                  "FaaSServer":{"type":"string","minLength": 1},
-                  "Actionname":{"type":"string","minLength": 1},
-                  "Arguments":{"type":"object"},
-                  "InvokeNext":{"type":["string", "array"]}
-                  },
-            "required":["FaaSServer", "Actionname"],
-            "additionalProperties": false
+          "type":"object",
+          "properties":{
+            "FaaSServer":{"type":"string","minLength": 1},
+            "Actionname":{"type":"string","minLength": 1},
+            "Arguments":{"type":"object"},
+            "InvokeNext":{"type":["string", "array"]}
+          },
+          "required":["FaaSServer", "Actionname"],
+          "additionalProperties": false
         }
       }
     },
@@ -51,42 +51,51 @@
       "propertyNames":{"minLength": 1},
       "patternProperties": {
         "":{
-            "type":"object",
-            "oneOf":[
+          "type":"object",
+          "properties":{
+            "FaaSType":{"enum":["OpenWhisk", "GitHubActions", "Lambda"]},
+            "Region":{"type":"string","minLength": 1},
+            "Endpoint":{"type":"string","minLength": 1},
+            "Namespace":{"type":"string","minLength": 1},
+            "API.key":{"type":"string","minLength": 1},
+            "AccessKey":{"type":"string","minLength": 1},
+            "SecretKey":{"type":"string","minLength": 1},
+            "WorkflowName":{"type":"string","minLength": 1},
+            "Token":{"type":"string","minLength": 1},
+            "Ref":{"type":"string","minLength": 1}
+          },
+          "additionalProperties":false,
+          "allOf":[
             {
-            "properties":{
-                  "FaaSType":{"enum":["OpenWhisk"]},
-                  "Region":{"type":"string","minLength": 1},
-                  "Endpoint":{"type":"string","minLength": 1},
-                  "Namespace":{"type":"string","minLength": 1},
-                  "API.key":{"type":"string","minLength": 1}
-                  },
-            "required":["FaaSType", "Region", "Endpoint", "Namespace", "API.key"],
-            "additionalProperties": false
+              "if": {
+                "properties": {"FaaSType":{"const": "OpenWhisk"}},
+                "required":["FaaSType"]
+              },
+              "then": {
+                "required":["Region", "Endpoint", "Namespace", "API.key"]
+              }
             },
             {
-            "properties":{
-                  "FaaSType":{"enum":["Lambda"]},
-                  "Region":{"type":"string","minLength": 1},
-                  "AccessKey":{"type":"string","minLength": 1},
-                  "SecretKey":{"type":"string","minLength": 1}
-                  },
-            "required":["FaaSType", "Region", "AccessKey", "SecretKey"],
-            "additionalProperties": false
+              "if": {
+                "properties": {"FaaSType":{"const": "Lambda"}},
+                "required":["FaaSType"]
+              },
+              "then": {
+                "required":["Region", "AccessKey", "SecretKey"]
+              }
             },
             {
-            "properties":{
-                  "FaaSType":{"enum":["GitHubActions"]},
-                  "WorkflowName":{"type":"string","minLength": 1},
-                  "Token":{"type":"string","minLength": 1},
-                  "Ref":{"type":"string","minLength": 1}
-                  },
-            "required":["FaaSType", "WorkflowName", "Token", "Ref"],
-            "additionalProperties": false
+              "if": {
+                "properties": {"FaaSType":{"const": "GitHubActions"}},
+                "required":["FaaSType"]
+              },
+              "then": {
+                "required":["WorkflowName", "Token", "Ref"]
+              }
             }
-            ]
-          }
+          ]
         }
+      }
     },
     "DataStores": {
       "description": "A list of one or more S3 data servers used in the workflow",
@@ -104,7 +113,7 @@
                   "Region":{"type":"string"},
                   "Writable":{"type":"string","minLength": 1}
                   },
-            "required":["AccessKey", "SecretKey", "Bucket", "Region"],
+            "required":["AccessKey", "SecretKey", "Bucket"],
             "additionalProperties": false
         }
       }
@@ -148,3 +157,4 @@
   },
   "required": [ "FunctionInvoke", "LoggingServer", "FunctionList", "ComputeServers", "DataStores"]
 }
+
