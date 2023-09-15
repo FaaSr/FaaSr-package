@@ -24,7 +24,7 @@ faasr_register_workflow_github_actions <- function(payload_file) {
       cat("login success\n")
     }else{
       cat("login failed: please check faasr-Computeservers-server_name-Token")
-      cat("please check the scopes of the Token, required: "admin:org/read:org"
+      cat("please check the scopes of the Token, required: \"admin:org/read:org\"")
       stop()
     }
     for (repo in repo_list[[server]]) {
