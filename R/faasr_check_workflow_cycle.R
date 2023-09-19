@@ -23,6 +23,7 @@ faasr_check_workflow_cycle <- function(faasr){
       faasr_log(err_msg)
       stop()
       }
+    }
   }
 
   # build an empty list of stacks - this will prevent the infinite loop
