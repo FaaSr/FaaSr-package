@@ -18,10 +18,10 @@ faasr_check_workflow_cycle <- function(faasr){
   for (func in names(graph)){
     for (path in graph[[func]]){
       if (!(path %in% names(faasr$FunctionList))){
-      err_msg <- paste0('{\"faasr_check_workflow_cycle\":\"invalid function name is found in ',func,'\"}', "\n")
-      cat(err_msg)
-      faasr_log(err_msg)
-      stop()
+        err_msg <- paste0('{\"faasr_check_workflow_cycle\":\"invalid next function ',path,' is found in ',func,'\"}', "\n")
+        cat(err_msg)
+        faasr_log(err_msg)
+        stop()
       }
     }
   }
