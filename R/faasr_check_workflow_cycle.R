@@ -59,7 +59,7 @@ faasr_check_workflow_cycle <- function(faasr){
   # do dfs starting with function invoke.
   dfs(faasr$FunctionInvoke, faasr$FunctionInvoke)
 
-  for (func in names(faasr$FuntionList)){
+  for (func in names(faasr$FunctionList)){
     if (!(func %in% stack)){
       err_msg <- paste0('{\"faasr_check_workflow_cycle\":\"unreachable state is found in ',func,'\"}', "\n")
       cat(err_msg)
