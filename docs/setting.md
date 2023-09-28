@@ -141,7 +141,7 @@ We don't recommend this because of hazard to upload JSON file
   }
 }
 ```
-2. use `Sys.setenv()`, which is recommended<br>
+**2. use `Sys.setenv()`, which is recommended<br>**
 In the Key:value pair, Key is "your server name" + "_" +"key type(capital)"<br>
 In the Key:value pair, Value is "your real key value"<br>
 Server name and key type should be strictly matching to what you define in the JSON
@@ -154,7 +154,7 @@ Sys.setenv("My_S3_Account_ACCESS_KEY"="s3 access key")
 Sys.setenv("My_S3_Account_ACCESS_KEY"="s3 secret key")
 ```
 
-3. use `env` file. You can use when starting the `faasr()`<br>
+**3. use `env` file. You can use when starting the `faasr()`<br>**
 `env` file contains Key:value pair.<br>
 In the Key:value pair, Key is "your server name" + "_" +"key type(capital)"<br>
 In the Key:value pair, Value is "your real key value"<br>
