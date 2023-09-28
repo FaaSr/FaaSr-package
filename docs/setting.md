@@ -130,7 +130,7 @@
 
 There are three ways to set keys
 
-1. define the real key into the JSON file<br>
+**1. define the real key into the JSON file<br>**
 We don't recommend this because of hazard to upload JSON file
  with credentials on the Internet
 ``` r
