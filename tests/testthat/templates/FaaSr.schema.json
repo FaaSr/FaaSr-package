@@ -1,0 +1,160 @@
+{
+  "$comment":"A JSON schema to validate a FaaSr payload, using R library: https://cran.r-project.org/web/packages/jsonvalidate/vignettes/jsonvalidate.html",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flare-forecast.org/FaaSr.schema.json",
+  "title": "FaaSr invocation payload",
+  "description": "Schema for an invocation of FaaSr",
+  "type": "object",
+  "properties": {
+    "FunctionInvoke": {
+      "description": "The name of the R function to be invoked by this action",
+      "type": "string",
+      "minLength": 1
+    },
+    "InvocationID": {
+      "description": "The unique ID used throughout all action invocations for this workflow",
+      "type": "string"
+    },
+    "LoggingServer": {
+      "description": "The name of the logging server to use - must match an S3 server defined under DataStores",
+      "type": "string",
+      "minLength": 1
+    },
+    "FaaSrLog": {
+      "description": "The name of the Log file's folder",
+      "type": "string"
+    },
+    "FunctionList": {
+      "description": "A list of one or more functions that describes the workflow",
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames":{"minLength": 1},
+      "minProperties": 1,
+      "patternProperties": {
+        "":{
+          "type":"object",
+          "properties":{
+            "FaaSServer":{"type":"string","minLength": 1},
+            "Actionname":{"type":"string","minLength": 1},
+            "Arguments":{"type":"object"},
+            "InvokeNext":{"type":["string", "array"]}
+          },
+          "required":["FaaSServer", "Actionname"],
+          "additionalProperties": false
+        }
+      }
+    },
+    "ComputeServers": {
+      "description": "A list of one or more FaaS compute servers used in the workflow",
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames":{"minLength": 1},
+      "patternProperties": {
+        "":{
+          "type":"object",
+          "properties":{
+            "FaaSType":{"enum":["OpenWhisk", "GitHubActions", "Lambda"]},
+            "Region":{"type":"string","minLength": 1},
+            "Endpoint":{"type":"string","minLength": 1},
+            "Namespace":{"type":"string","minLength": 1},
+            "API.key":{"type":"string","minLength": 1},
+            "AccessKey":{"type":"string","minLength": 1},
+            "SecretKey":{"type":"string","minLength": 1},
+            "UserName":{"type":"string","minLenght": 1},
+            "ActionRepoName":{"type":"string","minLenght": 1},            
+            "Token":{"type":"string","minLength": 1},
+            "Ref":{"type":"string","minLength": 1}
+          },
+          "additionalProperties":false,
+          "allOf":[
+            {
+              "if": {
+                "properties": {"FaaSType":{"const": "OpenWhisk"}},
+                "required":["FaaSType"]
+              },
+              "then": {
+                "required":["Region", "Endpoint", "Namespace", "API.key"]
+              }
+            },
+            {
+              "if": {
+                "properties": {"FaaSType":{"const": "Lambda"}},
+                "required":["FaaSType"]
+              },
+              "then": {
+                "required":["Region", "AccessKey", "SecretKey"]
+              }
+            },
+            {
+              "if": {
+                "properties": {"FaaSType":{"const": "GitHubActions"}},
+                "required":["FaaSType"]
+              },
+              "then": {
+                "required":["UserName", "ActionRepoName", "Token", "Ref"]
+              }
+            }
+          ]
+        }
+      }
+    },
+    "DataStores": {
+      "description": "A list of one or more S3 data servers used in the workflow",
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames":{"minLength": 1},
+      "patternProperties": {
+        "":{
+            "type":"object",
+            "properties":{
+                  "Endpoint":{"type":"string"},
+                  "AccessKey":{"type":"string","minLength": 1},
+                  "SecretKey":{"type":"string","minLength": 1},
+                  "Bucket":{"type":"string","minLength": 1},
+                  "Region":{"type":"string"},
+                  "Writable":{"type":"string","minLength": 1}
+                  },
+            "required":["AccessKey", "SecretKey", "Bucket"],
+            "additionalProperties": false
+        }
+      }
+    },
+   "ActionContainers": {
+      "description": "A mapping of action names to containers(Docker Hub)",
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames":{"minLength": 1},
+      "patternProperties": {
+        "":{"type":"string","minLength": 1}
+      }
+    },
+   "FunctionGitRepo": {
+      "description": "User R code from github Repository",
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames":{"minLength": 1},
+      "patternProperties":{
+        "":{"type":["string", "array"]}
+        }
+    },
+   "FunctionCRANPackage": {
+      "description": "User R code from CRAN package",
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames":{"minLength": 1},
+      "patternProperties":{
+        "":{"type":["string", "array"]}
+        }
+    },
+   "FunctionGitHubPackage": {
+      "description": "User R package from github Repository",
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames":{"minLength": 1},
+      "patternProperties":{
+        "":{"type":["string", "array"]}
+        }
+    }
+  },
+  "required": [ "FunctionInvoke", "LoggingServer", "FunctionList", "ComputeServers", "DataStores"]
+}

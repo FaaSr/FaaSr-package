@@ -1,4 +1,4 @@
-test_that("get_user_function_args", {
+test_that("get_user_function_Args", {
   ## faasr setup is required
   ## Argument is a list.
   ## faasr_get_user_function_args() is expected to return an arguments list in the FunctionInvoke function
