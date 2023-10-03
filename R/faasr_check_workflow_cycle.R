@@ -61,7 +61,7 @@ faasr_check_workflow_cycle <- function(faasr){
 
   pre <- faasr_predecessors_list(faasr, graph)
 
-	if (length(pre)==0){
+  if (length(pre)==0){
     for (func in names(faasr$FunctionList)){
       if (!(func %in% stack)){
         err_msg <- paste0('{\"faasr_check_workflow_cycle\":\"unreachable state is found in ',func,'\"}', "\n")
@@ -70,7 +70,6 @@ faasr_check_workflow_cycle <- function(faasr){
         stop()
       }
     }
-	}
-       
+  }     
   return(pre)
 }
