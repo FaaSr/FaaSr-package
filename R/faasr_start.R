@@ -34,16 +34,15 @@ faasr_start <- function(faasr_payload) {
   # Build a data structure representing the User Workflow, from the parsed Payload
   # FaaSr only supports Directed Acyclic Graph (DAG) User Workflows, with a single entry point
   # If the User Workflow is not a DAG, the Action aborts with stop() before executing the User Function
-  graph <- faasr_check_workflow_cycle(.faasr)
+  # Returning value is predecessor list. It uses "faasr_predecessors_list() function inside of it
+  # Make a list of all User Functions that are the predecessors of this User Function, if any
+  pre <- faasr_check_workflow_cycle(.faasr)
 
   # Check endpoint/region of the Logging server / TBD: Check all the DataStores servers
   # If endpoint is not defined(length==0) or empty(=="", for else cases), set empty value ""
   # If endpoint is not empty(not S3), check whether endpoint starts with http
   # If region is not defined(length==0) or empty(==""), set any value("region" in this case).
   .faasr <<- faasr_s3_check(.faasr)
-
-  # Make a list of all User Functions that are the predecessors of this User Function, if any
-  pre <- faasr_predecessors_list(.faasr, graph)
 
   # If this User Function has zero predecessors, it is the single entry point
   # In this case, create the log folder in S3 logs buket
