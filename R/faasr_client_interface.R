@@ -496,7 +496,7 @@ faasr_register_workflow_github_repo_exists <- function(repo) {
 faasr_register_workflow_aws_lambda <- function(faasr, cred){
   
   
-  # get aws lambda function list
+ # get aws lambda function list
   lambda_function_info <- faasr_register_workflow_lambda_function_lists(faasr)
   if (length(lambda_function_info)==0){
     return(FALSE)
@@ -534,32 +534,33 @@ faasr_register_workflow_lambda_function_lists <- function(faasr){
     
     # check if the function server type is Lambda
     if (server_type == "Lambda") {
-      
-      if(check_lambda_exists(func_name)){
-        cat("\nlambda function -- ", func_name, "already exists.\n")
-        cat("Do you want to update it?[y/n]\n")
-        while(TRUE) {
-          # check <- readLines(con = "stdin", 1)
-          check <- readline()
-          if(check == "y"){
-            lambda_function_info[[func_name]]$action <- "update"
-            break
-          } else if(check == 'n'){
-            cat("\nstop the script\n")
-            stop()
-          }else {
-            cat("Enter \"y\" or \"n\": ")
-          }
-        }
-      } else {
-        lambda_function_info[[func_name]]$action <- "create"
+      if(!action_name %in% names(lambda_function_info)){
+        lambda_function_info[[action_name]]$image <- action_name
       }
-      # add the function to the lambda function info list
-      lambda_function_info[[func_name]]$image <- action_name
-      
     }
   }
-  return (lambda_function_info)
+  for(action_name in names(lambda_function_info)){
+    if(check_lambda_exists(action_name)){
+        cat("\nlambda function -- ", action_name, "already exists.\n")
+            cat("Do you want to update it?[y/n]\n")
+            while(TRUE) {
+                check <- readLines(con = "stdin", 1)
+                if(check == "y"){
+                lambda_function_info[[action_name]]$action <- "update"
+                break
+                } else if(check == 'n'){
+                cat("\nstop the script\n")
+                stop()
+                }else {
+                cat("Enter \"y\" or \"n\": ")
+                }
+            }
+        } else {
+            lambda_function_info[[action_name]]$action <- "create"
+        }
+    }
+
+    return (lambda_function_info)
 }
 
 # Get aws lambda function image list
@@ -579,26 +580,18 @@ faasr_register_workflow_lambda_function_image <- function(faasr){
     action_name <- func$Actionname
     # check if the function server type is Lambda
     if (server_type == "Lambda") {
-      
-      # add the {action_name:image} pair to the function_image_list, if it's not present
+    # add the {action_name:image} pair to the function_image_list, if it's not present
       if (!action_name %in% names(function_image_list)) {
-        # if "Actionname" is "fassr", then use faasr provided image--faasr/aws-lambda-tidyverse,
-        # otherwise use user provided image
-        # if(action_name == "faasr"){
-        #     image_path <- "faasr/aws-lambda-tidyverse"
-        # } 
         action_name_value <- faasr$ActionContainers[[action_name]]
         if(length(action_name_value)== 0 || action_name_value == ""){
           image_path <- "faasr/aws-lambda-tidyverse"
-        }
-        else {
+        } else {
           image_path <- faasr$ActionContainers[[action_name]]
         }
         function_image_list[[action_name]] <- image_path
       }
     }
   }
-  
   return (function_image_list)
 }
 
@@ -1122,8 +1115,9 @@ faasr_invoke_workflow <- function(FunctionInvoke=NULL){
            faasr_json <- jsonlite::toJSON(faasr_w_cred, auto_unbox=TRUE)
            rd_nb <- sample(100000, size=1)
            writeLines(faasr_json, paste0("payload_ld_",rd_nb,".json"))
-           command <- paste0("aws lambda invoke --function-name ",functioninvoke," --cli-binary-format raw-in-base64-out --invocation-type RequestResponse --payload file://",paste0("payload_ld_",rd_nb,".json")," lambda_outputfile.txt")
+           command <- paste0("aws lambda invoke --function-name ",actionname," --cli-binary-format raw-in-base64-out --invocation-type RequestResponse --payload file://",paste0("payload_ld_",rd_nb,".json")," lambda_outputfile.txt")
            check <- system(command)
+           file.remove(paste0("payload_ld_",rd_nb,".json"))
          },
          "OpenWhisk"={
            faasr_w_cred <- faasr_replace_values(faasr, cred)
