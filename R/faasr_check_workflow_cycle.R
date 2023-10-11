@@ -13,7 +13,6 @@ faasr_check_workflow_cycle <- function(faasr){
     if (target %in% graph[[start]]) {
 	  err_msg <- paste0('{\"faasr_check_workflow_cycle\":\"function loop found in ',target,'\"}', "\n")
 	  cat(err_msg)
-	  faasr_log(err_msg)
 	  stop()
 	}
 
@@ -47,7 +46,6 @@ faasr_check_workflow_cycle <- function(faasr){
       if (!(path %in% names(faasr$FunctionList))){
         err_msg <- paste0('{\"faasr_check_workflow_cycle\":\"invalid next function ',path,' is found in ',func,'\"}', "\n")
         cat(err_msg)
-        faasr_log(err_msg)
         stop()
       }
     }
@@ -71,7 +69,6 @@ faasr_check_workflow_cycle <- function(faasr){
         if (!(func %in% stack)){
           err_msg <- paste0('{\"faasr_check_workflow_cycle\":\"unreachable state is found in ',func,'\"}', "\n")
           cat(err_msg)
-          faasr_log(err_msg)
           stop()
         }
       }
@@ -79,9 +76,8 @@ faasr_check_workflow_cycle <- function(faasr){
   }
   # if there's no function having no predecessors, it means that there's a loop.
   if (check){
-    err_msg <- paste0('{\"faasr_check_workflow_cycle\":\"unreachable state is found in ',func,'\"}', "\n")
+    err_msg <- paste0('{\"faasr_check_workflow_cycle\":\"function loop found: no initial node\"}', "\n")
     cat(err_msg)
-    faasr_log(err_msg)
     stop()
   }
 	
