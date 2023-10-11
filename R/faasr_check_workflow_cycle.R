@@ -58,7 +58,7 @@ faasr_check_workflow_cycle <- function(faasr){
 
   # find the initial function(pre==0)
   for (func in names(faasr$FunctionList)){
-    if (length(pre[[func]])==0){
+    if (is.null(pre[[func]])){
       # build an empty list of stacks - this will prevent the infinite loop
       stack <- list()
       # if it is the initial function, do dfs starting with it.
