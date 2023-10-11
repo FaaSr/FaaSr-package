@@ -1124,7 +1124,7 @@ faasr_invoke_workflow <- function(FunctionInvoke=NULL){
            faasr_json <- jsonlite::toJSON(faasr_w_cred, auto_unbox=TRUE)
            rd_nb <- sample(100000, size=1)
            writeLines(faasr_json, paste0("payload_ow_",rd_nb,".json"))
-           command <- paste0("ibmcloud fn action invoke ",actionname," --blocking --param-file ",json_path)
+           command <- paste0("ibmcloud fn action invoke ",actionname," --blocking --param-file ",paste0("payload_ow_",rd_nb,".json"))
            check <- system(command)
            file.remove(paste0("payload_ow_",rd_nb,".json"))
          })
