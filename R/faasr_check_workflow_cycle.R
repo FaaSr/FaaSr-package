@@ -58,7 +58,9 @@ faasr_check_workflow_cycle <- function(faasr){
 
   # find the initial function(pre==0)
   for (func in names(faasr$FunctionList)){
+    check <- TRUE
     if (is.null(pre[[func]])){
+      check <- FALSE
       # build an empty list of stacks - this will prevent the infinite loop
       stack <- list()
       # if it is the initial function, do dfs starting with it.
@@ -75,5 +77,13 @@ faasr_check_workflow_cycle <- function(faasr){
       }
     }
   }
+  # if there's no function having no predecessors, it means that there's a loop.
+  if (check){
+    err_msg <- paste0('{\"faasr_check_workflow_cycle\":\"unreachable state is found in ',func,'\"}', "\n")
+    cat(err_msg)
+    faasr_log(err_msg)
+    stop()
+  }
+	
   return(pre[[faasr$FunctionInvoke]])
 }
