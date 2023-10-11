@@ -57,7 +57,7 @@ faasr_check_workflow_cycle <- function(faasr){
   pre <- faasr_predecessors_list(faasr, graph)
 
   # find the initial function(pre==0)
-  for (func in names(pre)){
+  for (func in names(faasr$FunctionList)){
     if (length(pre[[func]])==0){
       # build an empty list of stacks - this will prevent the infinite loop
       stack <- list()
