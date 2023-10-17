@@ -1,0 +1,106 @@
+{   "FunctionInvoke": "first_action",
+    "InvocationID": "uuid_format_id",
+    "FaaSrLog": "logfolder_name/default:FaaSrLog",
+    "LoggingServer": "Servername for logging/should be one of DataStores Server name",
+    "FunctionList": {
+        "F1": {
+            "FaaSServer": "target_faas_server/should be one of ComputeServers Server name",
+            "Actionname": "actionname for function",
+            "Arguments": {
+                "input1": "input1.csv",
+                "input2": "input2.csv"
+            },
+            "InvokeNext": [
+                "F2",
+                "F3"
+            ]
+        },
+        "F2": {
+            "FaaSServer": "My_Github_Account",
+            "Actionname": "workflow.yml",
+            "Arguments": {
+                "input": "input3.csv"
+            }
+        },
+        "F3": {
+            "FaaSServer": "My_AWS_Account",
+            "Actionname": "f3_action",
+            "Arguments": {
+                "input": "input123.csv"
+            }
+        }
+    },
+    "ActionContainers": {
+        "f3_action": "user_docker_id/user_custom_image"
+    },
+    "FunctionCRANPackage": {
+        "F2": [
+            "cran_package",
+            "cran_package_1"
+        ],
+        "F3": [
+            "dpkg",
+            "dplyr"
+        ]
+    },
+    "FunctionGitHubPackage": {
+        "F1": [
+            "github_package",
+            "github_package_1"
+        ],
+        "F2": [
+            "FLARE-forecast/FLAREr",
+            "FaaSr/FaaSr-package"
+        ]
+    },
+    "FunctionGitRepo": {
+        "F1": [
+            "git_repository",
+            "git_repository1"
+        ],
+        "F3": [
+            "user_id/user_repo",
+            "user_id_1/user_repo_1"
+        ]
+    },
+    "ComputeServers": {
+        "My_Github_Account": {
+            "FaaSType": "GitHubActions",
+            "UserName": "user_name",
+            "ActionRepoName": "repo_name",
+            "Ref": "branch1",
+            "Token": "git_token" 
+        },
+        "My_AWS_Account": {
+            "FaaSType": "Lambda",
+            "AccessKey": "lambda_access_key",
+            "SecretKey": "lambda_secret_key",
+            "Region": "test"
+        },
+        "My_IBM_Account": {
+            "FaaSType": "OpenWhisk",
+            "Endpoint": "http://00.00.00.00",
+            "Namespace": "my_namespace",
+            "API.key": "ow_api_key",
+            "Region": "test"
+        }
+    },
+    "DataStores": {
+        "My_S3_Account": {
+            "Endpoint": "",
+            "Bucket": "my_bucket",
+            "Region": "us-east-1",
+            "Writable": "TRUE",
+            "AccessKey": "s3_access_key",
+            "SecretKey": "s3_secret_key"
+        },
+        "My_Minio_Account": {
+            "Endpoint": "https://play.min.io",
+            "Bucket": "my_bucket1",
+            "Region": "",
+            "Writable": "TRUE",
+            "AccessKey": "minio_access_key",
+            "SecretKey": "minio_secret_key"
+        }
+    }
+}
