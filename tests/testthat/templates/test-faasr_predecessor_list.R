@@ -2,6 +2,7 @@ test_that("predecessor_list", {
   ## this function requires two values: faasr, graph
   ## this function returns a character array "pre", which are predecessors.
   ## It is expected to get an empty list if the FunctionInvoke is set to first action.
+  faasr <- list()
   faasr$FunctionInvoke <- "F1"
   faasr$FunctionList$F1 <- list()
   faasr$FunctionList$F2 <- list()
