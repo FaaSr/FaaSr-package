@@ -1,19 +1,36 @@
 # Introduction
-### FaaSr is ...
+* FaaSr is a package that makes it easy for developers to create R functions and workflows that can run in the cloud, on-demand, based on triggers - such as timers, or repository commits.
+* It is built for Function-as-a-Service (FaaS) cloud computing, and supports both widely-used commercial (GitHub Actions, AWS Lambda, IBM Cloud) and open-source platforms (OpenWhisk).
+* It is also built for cloud storage, and supports the S3 standard also widely used in commercial (AWS S3), open-source (Minio) and research platforms (Open Storage Network)
+* With FaaSr, you can focus on developing the R functions, and leave dealing with the idiosyncrasies of different FaaS platforms and their APIs to the FaaSr package.
 
 # Prerequisites
 ## R library
-* FaaSr
-* uuid
-* jsonlite
+### FaaSr
+* you should install "FaaSr" library for the CLI.
+* devtools::install_github('FaaSr/FaaSr-package',ref='main',force=TRUE)
+### uuid [![CRAN Version](https://www.r-pkg.org/badges/version-ago/uuid)](https://cran.r-project.org/web/packages/uuid)
+* install.packages('uuid') 
+### jsonlite [![CRAN Version](https://www.r-pkg.org/badges/version-ago/jsonlite)](https://cran.r-project.org/web/packages/jsonlite)
+* install.packages('jsonlite')
 ## github actions
-* git
-* gh
+### git
+* git download is available at:
+* https://github.com/git-guides/install-git
+### gh
+* gh download is available at:
+* https://cli.github.com/
 ## OpenWhisk - ibmcloud
-* ibmcloud
-* ibmcloud function plug-in
+### ibmcloud
+* ibmcloud cli download is available at:
+* 
+### ibmcloud function plug-in
+* ibmcloud function plug-in should be installed by ibmcloud cli:
+* ibmcloud 
 ## Labmda
-* aws
+### aws
+* aws cli download is available at:
+* https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
 
 # JSON format
 ``` r

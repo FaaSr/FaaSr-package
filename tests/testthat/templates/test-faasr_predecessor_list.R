@@ -28,8 +28,7 @@ test_that("predecessor_list", {
   faasr$FunctionInvoke <- "F2"
   
   ## This time, result should return "F1" 
-  ## result should be "list", even if it has only one character values.
-  result <- list("F1")
+  result <- "F1"
   
   ## check the result
   expect_equal(faasr_predecessors_list(faasr, graph), result)

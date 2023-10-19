@@ -29,4 +29,7 @@ test_that("faasr_function", {
   expect_true(file.exists(faasr_test$json_path))
   
   ## Change the json files and test it.
+
+  ## After all the test, clean up the directory
+  unlink(".faasr_json", recursive=TRUE, force=TRUE)
 })
