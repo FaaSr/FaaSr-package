@@ -338,7 +338,21 @@ faasr_invoke_workflow <- function(FunctionInvoke=NULL){
            faasr_json <- jsonlite::toJSON(faasr_w_cred, auto_unbox=TRUE)
            rd_nb <- sample(100000, size=1)
            writeLines(faasr_json, paste0("payload_ld_",rd_nb,".json"))
-           command <- paste0("aws lambda invoke --function-name ",actionname," --cli-binary-format raw-in-base64-out --invocation-type RequestResponse --payload file://",paste0("payload_ld_",rd_nb,".json")," lambda_outputfile.txt")
+
+           # get lambda function timeout
+           check_lambda_config_command <- paste0("aws lambda get-function-configuration --function-name ", functioninvoke)
+           check_lambda_config_result <- system(check_lambda_config_command, intern = TRUE)
+
+           status_code <- attr(check_lambda_config_result, "status")
+           if (!is.null(status_code) && status_code == 254){
+             lambda_func_time_out <- 120
+           } else {
+            json_string <- paste(check_lambda_config_result, collapse = "")
+            json_data <- jsonlite::fromJSON(json_string)
+            lambda_func_time_out <- json_data$Timeout
+          }
+          
+           command <- paste0("aws lambda invoke --function-name ",actionname," --cli-connect-timeout ", lambda_func_time_out ," --cli-binary-format raw-in-base64-out --invocation-type RequestResponse --payload file://",paste0("payload_ld_",rd_nb,".json")," lambda_outputfile.txt")
            check <- system(command)
            file.remove(paste0("payload_ld_",rd_nb,".json"))
          },
