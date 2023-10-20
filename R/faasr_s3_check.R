@@ -14,7 +14,7 @@ faasr_s3_check <- function(faasr){
       faasr$DataStores[[server]]$Endpoint <- ""
     }else{
       if (!(startsWith(endpoint_check, "http"))){
-        msg <- paste0('{\"faasr_s3_check\":\"Invalid Logging server endpoint ',server,'\"}', "\n")
+        msg <- paste0('{\"faasr_s3_check\":\"Invalid Data store server endpoint ',server,'\"}', "\n")
         cat(msg)
         stop()
       }
