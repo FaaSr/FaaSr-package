@@ -17,6 +17,14 @@ faasr_abort_on_multiple_invocations <- function(faasr, pre) {
     log_server_name = faasr$LoggingDataStore
   }
   
+  if (log_server_name %in% names(.faasr$DataStores)) {
+    NULL
+  } else {
+    err_msg <- paste0('{\"faasr_abort_on_multiple_invocation\":\"Invalid data server name: ',log_server_name,'\"}', "\n")
+    cat(err_msg)
+    stop()	
+  }
+
   log_server <- faasr$DataStores[[log_server_name]]
   s3<-paws::s3(
     config=list(
