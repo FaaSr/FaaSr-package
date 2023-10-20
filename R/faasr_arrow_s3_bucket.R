@@ -1,3 +1,9 @@
+#' @title Provide user functions for "arrow" library
+#' @description Uses "arrow" library to set up the configurations with given json file and 
+#'              provide the object to the users
+#' @param server_name for string, default value is faasr$DefaultDataStore
+#' @return s3 representing object for "arrow"
+
 library("arrow")
 
 
