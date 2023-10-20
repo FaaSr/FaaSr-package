@@ -10,8 +10,11 @@ library("paws")
 faasr_log <- function(log_message) {
 
   # Extract name of logging server
-  log_server_name = .faasr$LoggingServer
-
+  if (is.null(.faasr$LoggingDataStore){
+    log_server_name = .faasr$DefaultDataStore
+  } else {
+    log_server_name = .faasr$LoggingDataStore
+  }
   # Validate that server_name exists, otherwise abort
   if (log_server_name %in% names(.faasr$DataStores)) {
     NULL
