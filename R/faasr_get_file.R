@@ -9,9 +9,9 @@
 
 library("paws")
 
-# Default server_name is Logging Server, default remote folder name is empty ("") and 
+# Default server_name is DefaultDataStore, default remote folder name is empty ("") and 
 # local folder name is current directory(".")
-faasr_get_file <- function(server_name=.faasr$LoggingServer, remote_folder="", remote_file, local_folder=".", local_file) { 
+faasr_get_file <- function(server_name=.faasr$DefaultDataStore, remote_folder="", remote_file, local_folder=".", local_file) { 
   # Check that an S3 server_name has been defined
   # If not, log an error and abort
   
