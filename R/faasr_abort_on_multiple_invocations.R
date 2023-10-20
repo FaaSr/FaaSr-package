@@ -11,7 +11,12 @@ library("paws")
 faasr_abort_on_multiple_invocations <- function(faasr, pre) {
 
   # Set env for checking
-  log_server_name = faasr$LoggingServer
+  if (is.null(faasr$LoggingDataStore)){
+    log_server_name = faasr$DefaultDataStore
+  } else {
+    log_server_name = faasr$LoggingDataStore
+  }
+  
   log_server <- faasr$DataStores[[log_server_name]]
   s3<-paws::s3(
     config=list(
