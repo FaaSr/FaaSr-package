@@ -16,7 +16,12 @@ faasr_init_log_folder <- function(faasr) {
     faasr$InvocationID<-UUIDgenerate()
   }
 
-  target_s3 <- faasr$LoggingServer
+  if (is.null(faasr$LoggingDataStore){
+    target_s3 <- faasr$DefaultDataStore
+  } else {
+    target_s3 <- faasr$LoggingDataStore
+  }
+      
   target_s3 <- faasr$DataStores[[target_s3]]
   s3<-paws::s3(
     config=list(
