@@ -16,7 +16,7 @@ faasr_init_log_folder <- function(faasr) {
     faasr$InvocationID<-UUIDgenerate()
   }
 
-  if (is.null(faasr$LoggingDataStore){
+  if (is.null(faasr$LoggingDataStore)){
     target_s3 <- faasr$DefaultDataStore
   } else {
     target_s3 <- faasr$LoggingDataStore
