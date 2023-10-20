@@ -14,7 +14,11 @@ faasr_rsm <- function(faasr) {
   lock_name <- paste0(faasr$FaaSrLog,"/", faasr$InvocationID,"/",faasr$FunctionInvoke,"./lock")
 
   # Set env for the storage.
-  target_s3 <- faasr$LoggingServer
+  if (is.null(faasr$LoggingDataStore)){
+    target_s3 <- faasr$DefaultDataStore
+  } else {
+    target_s3 <- faasr$LoggingDataStore
+  }
   target_s3 <- faasr$DataStores[[target_s3]]
   s3<-paws::s3(
     config=list(
@@ -76,7 +80,12 @@ faasr_acquire<-function(faasr) {
 faasr_release<-function(faasr) {
 	# Set env for locks.
 	lock_name <- paste0(faasr$FaaSrLog,"/", faasr$InvocationID,"/",faasr$FunctionInvoke,"./lock")
-	target_s3 <- faasr$LoggingServer
+	if (is.null(faasr$LoggingDataStore)){
+          target_s3 <- faasr$DefaultDataStore
+        } else {
+          target_s3 <- faasr$LoggingDataStore
+        }
+
 	target_s3 <- faasr$DataStores[[target_s3]]
 	s3<-paws::s3(
 	  config=list(
