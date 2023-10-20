@@ -95,7 +95,7 @@ faasr_start <- function(faasr_payload) {
   }
   file_name <- paste0(.faasr$FunctionInvoke, ".done")
   write.table("TRUE", file=paste0(log_folder, "/", file_name), row.names=F, col.names=F)
-  faasr_put_file(.faasr$LoggingServer, log_folder, file_name, log_folder, file_name)
+  faasr_put_file(local_folder=log_folder, local_file=file_name, remote_folder=log_folder, remote_file=file_name)
 
   # Now trigger the next Actions(s), if there are any in the User Workflow
   faasr_trigger(.faasr)

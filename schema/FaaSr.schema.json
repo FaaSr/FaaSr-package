@@ -15,8 +15,13 @@
       "description": "The unique ID used throughout all action invocations for this workflow",
       "type": "string"
     },
-    "LoggingServer": {
+    "LoggingDataStore": {
       "description": "The name of the logging server to use - must match an S3 server defined under DataStores",
+      "type": "string",
+      "minLength": 1
+    },
+    "DefaultDataStore": {
+      "description": "The name of the default server to use - must match an S3 server defined under DataStores",
       "type": "string",
       "minLength": 1
     },
@@ -156,6 +161,6 @@
         }
     }
   },
-  "required": [ "FunctionInvoke", "LoggingServer", "FunctionList", "ComputeServers", "DataStores"]
+  "required": [ "FunctionInvoke", "DefaultDataStore", "FunctionList", "ComputeServers", "DataStores"]
 }
 
