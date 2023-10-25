@@ -60,7 +60,7 @@ faasr_trigger <- function(faasr) {
           api_key <- faasr$ComputeServers[[next_server]]$API.key
 	  region <- faasr$ComputeServers[[next_server]]$Region
           namespace <- faasr$ComputeServers[[next_server]]$Namespace
-          actionname <- faasr$FunctionList[[invoke_next_function]]$Actionname
+          actionname <- faasr$FunctionList[[invoke_next_function]]$FunctionName
 
 	  # Openwhisk with IBM cloud - Get a token by using the API key
 	  # URL is the ibmcloud's iam center.
@@ -124,7 +124,7 @@ faasr_trigger <- function(faasr) {
           lambda <- paws::lambda()
 
 	  # Invoke next function with FunctionName and Payload, receive trigger response
-          next_lambda_function_name <- faasr$FunctionList[[invoke_next_function]]$Actionname
+          next_lambda_function_name <- faasr$FunctionList[[invoke_next_function]]$FunctionName
 
 	  # Invoke next function with FunctionName and Payload, receive trigger response
           response <- lambda$invoke(
@@ -152,7 +152,7 @@ faasr_trigger <- function(faasr) {
           username <- faasr$ComputeServers[[next_server]]$UserName
           reponame <- faasr$ComputeServers[[next_server]]$ActionRepoName
           repo <- paste0(username, "/", reponame)
-	  workflow_file <- faasr$FunctionList[[invoke_next_function]]$Actionname
+	  workflow_file <- faasr$FunctionList[[invoke_next_function]]$FunctionName
           git_ref <- faasr$ComputeServers[[next_server]]$Ref
 
 	  # Set inputs for the workflow trigger event with InvocationID and Next_Invoke_Function_Name
@@ -199,7 +199,7 @@ faasr_trigger <- function(faasr) {
             cat(err_msg)
             faasr_log(err_msg)
 	  } else if (status_code(response) == 404) {
-	    err_msg <- paste0("faasr_trigger: GitHub Action: Cannot find the destination, check the actionname: \"",repo,"\" and workflow name: \"",workflow_file,"\"\n")
+	    err_msg <- paste0("faasr_trigger: GitHub Action: Cannot find the destination, check the repo name: \"",repo,"\" and workflow name: \"",workflow_file,"\"\n")
             cat(err_msg)
             faasr_log(err_msg)
 	  } else if (status_code(response) == 422) {
