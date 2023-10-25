@@ -64,7 +64,7 @@ faasr_register_workflow_ibmcloud_action_lists <- function(faasr) {
       stop()
     }
     if (faasr$ComputeServers[[server_name]]$FaaSType == "OpenWhisk") {
-      action_name <- faasr$FunctionList[[fn]]$Actionname
+      action_name <- faasr$FunctionList[[fn]]$FunctionName
       action_list[[server_name]] <- unique(c(action_list[[server_name]],action_name))
     }
   }
@@ -169,15 +169,15 @@ faasr_register_workflow_ibmcloud_target_namespace <- function(server,faasr) {
 
 
 # create an action
-faasr_register_workflow_ibmcloud_create_action <- function(actionname, faasr) {
+faasr_register_workflow_ibmcloud_create_action <- function(functionname, faasr) {
   # actioncontainer can be either default or user-customized
-  if (length(faasr$ActionContainers[[actionname]])==0) {
+  if (length(faasr$ActionContainers[[functionname]])==0) {
     actioncontainer <- "faasr/openwhisk-tidyverse"
   } else {
-    actioncontainer <- faasr$ActionContainers[[actionname]]
+    actioncontainer <- faasr$ActionContainers[[functionname]]
   }
   # create a function with maximum timeout and 512MB memory space
-  command <- paste("ibmcloud fn action create",actionname,"--docker",actioncontainer,"--timeout 600000 --memory 2048")
+  command <- paste("ibmcloud fn action create",functionname,"--docker",actioncontainer,"--timeout 600000 --memory 2048")
   cat("creating a new action\n")
   check <- system(command,ignore.stdout=TRUE, ignore.stderr=TRUE)
   # if action already exists, ask the user to update the action
@@ -188,7 +188,7 @@ faasr_register_workflow_ibmcloud_create_action <- function(actionname, faasr) {
       check <- readline()
       if (check=="y") {
         # update the action
-        command <- paste("ibmcloud fn action update",actionname,"--docker",actioncontainer,"--timeout 600000 --memory 2048")
+        command <- paste("ibmcloud fn action update",functionname,"--docker",actioncontainer,"--timeout 600000 --memory 2048")
         cat("updating an action\n")
         system(command,ignore.stdout=TRUE, ignore.stderr=TRUE)
         cat("successful", "\n")
