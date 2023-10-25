@@ -40,11 +40,11 @@
           "type":"object",
           "properties":{
             "FaaSServer":{"type":"string","minLength": 1},
-            "Actionname":{"type":"string","minLength": 1},
+            "FunctionName":{"type":"string","minLength": 1},
             "Arguments":{"type":"object"},
             "InvokeNext":{"type":["string", "array"]}
           },
-          "required":["FaaSServer", "Actionname"],
+          "required":["FaaSServer", "FunctionName"],
           "additionalProperties": false
         }
       }
@@ -68,7 +68,7 @@
             "UserName":{"type":"string","minLenght": 1},
             "ActionRepoName":{"type":"string","minLenght": 1},            
             "Token":{"type":"string","minLength": 1},
-            "Ref":{"type":"string","minLength": 1}
+            "Branch":{"type":"string","minLength": 1}
           },
           "additionalProperties":false,
           "allOf":[
@@ -96,7 +96,7 @@
                 "required":["FaaSType"]
               },
               "then": {
-                "required":["UserName", "ActionRepoName", "Token", "Ref"]
+                "required":["UserName", "ActionRepoName", "Token", "Branch"]
               }
             }
           ]
