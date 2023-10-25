@@ -5,9 +5,9 @@
 
 faasr_get_user_function_args <- function(faasr) {
   # First extract the name of the User Function to invoke
-  user_function = faasr$FunctionInvoke
+  user_action = faasr$FunctionInvoke
 
   # Now extract and return the arguments specific to this User Function
-  args = faasr$FunctionList[[user_function]]$Arguments
+  args = faasr$FunctionList[[user_action]]$Arguments
   return(args)
 }
