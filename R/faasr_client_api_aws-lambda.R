@@ -81,7 +81,7 @@ faasr_register_workflow_lambda_function_lists <- function(faasr){
     func <- function_list[[func_name]]
     server_name <- func$FaaSServer
     server_type <- compute_servers[[server_name]]$FaaSType
-    action_name <- func$Actionname
+    action_name <- func$FunctionName
     
     # check if the function server type is Lambda
     if (server_type == "Lambda") {
@@ -128,7 +128,7 @@ faasr_register_workflow_lambda_function_image <- function(faasr){
     func <- function_list[[func_name]]
     server_name <- func$FaaSServer
     server_type <- compute_servers[[server_name]]$FaaSType
-    action_name <- func$Actionname
+    action_name <- func$FunctionName
     # check if the function server type is Lambda
     if (server_type == "Lambda") {
       # add the {action_name:image} pair to the function_image_list, if it's not present
