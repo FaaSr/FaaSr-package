@@ -326,9 +326,12 @@ faasr_invoke_workflow <- function(FunctionInvoke=NULL){
   switch(faas_type,
          # If first action is github actions, use github
          "GitHubActions"={
+           if (!endsWith(actionname,".yml") && !endsWith(actionname,".yaml"){
+            actionname <- paste0(actionname,".yml")
+           }
            gh_ref <- faasr$ComputeServers[[faas_name]]$Ref
            repo <- paste0(faasr$ComputeServers[[faas_name]]$UserName,"/",faasr$ComputeServers[[faas_name]]$ActionRepoName)
-           command <- paste0("gh workflow run --repo ",repo," --ref ",gh_ref," ",functionname," -f InvokeName=",actionname,)
+           command <- paste0("gh workflow run --repo ",repo," --ref ",gh_ref," ",actionname," -f InvokeName=",functionname,)
            check <- system(command)
          },
          "Lambda"={
@@ -340,7 +343,7 @@ faasr_invoke_workflow <- function(FunctionInvoke=NULL){
            writeLines(faasr_json, paste0("payload_ld_",rd_nb,".json"))
 
            # get lambda function timeout
-           check_lambda_config_command <- paste0("aws lambda get-function-configuration --function-name ", functionname)
+           check_lambda_config_command <- paste0("aws lambda get-function-configuration --function-name ", actionname)
            check_lambda_config_result <- system(check_lambda_config_command, intern = TRUE)
 
            status_code <- attr(check_lambda_config_result, "status")
@@ -352,7 +355,7 @@ faasr_invoke_workflow <- function(FunctionInvoke=NULL){
             lambda_func_time_out <- json_data$Timeout
           }
           
-           command <- paste0("aws lambda invoke --function-name ",functionname," --cli-connect-timeout ", lambda_func_time_out ," --cli-binary-format raw-in-base64-out --invocation-type RequestResponse --payload file://",paste0("payload_ld_",rd_nb,".json")," lambda_outputfile.txt")
+           command <- paste0("aws lambda invoke --function-name ",actionname," --cli-connect-timeout ", lambda_func_time_out ," --cli-binary-format raw-in-base64-out --invocation-type RequestResponse --payload file://",paste0("payload_ld_",rd_nb,".json")," lambda_outputfile.txt")
            check <- system(command)
            file.remove(paste0("payload_ld_",rd_nb,".json"))
          },
@@ -363,7 +366,7 @@ faasr_invoke_workflow <- function(FunctionInvoke=NULL){
            faasr_json <- jsonlite::toJSON(faasr_w_cred, auto_unbox=TRUE)
            rd_nb <- sample(100000, size=1)
            writeLines(faasr_json, paste0("payload_ow_",rd_nb,".json"))
-           command <- paste0("ibmcloud fn action invoke ",functionname," --blocking --param-file ",paste0("payload_ow_",rd_nb,".json"))
+           command <- paste0("ibmcloud fn action invoke ",actionname," --blocking --param-file ",paste0("payload_ow_",rd_nb,".json"))
            check <- system(command)
            file.remove(paste0("payload_ow_",rd_nb,".json"))
          })
