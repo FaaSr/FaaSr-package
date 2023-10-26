@@ -327,11 +327,11 @@ faasr_invoke_workflow <- function(FunctionInvoke=NULL){
          # If first action is github actions, use github
          "GitHubActions"={
            if (!endsWith(actionname,".yml") && !endsWith(actionname,".yaml")){
-            actionname <- paste0(actionname,".yml")
+            actionname_yml <- paste0(actionname,".yml")
            }
            gh_ref <- faasr$ComputeServers[[faas_name]]$Branch
            repo <- paste0(faasr$ComputeServers[[faas_name]]$UserName,"/",faasr$ComputeServers[[faas_name]]$ActionRepoName)
-           command <- paste0("gh workflow run --repo ",repo," --ref ",gh_ref," ",actionname," -f InvokeName=",actionname)
+           command <- paste0("gh workflow run --repo ",repo," --ref ",gh_ref," ",actionname_yml," -f InvokeName=",actionname)
            check <- system(command)
          },
          "Lambda"={
