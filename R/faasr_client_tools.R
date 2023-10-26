@@ -329,7 +329,7 @@ faasr_invoke_workflow <- function(FunctionInvoke=NULL){
            if (!endsWith(actionname,".yml") && !endsWith(actionname,".yaml")){
             actionname <- paste0(actionname,".yml")
            }
-           gh_ref <- faasr$ComputeServers[[faas_name]]$Ref
+           gh_ref <- faasr$ComputeServers[[faas_name]]$Branch
            repo <- paste0(faasr$ComputeServers[[faas_name]]$UserName,"/",faasr$ComputeServers[[faas_name]]$ActionRepoName)
            command <- paste0("gh workflow run --repo ",repo," --ref ",gh_ref," ",actionname," -f InvokeName=",functionname,)
            check <- system(command)
