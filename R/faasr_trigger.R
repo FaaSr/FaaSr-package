@@ -60,7 +60,7 @@ faasr_trigger <- function(faasr) {
           api_key <- faasr$ComputeServers[[next_server]]$API.key
 	  region <- faasr$ComputeServers[[next_server]]$Region
           namespace <- faasr$ComputeServers[[next_server]]$Namespace
-          actionname <- faasr$FunctionList[[invoke_next_function]]$FunctionName
+          actionname <- invoke_next_function
 
 	  # Openwhisk with IBM cloud - Get a token by using the API key
 	  # URL is the ibmcloud's iam center.
@@ -124,7 +124,7 @@ faasr_trigger <- function(faasr) {
           lambda <- paws::lambda()
 
 	  # Invoke next function with FunctionName and Payload, receive trigger response
-          next_lambda_function_name <- faasr$FunctionList[[invoke_next_function]]$FunctionName
+          next_lambda_function_name <- invoke_next_function
 
 	  # Invoke next function with FunctionName and Payload, receive trigger response
           response <- lambda$invoke(
@@ -152,7 +152,10 @@ faasr_trigger <- function(faasr) {
           username <- faasr$ComputeServers[[next_server]]$UserName
           reponame <- faasr$ComputeServers[[next_server]]$ActionRepoName
           repo <- paste0(username, "/", reponame)
-	  workflow_file <- faasr$FunctionList[[invoke_next_function]]$FunctionName
+	  if (!endsWith(invoke_next_function,".yml") && !endsWith(invoke_next_function,".yaml"){
+            invoke_next_function <- paste0(invoke_next_function,".yml")
+          }
+	  workflow_file <- invoke_next_function
           git_ref <- faasr$ComputeServers[[next_server]]$Ref
 
 	  # Set inputs for the workflow trigger event with InvocationID and Next_Invoke_Function_Name
