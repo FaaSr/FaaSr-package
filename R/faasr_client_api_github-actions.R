@@ -63,7 +63,7 @@ faasr_register_workflow_github_actions <- function(faasr, cred) {
         faasr_register_workflow_github_create_yml_file(container_name,actionname)
       }
     }
-    ref <- faasr$ComputeServers[[server]]$Ref
+    ref <- faasr$ComputeServers[[server]]$Branch
     faasr_register_workflow_github_gh_setup(response, repo, ref)
     cat("\n\n[faasr_msg] successfully registed server: ", repo,"\n\n")
   }
