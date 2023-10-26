@@ -152,7 +152,7 @@ faasr_trigger <- function(faasr) {
           username <- faasr$ComputeServers[[next_server]]$UserName
           reponame <- faasr$ComputeServers[[next_server]]$ActionRepoName
           repo <- paste0(username, "/", reponame)
-	  if (!endsWith(invoke_next_function,".yml") && !endsWith(invoke_next_function,".yaml"){
+	  if (!endsWith(invoke_next_function,".yml") && !endsWith(invoke_next_function,".yaml")){
             invoke_next_function <- paste0(invoke_next_function,".yml")
           }
 	  workflow_file <- invoke_next_function
