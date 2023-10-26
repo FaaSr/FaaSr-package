@@ -89,7 +89,7 @@ faasr_register_workflow_github_repo_lists <- function(faasr) {
       stop()
     }
     if (faasr$ComputeServers[[server_name]]$FaaSType == "GitHubActions") {
-      actionname <- paste0(faasr$FunctionList[[fn]]$FunctionName)
+      actionname <- fn
       repo_list[[server_name]] <- unique(c(repo_list[[server_name]],actionname))
     }
   }
@@ -152,7 +152,7 @@ faasr_register_workflow_github_set_payload <- function(faasr){
 # Create a yaml workflow file with the container name
 # TBD implement a native workflow pattern
 faasr_register_workflow_github_create_yml_file <- function(containername, actionname){
-  contents <- paste0("name: Running Function- ",actionname,"
+  contents <- paste0("name: Running Action- ",actionname,"
 
 on:
   workflow_dispatch:
