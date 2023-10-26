@@ -156,7 +156,7 @@ faasr_trigger <- function(faasr) {
             invoke_next_function <- paste0(invoke_next_function,".yml")
           }
 	  workflow_file <- invoke_next_function
-          git_ref <- faasr$ComputeServers[[next_server]]$Ref
+          git_ref <- faasr$ComputeServers[[next_server]]$Branch
 
 	  # Set inputs for the workflow trigger event with InvocationID and Next_Invoke_Function_Name
           input_id <- faasr$InvocationID
