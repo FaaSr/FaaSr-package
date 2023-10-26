@@ -326,7 +326,7 @@ faasr_invoke_workflow <- function(FunctionInvoke=NULL){
   switch(faas_type,
          # If first action is github actions, use github
          "GitHubActions"={
-           if (!endsWith(actionname,".yml") && !endsWith(actionname,".yaml"){
+           if (!endsWith(actionname,".yml") && !endsWith(actionname,".yaml")){
             actionname <- paste0(actionname,".yml")
            }
            gh_ref <- faasr$ComputeServers[[faas_name]]$Ref
