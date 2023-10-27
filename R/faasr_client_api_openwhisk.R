@@ -174,7 +174,7 @@ faasr_register_workflow_ibmcloud_create_action <- function(actionname, faasr) {
   if (length(faasr$ActionContainers[[actionname]])==0) {
     actioncontainer <- "faasr/openwhisk-tidyverse"
   } else {
-    actioncontainer <- faasr$ActionContainers[[factionname]]
+    actioncontainer <- faasr$ActionContainers[[actionname]]
   }
   # create a function with maximum timeout and 512MB memory space
   command <- paste("ibmcloud fn action create",actionname,"--docker",actioncontainer,"--timeout 600000 --memory 2048")
