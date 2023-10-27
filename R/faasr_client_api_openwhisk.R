@@ -60,7 +60,7 @@ faasr_register_workflow_ibmcloud_action_lists <- function(faasr) {
     server_name <- faasr$FunctionList[[fn]]$FaaSServer
     # if FaaStype is Openwhisk, add it to the list
     if (is.null(faasr$ComputeServers[[server_name]]$FaaSType)){
-      cat("\n\ninvalid server:", server_name," check server type\n\n")
+      cat("\n\n[faasr_msg]invalid server:", server_name," check server type\n\n")
       stop()
     }
     if (faasr$ComputeServers[[server_name]]$FaaSType == "OpenWhisk") {
@@ -73,7 +73,7 @@ faasr_register_workflow_ibmcloud_action_lists <- function(faasr) {
 
 faasr_register_workflow_ibmcloud_target_group <- function(){
   command <- paste0()
-  cat("Target Resource group(Type \"Enter\" to proceed with default value): ")
+  cat("[faasr_msg]Target Resource group(Type \"Enter\" to proceed with default value): ")
   check <- readline()
   if (check==""){
     command <- paste0("ibmcloud target -g Default")
@@ -84,9 +84,9 @@ faasr_register_workflow_ibmcloud_target_group <- function(){
   response <- system(command, ignore.stdout=TRUE, ignore.stderr=TRUE)
   
   if (response==0){
-    cat("\n\nTarget Resource group Success\n\n")
+    cat("\n\n[faasr_msg]Target Resource group Success\n\n")
   } else{
-    cat("\n\nTarget Resource group Failed, please check resource group\n\n")
+    cat("\n\n[faasr_msg]Target Resource group Failed, please check resource group\n\n")
     stop()
   }
 }
@@ -94,7 +94,7 @@ faasr_register_workflow_ibmcloud_target_group <- function(){
 # create a namespace
 faasr_register_workflow_ibmcloud_create_namespace <- function(name) {
   command <- paste0("ibmcloud fn namespace create ",name)
-  cat("creating a new namespace\n")
+  cat("[faasr_msg]creating a new namespace\n")
   system(command,ignore.stdout=TRUE, ignore.stderr=TRUE)
   # get the id of the namespace
   command <- paste0("ibmcloud fn namespace get ",name," --properties")
@@ -108,7 +108,7 @@ faasr_register_workflow_ibmcloud_create_namespace <- function(name) {
 faasr_register_workflow_ibmcloud_target_namespace <- function(server,faasr) {
   namespace<-faasr$ComputeServers[[server]]$Namespace
   command <- paste("ibmcloud fn namespace target",namespace)
-  cat("targetting a new namespace\n")
+  cat("\n\n[faasr_msg][faasr_msg]targetting a namespace:",namespace,"\n\n")
   check <- system(command,ignore.stdout=TRUE, ignore.stderr=TRUE)
   # if check == 0, i.e., no errors, return TRUE, retrieve ID in case that a user only doesn't provide ID
   if (check==0) {
@@ -119,25 +119,23 @@ faasr_register_workflow_ibmcloud_target_namespace <- function(server,faasr) {
     return(name_id)
     # if check != 0, i.e., errors, ask the user to create a new one
   } else {
-    cat("Invalid Namespace\n")
-    cat("Create a new Namespace?[y/n]")
+    cat("\n\n[faasr_msg]Invalid Namespace\n")
+    cat("[faasr_msg]Create a new Namespace?[y/n]\n")
     while(TRUE) {
       check <- readline()
       if (check=="y") {
-        cat("type Namespace name: ")
+        cat("\n\n[faasr_msg]type Namespace name: ")
         # receive the user's input for the namespace name
         name <- readline()
         # create a new namespace
         namespace <- faasr_register_workflow_ibmcloud_create_namespace(name)
         # save the result to the json file
         faasr$ComputeServers[[server]]$Namespace <- namespace
-        cat("successful", "\n")
-        faasr_register_workflow_ibmcloud_update_payload(faasr)
-        cat("New Namespace name is: ",namespace)
-        cat("Please start faasr() again with given payload file: \"faasr_payload_ow.json\"")
-        stop()
+        cat("\n\n[faasr_msg]creating namespace successful", "\n")
+        cat("\n\n[faasr_msg]New Namespace name is: ",namespace)
+        break
       } else if(check=="n") {
-        cat("stop the function")
+        cat("\n\n[faasr_msg]stop the function\n")
         stop()
       } else {
         cat("Enter \"y\" or \"n\": ")
@@ -178,20 +176,20 @@ faasr_register_workflow_ibmcloud_create_action <- function(actionname, faasr) {
   }
   # create a function with maximum timeout and 512MB memory space
   command <- paste("ibmcloud fn action create",actionname,"--docker",actioncontainer,"--timeout 600000 --memory 2048")
-  cat("creating a new action\n")
+  cat("\n\n[faasr_msg]creating a new action\n")
   check <- system(command,ignore.stdout=TRUE, ignore.stderr=TRUE)
   # if action already exists, ask the user to update the action
   if (check[1]==153) {
-    print("error: action name already exists")
-    cat("Do you want to update the action?[y/n]")
+    cat("[faasr_msg]Error: action name:\"",actionname,"\"already exists\n")
+    cat("[faasr_msg]Do you want to update the action?[y/n]\n")
     while(TRUE) {
       check <- readline()
       if (check=="y") {
         # update the action
         command <- paste("ibmcloud fn action update",actionname,"--docker",actioncontainer,"--timeout 600000 --memory 2048")
-        cat("updating an action\n")
+        cat("\n[faasr_msg]updating an action\n")
         system(command,ignore.stdout=TRUE, ignore.stderr=TRUE)
-        cat("successful", "\n")
+        cat("[faasr_msg]successful", "\n")
         break
       } else if(check=="n") {
         stop()
