@@ -92,15 +92,15 @@ faasr_register_workflow_lambda_function_lists <- function(faasr){
   }
   for(action_name in names(lambda_function_info)){
     if(check_lambda_exists(action_name)){
-      cat("\nlambda function -- ", action_name, "already exists.\n")
-      cat("Do you want to update it?[y/n]\n")
+      cat("\n\n[faasr_msg] lambda function -- ", action_name, "already exists.\n")
+      cat("[faasr_msg] Do you want to update it?[y/n]\n")
       while(TRUE) {
         check <- readLines(con = "stdin", 1)
         if(check == "y"){
           lambda_function_info[[action_name]]$action <- "update"
           break
         } else if(check == 'n'){
-          cat("\nstop the script\n")
+          cat("\n[faasr_msg] stop the script\n")
           stop()
         }else {
           cat("Enter \"y\" or \"n\": ")
@@ -158,7 +158,7 @@ faasr_register_workflow_aws_ecr_build <- function(faasr){
   aws_region <- system(get_region_command, intern = TRUE)
   
   # ask user to acquire ecr repo name
-  cat("\nThe ECR Repositery you want to create or use: [for example: lambda-script]\n")
+  cat("\n\n[faasr_msg]The ECR Repositery you want to create or use: [for example: lambda-script]\n")
   aws_ecr_repo_name <- NULL
   while(TRUE) {
     # aws_ecr_repo_name <- readLines(con = "stdin", 1)
@@ -177,7 +177,7 @@ faasr_register_workflow_aws_ecr_build <- function(faasr){
   # if the repository does not exist, create it
   if (!is.null(status_code) && status_code == 254) {
     
-    cat("\nwill create new ecr repo ", aws_ecr_repo_name, "\n")
+    cat("\n[faasr_msg] will create new ecr repo ", aws_ecr_repo_name, "\n")
     create_command <- paste0("aws ecr create-repository --repository-name ", aws_ecr_repo_name, " --region ", aws_region)
     create_result <- system(create_command, intern = TRUE)
     print(create_result)
@@ -191,7 +191,7 @@ faasr_register_workflow_aws_ecr_build <- function(faasr){
 faasr_register_workflow_aws_lambda_role_create <- function(faasr){
   
   # ask user to acuqire aws lambda role name
-  cat("\nThe name of AWS lambda role that you want to create or use: [for example: faasr-lambda]\n")
+  cat("\n[faasr_msg] The name of AWS lambda role that you want to create or use: [for example: faasr-lambda]\n")
   aws_lambda_role_name <- NULL
   while(TRUE) {
     #aws_lambda_role_name <- readLines(con = "stdin", 1)
@@ -286,7 +286,7 @@ faasr_register_workflow_aws_lambda_function_build <- function(lambda_function_in
   # ask user to specify the function timeout and memory size
   has_create <- any(sapply(lambda_function_info, function(x) x$action == "create"))
   #if(has_create){
-  cat("\nSet lambda function timeout(sec) [60 to 900]:\n")
+  cat("\n[faasr_msg] Set lambda function timeout(sec) [60 to 900]:\n")
   while(TRUE) {
     #aws_lambda_timeout <- readLines(con = "stdin", 1)
     aws_lambda_timeout <- readline()
@@ -295,13 +295,13 @@ faasr_register_workflow_aws_lambda_function_build <- function(lambda_function_in
     if(aws_lambda_timeout != "" && !is.na(timeout_numeric_input) && timeout_numeric_input >= 60 && timeout_numeric_input <= 900){
       break
     } else {
-      cat("Invalid input. Please enter a numeric value between 60 and 900:\n")
+      cat("[faasr_msg] Invalid input. Please enter a numeric value between 60 and 900:\n")
     }
   }
   # convert the input to a numeric value
   aws_lambda_timeout <- as.numeric(aws_lambda_timeout)
   
-  cat("\nSet lambda function memory size(MB) [256 to 10240]:\n")
+  cat("\n[faasr_msg] Set lambda function memory size(MB) [256 to 10240]:\n")
   while(TRUE) {
     #aws_lambda_memory <- readLines(con = "stdin", 1)
     aws_lambda_memory <- readline()
@@ -310,7 +310,7 @@ faasr_register_workflow_aws_lambda_function_build <- function(lambda_function_in
     if(aws_lambda_memory != "" && !is.na(memory_numeric_input) && memory_numeric_input >= 256 && memory_numeric_input <= 10240){
       break
     } else {
-      cat("Invalid input. Please enter a numeric value between 256 and 10240:\n")
+      cat("[faasr_msg] Invalid input. Please enter a numeric value between 256 and 10240:\n")
     }
   }
   # convert the input to a numeric value
@@ -327,7 +327,7 @@ faasr_register_workflow_aws_lambda_function_build <- function(lambda_function_in
     function_image_url <- function_image_list[[function_image_name]]
     
     if(lambda_function_info[[function_name]]$action == "update"){
-      cat("\nWill update lambda function configuration", function_name, "\n")
+      cat("\n[faasr_msg] Will update lambda function configuration", function_name, "\n")
       update_lambda__config_command <- paste0("aws lambda update-function-configuration --function-name ",function_name," --role ",lambda_role_arn," --timeout ",aws_lambda_timeout," --memory-size ",aws_lambda_memory)
       print(update_lambda__config_command)
       return_status <- system(update_lambda__config_command, intern = TRUE)
@@ -343,14 +343,14 @@ faasr_register_workflow_aws_lambda_function_build <- function(lambda_function_in
     function_image_url <- function_image_list[[function_image_name]]
     
     if(lambda_function_info[[function_name]]$action == "update"){
-      cat("\nWill update lambda function image", function_name, "\n")
+      cat("\n[faasr_msg] Will update lambda function image", function_name, "\n")
       update_lambda_command <- paste0("aws lambda update-function-code --function-name ",function_name," --image-uri ", function_image_url)
       print(update_lambda_command)
       #system(update_lambda_command, intern = TRUE)
       execute_command_with_retry(update_lambda_command)
       
     } else if(lambda_function_info[[function_name]]$action == "create"){
-      cat("\nWill create lambda function", function_name, "\n")
+      cat("\n[faasr_msg] Will create lambda function", function_name, "\n")
       create_lambda_command <- paste0("aws lambda create-function --region ",aws_region," --function-name ",function_name," --package-type Image --code ImageUri=",function_image_url," --role ",lambda_role_arn ," --timeout ",aws_lambda_timeout," --memory-size ",aws_lambda_memory)
       print(create_lambda_command)
       system(create_lambda_command, intern = TRUE)
@@ -383,23 +383,23 @@ execute_command_with_retry <- function(command, max_retries = 3, sleep_seconds =
     
     # check the status code to see if command failed
     if (!is.null(status_code) && status_code == 254) {
-      cat("Command failed with status code 254. Retrying in", sleep_seconds, "seconds...\n")
+      cat("[faasr_msg] Command failed with status code 254. Retrying in", sleep_seconds, "seconds...\n")
     } else {
       
       json_output <- try(jsonlite::fromJSON(paste(command_output, collapse = "")), silent = TRUE)
       
       if (!inherits(json_output, "try-error") && json_output$LastUpdateStatus %in% c("InProgress", "Complete")) {
-        cat("Update is in progress or completed successfully.\n")
+        cat("[faasr_msg] Update is in progress or completed successfully.\n")
         return(TRUE)
       } else {
-        cat("LastUpdateStatus is not as expected. Retrying in", sleep_seconds, "seconds...\n")
+        cat("[faasr_msg] LastUpdateStatus is not as expected. Retrying in", sleep_seconds, "seconds...\n")
       }
     }
     
     # Pause before retrying
     Sys.sleep(sleep_seconds)
   }
-  cat("Max retries reached. Exiting.\n")
+  cat("[faasr_msg] Max retries reached. Exiting.\n")
   return(FALSE)
 }
 
