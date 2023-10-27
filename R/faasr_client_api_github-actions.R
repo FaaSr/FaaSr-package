@@ -235,13 +235,13 @@ faasr_register_workflow_github_gh_setup <- function(check, repo, ref) {
   } else if (check == TRUE) {
     # if the repository already exists, ask user to update it or not
     cat("\n\n[faasr_msg] Repository already exists\n")
-    cat("Update the repository?[y/n]")
+    cat("[faasr_msg] Update the repository?[y/n]")
     while(TRUE) {
       check1 <- readline()
       if (check1=="y") {
         break
       } else if(check1 == "n") {
-        cat("\n\n[faasr_msg]stop the function\n")
+        cat("\n\n[faasr_msg] Stop the function\n")
         setwd(wd)
         stop()
       } else {
