@@ -95,7 +95,7 @@ faasr_register_workflow_lambda_function_lists <- function(faasr){
       cat("\n\n[faasr_msg] lambda function -- ", action_name, "already exists.\n")
       cat("[faasr_msg] Do you want to update it?[y/n]\n")
       while(TRUE) {
-        check <- readLines(con = "stdin", 1)
+        check <- readline()
         if(check == "y"){
           lambda_function_info[[action_name]]$action <- "update"
           break
@@ -161,7 +161,6 @@ faasr_register_workflow_aws_ecr_build <- function(faasr){
   cat("\n\n[faasr_msg]The ECR Repositery you want to create or use: [for example: lambda-script]\n")
   aws_ecr_repo_name <- NULL
   while(TRUE) {
-    # aws_ecr_repo_name <- readLines(con = "stdin", 1)
     aws_ecr_repo_name <- readline()
     if(aws_ecr_repo_name != ""){
       break
@@ -194,7 +193,6 @@ faasr_register_workflow_aws_lambda_role_create <- function(faasr){
   cat("\n[faasr_msg] The name of AWS lambda role that you want to create or use: [for example: faasr-lambda]\n")
   aws_lambda_role_name <- NULL
   while(TRUE) {
-    #aws_lambda_role_name <- readLines(con = "stdin", 1)
     aws_lambda_role_name <- readline()
     if(aws_lambda_role_name != ""){
       break
@@ -288,7 +286,6 @@ faasr_register_workflow_aws_lambda_function_build <- function(lambda_function_in
   #if(has_create){
   cat("\n[faasr_msg] Set lambda function timeout(sec) [60 to 900]:\n")
   while(TRUE) {
-    #aws_lambda_timeout <- readLines(con = "stdin", 1)
     aws_lambda_timeout <- readline()
     timeout_numeric_input <- suppressWarnings(as.numeric(aws_lambda_timeout))
     # Check if the input is numeric and between 60 and 900
@@ -303,7 +300,6 @@ faasr_register_workflow_aws_lambda_function_build <- function(lambda_function_in
   
   cat("\n[faasr_msg] Set lambda function memory size(MB) [256 to 10240]:\n")
   while(TRUE) {
-    #aws_lambda_memory <- readLines(con = "stdin", 1)
     aws_lambda_memory <- readline()
     memory_numeric_input <- suppressWarnings(as.numeric(aws_lambda_memory))
     # Check if the input is numeric and between 60 and 900
