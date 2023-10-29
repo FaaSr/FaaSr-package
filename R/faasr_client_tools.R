@@ -314,21 +314,24 @@ faasr_invoke_workflow <- function(FunctionInvoke=NULL){
   
   # if there's given function, it will be invoked.
   if (!is.null(FunctionInvoke)){
-    functioninvoke <- FunctionInvoke
+    actionname <- FunctionInvoke
   } else{
-    functioninvoke <- faasr$FunctionInvoke
+    actionname <- faasr$FunctionInvoke
   }
   # define the required variables.
-  faas_name <- faasr$FunctionList[[functioninvoke]]$FaaSServer
+  faas_name <- faasr$FunctionList[[actionname]]$FaaSServer
   faas_type <- faasr$ComputeServers[[faas_name]]$FaaSType
-  actionname <- faasr$FunctionList[[functioninvoke]]$Actionname
+  functionname <- faasr$FunctionList[[actionname]]$FunctionName
   
   switch(faas_type,
          # If first action is github actions, use github
          "GitHubActions"={
-           gh_ref <- faasr$ComputeServers[[faas_name]]$Ref
+           if (!endsWith(actionname,".yml") && !endsWith(actionname,".yaml")){
+            actionname_yml <- paste0(actionname,".yml")
+           }
+           gh_ref <- faasr$ComputeServers[[faas_name]]$Branch
            repo <- paste0(faasr$ComputeServers[[faas_name]]$UserName,"/",faasr$ComputeServers[[faas_name]]$ActionRepoName)
-           command <- paste0("gh workflow run --repo ",repo," --ref ",gh_ref," ",actionname," -f InvokeName=",functioninvoke)
+           command <- paste0("gh workflow run --repo ",repo," --ref ",gh_ref," ",actionname_yml," -f InvokeName=",actionname)
            check <- system(command)
          },
          "Lambda"={
@@ -340,7 +343,7 @@ faasr_invoke_workflow <- function(FunctionInvoke=NULL){
            writeLines(faasr_json, paste0("payload_ld_",rd_nb,".json"))
 
            # get lambda function timeout
-           check_lambda_config_command <- paste0("aws lambda get-function-configuration --function-name ", functioninvoke)
+           check_lambda_config_command <- paste0("aws lambda get-function-configuration --function-name ", actionname)
            check_lambda_config_result <- system(check_lambda_config_command, intern = TRUE)
 
            status_code <- attr(check_lambda_config_result, "status")

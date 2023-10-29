@@ -63,7 +63,7 @@ faasr_register_workflow_github_actions <- function(faasr, cred) {
         faasr_register_workflow_github_create_yml_file(container_name,actionname)
       }
     }
-    ref <- faasr$ComputeServers[[server]]$Ref
+    ref <- faasr$ComputeServers[[server]]$Branch
     faasr_register_workflow_github_gh_setup(response, repo, ref)
     cat("\n\n[faasr_msg] successfully registed server: ", repo,"\n\n")
   }
@@ -89,7 +89,7 @@ faasr_register_workflow_github_repo_lists <- function(faasr) {
       stop()
     }
     if (faasr$ComputeServers[[server_name]]$FaaSType == "GitHubActions") {
-      actionname <- paste0(faasr$FunctionList[[fn]]$Actionname)
+      actionname <- fn
       repo_list[[server_name]] <- unique(c(repo_list[[server_name]],actionname))
     }
   }
@@ -152,7 +152,7 @@ faasr_register_workflow_github_set_payload <- function(faasr){
 # Create a yaml workflow file with the container name
 # TBD implement a native workflow pattern
 faasr_register_workflow_github_create_yml_file <- function(containername, actionname){
-  contents <- paste0("name: Running Actionname- ",actionname,"
+  contents <- paste0("name: Running Action- ",actionname,"
 
 on:
   workflow_dispatch:
@@ -235,13 +235,13 @@ faasr_register_workflow_github_gh_setup <- function(check, repo, ref) {
   } else if (check == TRUE) {
     # if the repository already exists, ask user to update it or not
     cat("\n\n[faasr_msg] Repository already exists\n")
-    cat("Update the repository?[y/n]")
+    cat("[faasr_msg] Update the repository?[y/n]")
     while(TRUE) {
       check1 <- readline()
       if (check1=="y") {
         break
       } else if(check1 == "n") {
-        cat("\n\n[faasr_msg]stop the function\n")
+        cat("\n\n[faasr_msg] Stop the function\n")
         setwd(wd)
         stop()
       } else {
