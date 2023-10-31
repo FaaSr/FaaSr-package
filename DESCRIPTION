@@ -38,6 +38,7 @@ Imports:
     RCurl,
     httr,
     uuid,
-    paws
+    paws,
+    arrow
 Encoding: UTF-8
 LazyData: true
