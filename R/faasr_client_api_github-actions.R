@@ -282,7 +282,7 @@ faasr_register_workflow_github_repo_exists <- function(repo) {
 
 # create README.md file for repository description
 faasr_register_workflow_github_readme <- function(){
-  contents <- paste0("## This is an automatically generated FaaSr repository 
+  contents <- paste0("# This is an automatically generated FaaSr repository 
 
 This repository has been created automatically by the FaaSr register_workflow() function.</br>
 It stores the workflow .yml files for your FaaSr workflow, as well as the JSON configuration and secrets.</br>
