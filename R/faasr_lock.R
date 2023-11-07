@@ -63,6 +63,7 @@ faasr_acquire<-function(faasr) {
 	# Call faasr_rsm to get a lock, faasr_rsm returns either TRUE or FALSE
 	Lock <- faasr_rsm(faasr)
 	cnt <- 0
+	max_cnt <- 4
 	# if function acquires a lock, it gets out of the loop
 	while(TRUE) {
 		# if Lock is TRUE i.e., this function has a lock, return TRUE i.e., get out of the While loop
@@ -71,8 +72,8 @@ faasr_acquire<-function(faasr) {
 		} else {
 		# if it doesn't, keep trying to get the flag&lock by calling faasr_rsm again until it returns TRUE.
 		# before retrying, sleep exponential to cnt
-		  if (cnt > 4){
-		    Sys.sleep(16)
+		  if (cnt > max_cnt){
+		    Sys.sleep(2^max_cnt)
 		  } else {
 		    Sys.sleep(2^cnt)
 		    cnt <- cnt+1
