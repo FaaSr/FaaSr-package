@@ -23,7 +23,7 @@ faasr_arrow_s3_bucket <- function(server_name=.faasr$DefaultDataStore) {
 
 
   s3 <- arrow::s3_bucket(
-    bucket = server_name,
+    bucket = target_s3$Bucket,
     access_key = target_s3$AccessKey,
     secret_key = target_s3$SecretKey,
     endpoint_override = target_s3$Endpoint
