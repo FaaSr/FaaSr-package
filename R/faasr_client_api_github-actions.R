@@ -54,6 +54,7 @@ faasr_register_workflow_github_actions <- function(faasr, cred) {
     response <- faasr_register_workflow_github_repo_exists(repo)
     faasr_register_workflow_github_create_env(server,repo,cred)
     faasr_register_workflow_github_set_payload(faasr)
+    faasr_register_workflow_github_readme()
     
     for (actionname in repo_list[[server]]){
       if (length(faasr$ActionContainers[[actionname]]) == 0) {
@@ -278,4 +279,17 @@ faasr_register_workflow_github_repo_exists <- function(repo) {
   # if it exists, it returns TRUE, if not, it returns FALSE
   return(exit_code == 0)
 }
+
+# create README.md file for repository description
+faasr_register_workflow_github_readme <- function(){
+  contents <- paste0("# This is an automatically generated FaaSr repository 
+
+This repository has been created automatically by the FaaSr register_workflow() function.</br>
+It stores the workflow .yml files for your FaaSr workflow, as well as the JSON configuration and secrets.</br>
+It is safe to delete this repository if you no longer need this workflow. It can be re-created by running register_workflow()</br>")
+  path <- "README.md"
+  writeLines(contents, path)
+}
+
+
 
