@@ -169,7 +169,7 @@ faasr_register_workflow_ibmcloud_target_namespace <- function(server,faasr) {
 # create an action
 faasr_register_workflow_ibmcloud_create_action <- function(actionname, faasr) {
   # actioncontainer can be either default or user-customized
-  if (length(faasr$ActionContainers[[actionname]])==0) {
+  if (length(faasr$ActionContainers[[actionname]])==0 || faasr$ActionContainers[[actionname]] == "") {
     actioncontainer <- "faasr/openwhisk-tidyverse"
   } else {
     actioncontainer <- faasr$ActionContainers[[actionname]]
