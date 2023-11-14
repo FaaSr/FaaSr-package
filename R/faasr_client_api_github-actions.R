@@ -57,7 +57,7 @@ faasr_register_workflow_github_actions <- function(faasr, cred) {
     faasr_register_workflow_github_readme()
     
     for (actionname in repo_list[[server]]){
-      if (length(faasr$ActionContainers[[actionname]]) == 0) {
+      if (length(faasr$ActionContainers[[actionname]]) == 0 || faasr$ActionContainers[[actionname]] == "") {
         faasr_register_workflow_github_create_yml_file("faasr/github-actions-tidyverse",actionname)
       } else {
         container_name <- faasr$ActionContainers[[actionname]]
