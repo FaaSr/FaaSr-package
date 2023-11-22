@@ -47,3 +47,33 @@ The first successful model of cloud computing is often referred to as Infrastruc
 An analogy that is often used is that IaaS is akin to renting a car, where the user is responsible for "managing" the car (driving, navigating, parking, fueling, etc), while FaaS is more akin to a taxi or ride-share, where the user accomplishes the same goal (moving from point A to point B) but the "management" of the car is offered by the service provider (taxi or ride-share company).
 
 Examples of services that support the FaaS model include AWS Lambda, the OpenWhisk open-source project, and GitHub Actions.
+
+## Example use cases of FaaS in science
+
+There are many successful commercial use cases of FaaS, and the approach can also provide a powerful framework for scientific applications. Examples include but are not limited to:
+
+* Automated QA/QC, where workflows can be automatically deployed in response to new data, updates, or on a programmable schedule
+
+* Forecasting, where workflows can be automatically deployed to execute the various stages of a forecasting application (e.g. data QA/QC, model execution, data assimilation, and visualization)
+
+Without FaaS, deploying and managing such kinds of workflows is time-consuming, error-prone, and requires skills in system administration and configuration that pose significant barriers to researchers. For example, to deploy such an automated workflow in an IaaS cloud, a user needs to be familiar with creating a virtual machine, configuring it, installing software dependences, managing security configuration and updates, and managing the orchestration of multiple components/functions of the workflow. While these can be successfully navigated by large research teams with dedicated IT staff, it is generally out of reach to smaller groups or individual researchers.
+
+With FaaS, it is possible to enable individual researchers and small teams to deploy such workflows without managing servers, bringing cloud capabilities closer to a wider range of researchers and applications. However, there are still challenges:
+
+* There is a significant learning curve in using the APIs (Application Programming Interfces) of FaaS platforms
+
+* Different FaaS platforms use different, incompatible APIs; developing for one platform can lead to vendor lock-in over time
+
+* Typically, FaaS platforms have native support for languages such as Python and Javascript, whereas many applications in the scientific community are written in R
+
+* FaaS execution is "stateless" whereby all the data that a function uses/creates in runtimemust be downloaded/uploaded to cloud data storage external to the FaaS platform
+
+FaaSr supports the science use cases by addressing these challenges:
+
+* FaaSr hides FaaS provider-specific APIs from end users through the functions provided by the FaaSr package
+
+* FaaSr supports multiple FaaS platforms, while exposing the same interface
+
+* FaaSr supports bindings for the R language and uses Rocker containers, allowing users to write functions natively in R
+
+* FaaSr provides easy-to-use primitives for cloud data transfer using S3, and Apache Arrow
