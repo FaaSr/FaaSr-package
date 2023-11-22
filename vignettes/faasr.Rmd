@@ -14,7 +14,7 @@ vignette: >
 ```{r, echo = FALSE, message = FALSE}
 knitr::opts_chunk$set(collapse = T, comment = "#>")
 options(tibble.print_min = 4L, tibble.print_max = 4L)
-library(faasr)
+library(FaaSr)
 set.seed(1014)
 ```
 
@@ -40,5 +40,10 @@ FaaSr is a package that makes it easy for developers to create R functions and w
 
 With FaaSr, you can focus on developing R functions and compose workflows, and leave dealing with the idiosyncrasies of different FaaS platforms and their APIs to the FaaSr package.
 
+## Function-as-a-Service (FaaS)
 
+The first successful model of cloud computing is often referred to as Infrastructure-as-a-Service (IaaS), and offered by services such as Amazon EC2. While the IaaS model has enabled significant innovation in the delivery of scalable and affordable computing to various users (from individuals to small groups to large enterprises) it has a significant drawback: the complexity of managing the cloud servers (Virtual Machines, or VMs) is exposed to users. The more recent FaaS model of cloud computing addresses this problem by allowing users to use cloud services without the burden of managing servers.
 
+An analogy that is often used is that IaaS is akin to renting a car, where the user is responsible for "managing" the car (driving, navigating, parking, fueling, etc), while FaaS is more akin to a taxi or ride-share, where the user accomplishes the same goal (moving from point A to point B) but the "management" of the car is offered by the service provider (taxi or ride-share company).
+
+Examples of services that support the FaaS model include AWS Lambda, the OpenWhisk open-source project, and GitHub Actions.
