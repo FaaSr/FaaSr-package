@@ -1,0 +1,44 @@
+---
+title: "Introduction to FaaSr"
+output: rmarkdown::html_vignette
+description: >
+  Start here if this is your first time using FaaSr. You'll learn the basic   
+  philosophy behind Function-as-a-Service (FaaS) and how FaaSr can help 
+  simplify the development and deployment of FaaS-ready workflows using R.
+vignette: >
+  %\VignetteIndexEntry{Introduction to FaaSr}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r, echo = FALSE, message = FALSE}
+knitr::opts_chunk$set(collapse = T, comment = "#>")
+options(tibble.print_min = 4L, tibble.print_max = 4L)
+library(faasr)
+set.seed(1014)
+```
+
+Many applications developed in R can benefit from:
+
+* Encapsulation of R functions and its dependences in Docker containers
+
+* Composition of multiple R functions into workflows
+
+* Automated cloud deployment of workflows without requiring server management
+
+* Dynamic invocation of workflows based on events such as timers
+
+* Support for cloud services for data storage, retrieval, and external access
+
+FaaSr is a package that makes it easy for developers to create R functions and workflows that can run in the cloud.
+
+* It is built to work with Function-as-a-Service (FaaS) cloud computing
+
+* It allows you to write R code once and create workflows that can be deployed on both widely-used commercial (GitHub Actions, AWS Lambda) and open-source platforms (OpenWhisk). 
+
+* It is also built to work with cloud storage, and provides simple primitives for data access using AWS S3 and Apache Arrow
+
+With FaaSr, you can focus on developing R functions and compose workflows, and leave dealing with the idiosyncrasies of different FaaS platforms and their APIs to the FaaSr package.
+
+
+
