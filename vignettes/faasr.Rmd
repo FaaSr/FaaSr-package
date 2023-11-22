@@ -77,3 +77,23 @@ FaaSr supports the science use cases by addressing these challenges:
 * FaaSr supports bindings for the R language and uses Rocker containers, allowing users to write functions natively in R
 
 * FaaSr provides easy-to-use primitives for cloud data transfer using S3, and Apache Arrow
+
+## Overview of using FaaSr
+
+While FaaSr provides an extensible platform to develop customizable workflows for advanced usage, in the common case a user:
+
+* Installs the FaaSr package to their local RStudio environment
+
+* Develops and publishes to a GitHub repository the R code for each function in their workflow
+
+* Sets up an S3 bucket in a cloud data storage provider of their choice
+
+* Creates a workflow by composing functions into a graph that establishes the order in which functions are invoked
+
+* Configures credentials for their FaaS and S3 services of choice as environment variables in RStudio
+
+* Uses FaaSr functions to register and invoke their workflows in their FaaS platforms of choice
+
+* Uses S3 to upload/download data for inputs/outputs of their workflow
+
+These are covered in other vignettes for this package.
