@@ -374,4 +374,182 @@ faasr_invoke_workflow <- function(FunctionInvoke=NULL){
 .faasr_user$operations$invoke_workflow <- faasr_invoke_workflow
 
 
+faasr_set_workflow_timer <- function(cron, target=NULL){
+  svc <- .faasr_get_svc()
+  cred <- svc$cred
+  faasr <- svc$json
+  json_path <- svc$json_path
+  cred <- faasr_collect_sys_env(faasr,cred)
+  if (is.null(target)){
+    target <- faasr$FunctionInvoke
+  }
+  type <- faasr$ComputeServers[[faasr$FunctionList[[target]]$FaaSServer]]$FaaSType
+  if (type == "GitHubActions"){
+    faasr_set_workflow_timer_gh(faasr,target,cron)
+  } else if (type == "Lambda"){
+    faasr_set_workflow_timer_ld(faasr,target,cron)
+  } else if (type == "OpenWhisk"){
+    faasr_set_workflow_timer_ow(faasr,cred,target,cron)
+  }
+}
+.faasr_user$operations$set_workflow_timer <- faasr_set_workflow_timer
+
+faasr_unset_workflow_timer <- function(target=NULL){
+  svc <- .faasr_get_svc()
+  cred <- svc$cred
+  faasr <- svc$json
+  json_path <- svc$json_path
+  cred <- faasr_collect_sys_env(faasr,cred)
+  if (is.null(target)){
+    target <- faasr$FunctionInvoke
+  }
+  type <- faasr$ComputeServers[[faasr$FunctionList[[target]]$FaaSServer]]$FaaSType
+  if (type == "GitHubActions"){
+    faasr_set_workflow_timer_gh(faasr,target, cron=NULL, unset=TRUE)
+  } else if (type == "Lambda"){
+    faasr_set_workflow_timer_ld(faasr,target, cron=NULL, unset=TRUE)
+  } else if (type == "OpenWhisk"){
+    faasr_set_workflow_timer_ow(faasr,cred,target, cron=NULL, unset=TRUE)
+  }
+}
+.faasr_user$operations$unset_workflow_timer <- faasr_unset_workflow_timer
+
+
+faasr_set_workflow_timer_ld <- function(){
+  
+}
+
+faasr_set_workflow_timer_ow <- function(faasr, cred, target, cron, unset=FALSE){
+  
+  endpoint <- faasr$ComputeServers[[faasr$FunctionList[[target]]$FaaSServer]]$Endpoint
+  faasr_w_cred <- FaaSr::faasr_replace_values(faasr, cred)
+  faasr_json <- jsonlite::toJSON(faasr_w_cred, auto_unbox=TRUE)
+  faasr_json <- toString(faasr_json)
+  faasr_json <- gsub("\"", "\\\\\\\"", faasr_json)
+  if (unset==TRUE){
+    if (endpoint == "" || grepl("cloud.ibm.com", endpoint)){
+      command <- paste0("ibmcloud fn trigger delete ",target,"_trigger")
+      result <- system(command)
+      if (result!=0){
+        cat("[faasr_msg] Error: cannot delete trigger")
+        stop()
+      }
+      command <- paste0("ibmcloud fn rule delete ",target,"_rule")
+      result <- system(command)
+      if (result!=0){
+        cat("[faasr_msg] Error: cannot delete rule")
+        stop()
+      }
+    } else {
+      command <- paste0("wsk trigger delete ",target,"_trigger")
+      system(command)
+      command <- paste0("wsk rule delete ",target,"_rule")
+      system(command)
+    }
+  } else {
+    if (endpoint == "" || grepl("cloud.ibm.com", endpoint)){
+      command <- paste0("ibmcloud fn trigger create ",target,"_trigger --feed /whisk.system/alarms/alarm --param cron \"",cron,"\" --param trigger_payload \"",faasr_json,"\"")
+      result <- system(command)
+      if (result!=0){
+        cat("[faasr_msg] Error: cannot create trigger")
+        stop()
+      }
+      command <- paste0("ibmcloud fn rule create ",target,"_rule ",target,"_trigger ",target)
+      result <- system(command)
+      if (result!=0){
+        cat("[faasr_msg] Error: cannot create rule")
+        stop()
+      }
+    } else {
+      command <- paste0("wsk trigger create ",target,"_trigger --feed /whisk.system/alarms/alarm --param cron \"",cron,"\" --param trigger_payload \"",faasr_json,"\"")
+      system(command)
+      command <- paste0("wsk rule create ",target,"_rule ",target,"_trigger ",target)
+      system(command)
+      command <- paste0("wsk trigger fire ",target,"_trigger")
+      system(command)
+    }
+  }
+}
+
+faasr_set_workflow_timer_gh <- function(faasr, target, cron, unset=FALSE){
+  
+  folder <- faasr$FaaSrLog
+  id <- faasr$InvocationID
+  
+  cat("[faasr_msg] Be cautious that mininum cron timer for github actions is 5minutes (*/5 * * * *), yours:", cron)
+  if (!endsWith(target,".yml")){
+    target_yml <- paste0(target,".yml")
+  } else {
+    target_yml <- target
+  }
+  
+  workflow <- paste0(faasr$ComputeServers[[faasr$FunctionList[[target]]$FaaSServer]]$ActionRepoName,"/.github/workflows/",target_yml)
+  if (!file.exists(workflow)){
+    cat("\n\n[faasr_msg]Check that current working directory is correct and/or local repository exists\n\n")
+    cat("\n\n[faasr_msg]Error: No workflow file found\n\n")
+    stop()
+  }
+  
+  contents_1 <- paste0("name: Running Action- ",target,"
+
+on:")
+  contents_2 <- paste0("
+  schedule:
+    - cron: \"",cron,"\"")
+  contents_3 <- paste0("
+  workflow_dispatch:
+    inputs:
+      ID:
+        description: 'InvocationID'
+        required: false
+      InvokeName:
+        description: 'FunctionInvoke'
+        required: true
+      FaaSrLog:
+        description: 'FaaSrLog'
+        required: false
+
+jobs:
+  run_docker_image:
+    runs-on: ubuntu-latest
+    container: ",faasr$ActionContainers[[target]],"
+    env:
+      SECRET_PAYLOAD: ${{ secrets.SECRET_PAYLOAD }}
+      PAYLOAD_REPO: ${{ vars.PAYLOAD_REPO }}
+      INPUT_ID: ${{ github.event.inputs.ID || \'",id,"\'  }}
+      INPUT_INVOKENAME: ${{ github.event.inputs.InvokeName || \'",target,"\' }}
+      INPUT_FAASRLOG: ${{ github.event.inputs.FaaSrLog || \'",folder,"\'  }}
+    steps:
+    - name: run Rscript
+      run: |
+        cd /action
+        Rscript faasr_start_invoke_github-actions.R")
+  
+  if (unset==TRUE){
+    contents_2 <- NULL
+  }
+  contents <- paste0(contents_1, contents_2, contents_3)
+  
+  writeLines(contents, workflow)
+  wd <- getwd()
+  setwd(faasr$ComputeServers[[faasr$FunctionList[[target]]$FaaSServer]]$ActionRepoName)
+  user_name <- faasr$ComputeServers[[faasr$FunctionList[[target]]$FaaSServer]]$UserName
+  repo_name <- faasr$ComputeServers[[faasr$FunctionList[[target]]$FaaSServer]]$ActionRepoName
+  repo <- paste0(user_name,"/",repo_name)
+  ref <- faasr$ComputeServers[[faasr$FunctionList[[target]]$FaaSServer]]$Branch
+  system("git init")
+  msg <- paste0("git checkout -B ", ref)
+  system(msg)
+  system("git add .")
+  system("git commit -m \'update repo\'")
+  command <- paste0("git push -f http://github.com/", repo, " ", ref)
+  check2 <- system(command)
+  if (check2==0){
+    cat("\n\n[faasr_msg] Successfully update the repo with cron timer\n")
+  } else{
+    cat("\n\n[faasr_msg] Error: Failed to update the repo with cron timer\n")
+  }
+  setwd(wd)
+}
+
 
