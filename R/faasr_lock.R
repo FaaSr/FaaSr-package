@@ -12,6 +12,8 @@ faasr_rsm <- function(faasr) {
   flag_path <- paste0(faasr$FaaSrLog,"/", faasr$InvocationID,"/",faasr$FunctionInvoke,"/flag/")
   flag_name <- paste0(flag_path,flag_content)
   lock_name <- paste0(faasr$FaaSrLog,"/", faasr$InvocationID,"/",faasr$FunctionInvoke,"./lock")
+  id_folder <- paste0(faasr$FaaSrLog,"/",faasr$InvocationID)
+  func_done <- paste0(id_folder,"/",faasr$FunctionInvoke,".done")
 
   # Set env for the storage.
   if (is.null(faasr$LoggingDataStore)){
@@ -32,6 +34,8 @@ faasr_rsm <- function(faasr) {
 	  region=target_s3$Region
 	)
   )
+  cnt <- 0
+  max_cnt <- 4
 
   # Make a loop
   while(TRUE) {
@@ -40,6 +44,21 @@ faasr_rsm <- function(faasr) {
 	# if someone has a flag i.e.,faasr_anyone_else_interested returns TRUE, delete_flag and try again.
 	if(faasr_anyone_else_interested(faasr, target_s3, flag_path, flag_name)) {
 	  s3$delete_object(Key=flag_name, Bucket=target_s3$Bucket)
+	  if (cnt > max_cnt){
+	    check_done <- s3$list_objects_v2(Prefix=func_done, Bucket=target_s3$Bucket)
+	    get_cnt <<- get_cnt + 1
+	    if (length(check_done)!=0){
+	      res_msg <- paste0('{\"faasr_abort_on_multiple_invocations\":\"not the last trigger invoked - timeout\"}', "\n")
+	      cat(res_msg)
+	      faasr_log(res_msg)
+	      stop()
+	    }
+	    Sys.sleep(2^max_cnt)
+	  } else {
+	    Sys.sleep(2^cnt)
+	    cnt <- cnt+1
+	  }
+		
 	# if nobody has a flag i.e.,faasr_anyone_else_interested returns FALSE, check the lock condition.
 	} else {
 	# if ".lock" exists in the bucket, return FALSE, and try all over again.
