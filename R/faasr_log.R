@@ -60,13 +60,14 @@ faasr_log_flush <- function(){
     check_log_file <- s3$list_objects_v2(Bucket=log_server$Bucket, Prefix=log_file)
     if (length(check_log_file$Contents) != 0) {
       if (file.exists(log_file)) {
-        file.remove(log_file)
+        result <- file.remove(log_file)
       }
-      s3$download_file(Bucket=log_server$Bucket, Key=log_file, Filename=log_file)
+      result <- s3$download_file(Bucket=log_server$Bucket, Key=log_file, Filename=log_file)
     }
      # append message to the local file then upload
-    write.table(logs_local, log_file, col.names=FALSE, row.names = FALSE, append=TRUE, quote=FALSE)
-    s3$put_object(Body=log_file, Key=log_file, Bucket=log_server$Bucket)
+    result <- write.table(logs_local, log_file, col.names=FALSE, row.names = FALSE, append=TRUE, quote=FALSE)
+    result <- s3$put_object(Body=log_file, Key=log_file, Bucket=log_server$Bucket)
+    result <- file.remove(log_file_local)
   }
   
 }
