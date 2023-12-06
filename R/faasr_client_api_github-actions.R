@@ -57,7 +57,7 @@ faasr_register_workflow_github_actions <- function(faasr, cred) {
     faasr_register_workflow_github_readme()
     
     for (actionname in repo_list[[server]]){
-      if (length(faasr$ActionContainers[[actionname]]) == 0) {
+      if (length(faasr$ActionContainers[[actionname]]) == 0 || faasr$ActionContainers[[actionname]] == "") {
         faasr_register_workflow_github_create_yml_file("faasr/github-actions-tidyverse",actionname)
       } else {
         container_name <- faasr$ActionContainers[[actionname]]
@@ -289,6 +289,98 @@ It stores the workflow .yml files for your FaaSr workflow, as well as the JSON c
 It is safe to delete this repository if you no longer need this workflow. It can be re-created by running register_workflow()</br>")
   path <- "README.md"
   writeLines(contents, path)
+}
+
+# set workflow timer for github
+faasr_set_workflow_timer_gh <- function(faasr, target, cron, unset=FALSE){
+
+  # bring variables
+  folder <- faasr$FaaSrLog
+  id <- faasr$InvocationID
+
+  # Note: github only accepts less frequnt than a job per 5min
+  cat("[faasr_msg] Be cautious that mininum cron timer for github actions is 5minutes (*/5 * * * *), yours:", cron)
+  # set yaml file name
+  if (!endsWith(target,".yml")){
+    target_yml <- paste0(target,".yml")
+  } else {
+    target_yml <- target
+  }
+
+  # bring the workflow file path
+  # Note that the github local repository should reside in the current directory
+  workflow <- paste0(faasr$ComputeServers[[faasr$FunctionList[[target]]$FaaSServer]]$ActionRepoName,"/.github/workflows/",target_yml)
+  if (!file.exists(workflow)){
+    cat("\n\n[faasr_msg]Check that current working directory is correct and/or local repository exists\n\n")
+    cat("\n\n[faasr_msg]Error: No workflow file found\n\n")
+    stop()
+  }
+  # Contents of workflow yaml file differs depending on the set/unset parameter
+  # Content_2 indicates the timer
+  contents_1 <- paste0("name: Running Action- ",target,"
+
+on:")
+  contents_2 <- paste0("
+  schedule:
+    - cron: \"",cron,"\"")
+  contents_3 <- paste0("
+  workflow_dispatch:
+    inputs:
+      ID:
+        description: 'InvocationID'
+        required: false
+      InvokeName:
+        description: 'FunctionInvoke'
+        required: true
+      FaaSrLog:
+        description: 'FaaSrLog'
+        required: false
+
+jobs:
+  run_docker_image:
+    runs-on: ubuntu-latest
+    container: ",faasr$ActionContainers[[target]],"
+    env:
+      SECRET_PAYLOAD: ${{ secrets.SECRET_PAYLOAD }}
+      PAYLOAD_REPO: ${{ vars.PAYLOAD_REPO }}
+      INPUT_ID: ${{ github.event.inputs.ID || \'",id,"\'  }}
+      INPUT_INVOKENAME: ${{ github.event.inputs.InvokeName || \'",target,"\' }}
+      INPUT_FAASRLOG: ${{ github.event.inputs.FaaSrLog || \'",folder,"\'  }}
+    steps:
+    - name: run Rscript
+      run: |
+        cd /action
+        Rscript faasr_start_invoke_github-actions.R")
+  
+  if (unset==TRUE){
+    contents_2 <- NULL
+  }
+  contents <- paste0(contents_1, contents_2, contents_3)
+  # create a workflow yaml file
+  writeLines(contents, workflow)
+  wd <- getwd()
+  # get into the local directory/ set variables
+  setwd(faasr$ComputeServers[[faasr$FunctionList[[target]]$FaaSServer]]$ActionRepoName)
+  user_name <- faasr$ComputeServers[[faasr$FunctionList[[target]]$FaaSServer]]$UserName
+  repo_name <- faasr$ComputeServers[[faasr$FunctionList[[target]]$FaaSServer]]$ActionRepoName
+  repo <- paste0(user_name,"/",repo_name)
+  ref <- faasr$ComputeServers[[faasr$FunctionList[[target]]$FaaSServer]]$Branch
+  # start git init/checkout/push
+  system("git init")
+  msg <- paste0("git checkout -B ", ref)
+  system(msg)
+  system("git add .")
+  system("git commit -m \'update repo\'")
+  command <- paste0("git push -f http://github.com/", repo, " ", ref)
+  check2 <- system(command)
+  # check the result
+  if (check2==0){
+    cat("\n\n[faasr_msg] Successfully update the repo with cron timer\n")
+  } else{
+    cat("\n\n[faasr_msg] Error: Failed to update the repo with cron timer\n")
+  }
+  # get out of the local repository
+  setwd(wd)
 }
 
 

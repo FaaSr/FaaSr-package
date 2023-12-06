@@ -169,7 +169,7 @@ faasr_register_workflow_ibmcloud_target_namespace <- function(server,faasr) {
 # create an action
 faasr_register_workflow_ibmcloud_create_action <- function(actionname, faasr) {
   # actioncontainer can be either default or user-customized
-  if (length(faasr$ActionContainers[[actionname]])==0) {
+  if (length(faasr$ActionContainers[[actionname]])==0 || faasr$ActionContainers[[actionname]] == "") {
     actioncontainer <- "faasr/openwhisk-tidyverse"
   } else {
     actioncontainer <- faasr$ActionContainers[[actionname]]
@@ -196,6 +196,69 @@ faasr_register_workflow_ibmcloud_create_action <- function(actionname, faasr) {
       } else {
         cat("Enter \"y\" or \"n\": ")
       }
+    }
+  }
+}
+
+# set workflow timer for openwhisk
+faasr_set_workflow_timer_ow <- function(faasr, cred, target, cron, unset=FALSE){
+
+  # set variables
+  endpoint <- faasr$ComputeServers[[faasr$FunctionList[[target]]$FaaSServer]]$Endpoint
+  faasr_w_cred <- FaaSr::faasr_replace_values(faasr, cred)
+  faasr_json <- jsonlite::toJSON(faasr_w_cred, auto_unbox=TRUE)
+  faasr_json <- toString(faasr_json)
+  # json file should get out two layers, so escaping letter should be twice
+  faasr_json <- gsub("\"", "\\\\\\\"", faasr_json)
+  # if unset==TRUE, delete the rule and trigger
+  if (unset==TRUE){
+    # if endpoint is empty or contains "cloud.ibm.com", use "ibmcloud fn" cli
+    if (endpoint == "" || grepl("cloud.ibm.com", endpoint)){
+      command <- paste0("ibmcloud fn trigger delete ",target,"_trigger")
+      result <- system(command)
+      if (result!=0){
+        cat("[faasr_msg] Error: cannot delete trigger")
+        stop()
+      }
+      command <- paste0("ibmcloud fn rule delete ",target,"_rule")
+      result <- system(command)
+      if (result!=0){
+        cat("[faasr_msg] Error: cannot delete rule")
+        stop()
+      }
+    # if not, use "wsk" cli
+    } else {
+      command <- paste0("wsk trigger delete ",target,"_trigger")
+      system(command)
+      command <- paste0("wsk rule delete ",target,"_rule")
+      system(command)
+    }
+  # if unset=FALSE, set the rule and trigger
+  } else {
+    # if endpoint is empty or contains "cloud.ibm.com", use "ibmcloud fn" cli
+    if (endpoint == "" || grepl("cloud.ibm.com", endpoint)){
+      # create the trigger with cron and faasr json payload
+      command <- paste0("ibmcloud fn trigger create ",target,"_trigger --feed /whisk.system/alarms/alarm --param cron \"",cron,"\" --param trigger_payload \"",faasr_json,"\"")
+      result <- system(command)
+      if (result!=0){
+        cat("[faasr_msg] Error: cannot create trigger")
+        stop()
+      }
+      # create the rule, rule links the trigger and the function
+      command <- paste0("ibmcloud fn rule create ",target,"_rule ",target,"_trigger ",target)
+      result <- system(command)
+      if (result!=0){
+        cat("[faasr_msg] Error: cannot create rule")
+        stop()
+      }
+    # if not, use the "wsk" cli
+    } else {
+      command <- paste0("wsk trigger create ",target,"_trigger --feed /whisk.system/alarms/alarm --param cron \"",cron,"\" --param trigger_payload \"",faasr_json,"\"")
+      system(command)
+      command <- paste0("wsk rule create ",target,"_rule ",target,"_trigger ",target)
+      system(command)
+      command <- paste0("wsk trigger fire ",target,"_trigger")
+      system(command)
     }
   }
 }

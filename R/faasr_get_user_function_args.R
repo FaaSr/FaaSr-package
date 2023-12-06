@@ -9,5 +9,8 @@ faasr_get_user_function_args <- function(faasr) {
 
   # Now extract and return the arguments specific to this User Function
   args = faasr$FunctionList[[user_action]]$Arguments
+  if (is.null(args)){
+    return(list())
+  }
   return(args)
 }

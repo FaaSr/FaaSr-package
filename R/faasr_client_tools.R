@@ -374,4 +374,44 @@ faasr_invoke_workflow <- function(FunctionInvoke=NULL){
 .faasr_user$operations$invoke_workflow <- faasr_invoke_workflow
 
 
+faasr_set_workflow_timer <- function(cron, target=NULL){
+  svc <- .faasr_get_svc()
+  cred <- svc$cred
+  faasr <- svc$json
+  json_path <- svc$json_path
+  cred <- faasr_collect_sys_env(faasr,cred)
+  if (is.null(target)){
+    target <- faasr$FunctionInvoke
+  }
+  type <- faasr$ComputeServers[[faasr$FunctionList[[target]]$FaaSServer]]$FaaSType
+  if (type == "GitHubActions"){
+    faasr_set_workflow_timer_gh(faasr,target,cron)
+  } else if (type == "Lambda"){
+    faasr_set_workflow_timer_ld(faasr,cred,target,cron)
+  } else if (type == "OpenWhisk"){
+    faasr_set_workflow_timer_ow(faasr,cred,target,cron)
+  }
+}
+.faasr_user$operations$set_workflow_timer <- faasr_set_workflow_timer
+
+faasr_unset_workflow_timer <- function(target=NULL){
+  svc <- .faasr_get_svc()
+  cred <- svc$cred
+  faasr <- svc$json
+  json_path <- svc$json_path
+  cred <- faasr_collect_sys_env(faasr,cred)
+  if (is.null(target)){
+    target <- faasr$FunctionInvoke
+  }
+  type <- faasr$ComputeServers[[faasr$FunctionList[[target]]$FaaSServer]]$FaaSType
+  if (type == "GitHubActions"){
+    faasr_set_workflow_timer_gh(faasr,target, cron=NULL, unset=TRUE)
+  } else if (type == "Lambda"){
+    faasr_set_workflow_timer_ld(faasr,cred, target, cron=NULL, unset=TRUE)
+  } else if (type == "OpenWhisk"){
+    faasr_set_workflow_timer_ow(faasr,cred,target, cron=NULL, unset=TRUE)
+  }
+}
+.faasr_user$operations$unset_workflow_timer <- faasr_unset_workflow_timer
+
 

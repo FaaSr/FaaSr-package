@@ -57,52 +57,66 @@ faasr_trigger <- function(faasr) {
           #
           # TBD - need to differentiate from IBMcloud or plain OpenWhisk
           # Set the env values for the openwhisk action.
+	  endpoint <- faasr$ComputeServers[[next_server]]$Endpoint
           api_key <- faasr$ComputeServers[[next_server]]$API.key
 	  region <- faasr$ComputeServers[[next_server]]$Region
           namespace <- faasr$ComputeServers[[next_server]]$Namespace
           actionname <- invoke_next_function
 
-	  # Openwhisk with IBM cloud - Get a token by using the API key
-	  # URL is the ibmcloud's iam center.
-	  url <- "https://iam.cloud.ibm.com/identity/token"
+	  if (endpoint == "" || grepl("cloud.ibm.com", endpoint)){
+	    # Openwhisk with IBM cloud - Get a token by using the API key
+	    # URL is the ibmcloud's iam center.
+	    url <- "https://iam.cloud.ibm.com/identity/token"
 
-	  # Body contains authorization type and api key
-	  body <- list(grant_type = "urn:ibm:params:oauth:grant-type:apikey",apikey=api_key)
+	    # Body contains authorization type and api key
+	    body <- list(grant_type = "urn:ibm:params:oauth:grant-type:apikey",apikey=api_key)
 
-	  # Header is HTTR request's header.
-	  headers <- c("Content-Type"="application/x-www-form-urlencoded")
+	    # Header is HTTR request's header.
+	    headers <- c("Content-Type"="application/x-www-form-urlencoded")
 
-          # Use httr::POST to send the POST request to the IBMcloud iam centers to get a token.
-	  response <- POST(url = url,body = body,encode = "form",add_headers(.headers = headers))
+            # Use httr::POST to send the POST request to the IBMcloud iam centers to get a token.
+	    response <- POST(url = url,body = body,encode = "form",add_headers(.headers = headers))
 
-	  # Parse the result to get a token.
-	  result <- content(response, as = "parsed")
+	    # Parse the result to get a token.
+	    result <- content(response, as = "parsed")
 
-	  # if result returns no error(length is 0), define token.
-	  if (length(result$errorMessage) == 0) {
-	    token <- paste("Bearer",result$access_token)
-	    # if result returns an error, return an error message and stop.
+	    # if result returns no error(length is 0), define token.
+	    if (length(result$errorMessage) == 0) {
+	      token <- paste("Bearer",result$access_token)
+	      # if result returns an error, return an error message and stop.
+	    } else {
+	      err_msg <- paste0('{\"faasr_trigger\":\"unable to invoke next action, authentication error\"}', "\n")
+	      cat(err_msg)
+	      faasr_log(err_msg)
+	      break
+	    }
+
+	    url_2 <- paste0("https://",region,".functions.cloud.ibm.com/api/v1/namespaces/",namespace,"/actions/",actionname,"?blocking=false&result=false")
+	    
+	    # header is HTTR request headers
+	    headers_2 <- c("accept"="application/json", "authorization"=token, "content-type"="application/json")
+	    # data is a body and it should be a JSON. To pass the payload, toJSON is required.
+	    data_2 <- toJSON(faasr, auto_unbox=TRUE)
+		  
+	    # Make one option for invoking RCurl
+	    curl_opts_2 <- list(post=TRUE, httpheader=headers_2, postfields=data_2)
+		  
 	  } else {
-	    err_msg <- paste0('{\"faasr_trigger\":\"unable to invoke next action, authentication error\"}', "\n")
-	    cat(err_msg)
-	    faasr_log(err_msg)
-	    break
+	    if (!startsWith(endpoint, "https") && !startsWith(endpoint, "http")){
+	      endpoint <- paste0("https://", endpoint)
+	    }
+	    url_2 <- paste0(endpoint, "/api/v1/namespace/",namespace,"/actions/",actionname,"?blocking=false&result=false")
+	    # Openwhisk - Invoke next action - action name should be described.
+	    # Reference: https://cloud.ibm.com/apidocs/functions
+	    # URL is a form of "https://region.functions.cloud.ibm.cloud/api/v1/namespaces/namespace/actions/actionname",
+	    # blocking=TRUE&result=TRUE is optional
+	  
+	    # data is a body and it should be a JSON. To pass the payload, toJSON is required.
+	    data_2 <- toJSON(faasr, auto_unbox=TRUE)
+
+	    # Make one option for invoking RCurl
+	    curl_opts_2 <- list(post=TRUE, httpheader=headers_2, postfields=data_2, userpwd=api_key)
 	  }
-
-	  # Openwhisk - Invoke next action - action name should be described.
-	  # Reference: https://cloud.ibm.com/apidocs/functions
-	  # URL is a form of "https://region.functions.cloud.ibm.cloud/api/v1/namespaces/namespace/actions/actionname",
-	  # blocking=TRUE&result=TRUE is optional
-	  url_2 <- paste0("https://",region,".functions.cloud.ibm.com/api/v1/namespaces/",namespace,"/actions/",actionname,"?blocking=false&result=false")
-
-	  # header is HTTR request headers
-	  headers_2 <- c("accept"="application/json", "authorization"=token, "content-type"="application/json")
-
-	  # data is a body and it should be a JSON. To pass the payload, toJSON is required.
-	  data_2 <- toJSON(faasr, auto_unbox=TRUE)
-
-	  # Make one option for invoking RCurl
-	  curl_opts_2 <- list(post=TRUE, httpheader=headers_2, postfields=data_2)
 
 	  # Perform RCurl::curlPerform to send the POST request to IBMcloud function server.
 	  response_2 <- curlPerform(url=url_2, .opts=curl_opts_2)
