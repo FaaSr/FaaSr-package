@@ -399,3 +399,87 @@ execute_command_with_retry <- function(command, max_retries = 3, sleep_seconds =
   return(FALSE)
 }
 
+# set workflow timer for lambda
+faasr_set_workflow_timer_ld <- function(faasr, cred, target, cron, unset=FALSE){
+  
+  faasr_w_cred <- FaaSr::faasr_replace_values(faasr, cred)
+  faasr_payload_json <- jsonlite::toJSON(faasr_w_cred, auto_unbox = TRUE)
+  
+  # get the AWS account ID
+  get_account_id_command <- "aws sts get-caller-identity --query Account --output text"
+  aws_account_id <- system(get_account_id_command, intern = TRUE)
+  
+  # get the AWS region
+  aws_region <- faasr$ComputeServers[[faasr$FunctionList[[target]]$FaaSServer]]$Region
+  
+  # get the lambda function name
+  lambda_function_name <- faasr$FunctionInvoke
+  
+  if (unset==TRUE){
+
+    event_rule_name <- paste0('FaaSr-scheduled-cron-rule-', lambda_function_name)
+
+    # remove event permission from lambda
+    unset_lambda_permission_command <- paste0('aws lambda remove-permission --function-name ', lambda_function_name, ' --statement-id ',event_rule_name)
+    unset_lambda_permission_result <- system(unset_lambda_permission_command, intern = TRUE)
+    
+    # remove target from event
+    unset_event_target_command <- paste0('aws events remove-targets --rule ',event_rule_name,' --ids 1')
+    unset_event_target_result <- system(unset_event_target_command, intern = TRUE)
+    
+    # remove event rule
+    unset_events_put_rules_command <- paste0('aws events delete-rule --name ',event_rule_name)
+    unset_events_put_rules_result <- system(unset_events_put_rules_command, intern = TRUE)
+    
+  } else{
+    
+    # set event rules
+    event_cron_rule <- cron
+    cat("event schedule: cron(",  event_cron_rule, ")\n")
+    #event_cron_rule <- "cron(0/5 * * * ? *)" # every 5 minute
+    
+    # set event rule name based on lambda function name
+    event_rule_name <- paste0('FaaSr-scheduled-cron-rule-', lambda_function_name)
+    set_events_put_rules_command <- paste0('aws events put-rule --name ',event_rule_name,' --schedule-expression "cron(',  event_cron_rule, ')"')
+    set_events_put_rules_result <- system(set_events_put_rules_command, intern = TRUE)
+    
+    # add permission to lambda
+    set_lambda_permission_command <- paste0('aws lambda add-permission --function-name ', lambda_function_name, ' --statement-id ',event_rule_name,' --action "lambda:InvokeFunction" --principal events.amazonaws.com --source-arn arn:aws:events:', aws_region, ':', aws_account_id, ':rule/',event_rule_name)
+    set_lambda_permission_result <- system(set_lambda_permission_command, intern = TRUE)
+    
+    
+    # access the status code
+    status_code <- attr(set_lambda_permission_result, "status")
+    # check if the permission statement already exist
+    if (!is.null(status_code) && status_code == 254){
+      print("permission statement already exist")
+    }
+    
+    # set event target and input payload
+    lambda_function_arn <- paste0('arn:aws:lambda:', aws_region, ':', aws_account_id, ':function:', lambda_function_name)
+    # Construct the content for faasr_lambda_event_targets.json
+    targets <- list(
+      list(
+        Id = "1",
+        Arn = lambda_function_arn,
+        Input = faasr_payload_json
+      )
+    )
+    
+    # Convert the targets list to JSON
+    targets_json <- jsonlite::toJSON(targets, pretty = TRUE, auto_unbox = TRUE)
+    
+    # Write faasr_lambda_event_targets.json to file
+    write(targets_json, file = "faasr_lambda_event_targets.json")
+    
+    # set event target with the faasr_lambda_event_targets.json
+    set_lambda_timer_command <- "aws events put-targets --rule FaaSr-scheduled-cron-rule --targets file://faasr_lambda_event_targets.json"
+    set_lambda_timer_result <- system(set_lambda_timer_command, intern = TRUE)
+    
+    file.remove("faasr_lambda_event_targets.json")
+  }
+  
+}
+
+
+                           

@@ -387,7 +387,7 @@ faasr_set_workflow_timer <- function(cron, target=NULL){
   if (type == "GitHubActions"){
     faasr_set_workflow_timer_gh(faasr,target,cron)
   } else if (type == "Lambda"){
-    faasr_set_workflow_timer_ld(faasr,target,cron)
+    faasr_set_workflow_timer_ld(faasr,cred,target,cron)
   } else if (type == "OpenWhisk"){
     faasr_set_workflow_timer_ow(faasr,cred,target,cron)
   }
@@ -407,7 +407,7 @@ faasr_unset_workflow_timer <- function(target=NULL){
   if (type == "GitHubActions"){
     faasr_set_workflow_timer_gh(faasr,target, cron=NULL, unset=TRUE)
   } else if (type == "Lambda"){
-    faasr_set_workflow_timer_ld(faasr,target, cron=NULL, unset=TRUE)
+    faasr_set_workflow_timer_ld(faasr,cred, target, cron=NULL, unset=TRUE)
   } else if (type == "OpenWhisk"){
     faasr_set_workflow_timer_ow(faasr,cred,target, cron=NULL, unset=TRUE)
   }
