@@ -12,8 +12,6 @@ faasr_rsm <- function(faasr) {
   flag_path <- paste0(faasr$FaaSrLog,"/", faasr$InvocationID,"/",faasr$FunctionInvoke,"/flag/")
   flag_name <- paste0(flag_path,flag_content)
   lock_name <- paste0(faasr$FaaSrLog,"/", faasr$InvocationID,"/",faasr$FunctionInvoke,"./lock")
-  id_folder <- paste0(faasr$FaaSrLog,"/",faasr$InvocationID)
-  func_done <- paste0(id_folder,"/",faasr$FunctionInvoke,".done")
 
   # Set env for the storage.
   if (is.null(faasr$LoggingDataStore)){
