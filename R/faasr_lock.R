@@ -45,14 +45,6 @@ faasr_rsm <- function(faasr) {
 	if(faasr_anyone_else_interested(faasr, target_s3, flag_path, flag_name)) {
 	  s3$delete_object(Key=flag_name, Bucket=target_s3$Bucket)
 	  if (cnt > max_cnt){
-	    check_done <- s3$list_objects_v2(Prefix=func_done, Bucket=target_s3$Bucket)
-	    get_cnt <<- get_cnt + 1
-	    if (length(check_done)!=0){
-	      res_msg <- paste0('{\"faasr_abort_on_multiple_invocations\":\"not the last trigger invoked - timeout\"}', "\n")
-	      cat(res_msg)
-	      faasr_log(res_msg)
-	      stop()
-	    }
 	    Sys.sleep(2^max_cnt)
 	  } else {
 	    Sys.sleep(2^cnt)
