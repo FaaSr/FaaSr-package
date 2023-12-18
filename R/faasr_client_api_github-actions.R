@@ -129,7 +129,7 @@ faasr_register_workflow_github_create_env <- function(server_name, repo_name, cr
   
   cred$PAYLOAD_GITHUB_TOKEN <- cred[[paste0(server_name,"_TOKEN")]]
   secrets_json <- jsonlite::toJSON(cred, auto_unbox=TRUE)
-  contents <- paste0("SECRET_PAYLOAD=",secrets_json)
+  contents <- paste0("SECRET_PAYLOAD=",secrets_json,",","REPO_TOKEN",cred[[paste0(server_name,"_TOKEN")]])
   # create a file ".env"
   writeLines(contents, ".env")
   # create a file ".gitignore"
@@ -175,6 +175,7 @@ jobs:
     env:
       SECRET_PAYLOAD: ${{ secrets.SECRET_PAYLOAD }}
       PAYLOAD_REPO: ${{ vars.PAYLOAD_REPO }}
+      GITHUB_PAT: ${{ secrets.REPO_TOKEN }}
       INPUT_ID: ${{ github.event.inputs.ID }}
       INPUT_INVOKENAME: ${{ github.event.inputs.InvokeName }}
       INPUT_FAASRLOG: ${{ github.event.inputs.FaaSrLog }}
@@ -343,6 +344,7 @@ jobs:
     env:
       SECRET_PAYLOAD: ${{ secrets.SECRET_PAYLOAD }}
       PAYLOAD_REPO: ${{ vars.PAYLOAD_REPO }}
+      GITHUB_PAT: ${{ secrets.REPO_TOKEN }}
       INPUT_ID: ${{ github.event.inputs.ID || \'",id,"\'  }}
       INPUT_INVOKENAME: ${{ github.event.inputs.InvokeName || \'",target,"\' }}
       INPUT_FAASRLOG: ${{ github.event.inputs.FaaSrLog || \'",folder,"\'  }}
