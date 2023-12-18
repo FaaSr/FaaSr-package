@@ -132,10 +132,13 @@ faasr_register_workflow_github_create_env <- function(server_name, repo_name, cr
   contents_1 <- paste0("SECRET_PAYLOAD=",secrets_json)
   contents_2 <- paste0("REPO_TOKEN=",cred[[paste0(server_name,"_TOKEN")]])
   # create a file ".env"
-  writeLines(contents_1, ".env_1")
-  writeLines(contents_2, ".env_2")
+  if (!dir.exists("faasr_creds")){
+    dir.create("faasr_creds")
+  }
+  writeLines(contents_1, "faasr_creds/.env_1")
+  writeLines(contents_2, "faasr_creds/.env_2")
   # create a file ".gitignore"
-  writeLines(".env_1, .env_2",".gitignore")
+  writeLines("faasr_creds/",".gitignore")
   # create a directory ".github/workflows"
   if (!dir.exists(".github/workflows")) {
     dir.create(".github/workflows", recursive=TRUE)
@@ -268,8 +271,8 @@ faasr_register_workflow_github_gh_setup <- function(check, repo, ref) {
     }
   }
   # set secrets and variables
-  system(paste0("gh secret set -f .env_1 --repo ", repo))
-  system(paste0("gh secret set -f .env_2 --repo ", repo))
+  system(paste0("gh secret set -f faasr_creds/.env_1 --repo ", repo))
+  system(paste0("gh secret set -f faasr_creds/.env_2 --repo ", repo))
   system(paste0('gh variable set PAYLOAD_REPO --body ', repo,'/payload.json',' --repo ',repo))
   # return to the default directory to make another one
   setwd("..")
