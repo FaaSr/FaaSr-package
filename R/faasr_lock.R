@@ -32,6 +32,8 @@ faasr_rsm <- function(faasr) {
 	  region=target_s3$Region
 	)
   )
+  cnt <- 0
+  max_cnt <- 4
 
   # Make a loop
   while(TRUE) {
@@ -40,6 +42,13 @@ faasr_rsm <- function(faasr) {
 	# if someone has a flag i.e.,faasr_anyone_else_interested returns TRUE, delete_flag and try again.
 	if(faasr_anyone_else_interested(faasr, target_s3, flag_path, flag_name)) {
 	  s3$delete_object(Key=flag_name, Bucket=target_s3$Bucket)
+	  if (cnt > max_cnt){
+	    Sys.sleep(2^max_cnt)
+	  } else {
+	    Sys.sleep(2^cnt)
+	    cnt <- cnt+1
+	  }
+		
 	# if nobody has a flag i.e.,faasr_anyone_else_interested returns FALSE, check the lock condition.
 	} else {
 	# if ".lock" exists in the bucket, return FALSE, and try all over again.
