@@ -133,7 +133,7 @@ faasr_register_workflow_github_create_env <- function(server_name, repo_name, cr
   # create a file ".env"
   writeLines(contents, ".env")
   # create a file ".gitignore"
-  writeLines(".env",".gitignore")
+  writeLines(".env*",".gitignore")
   # create a directory ".github/workflows"
   if (!dir.exists(".github/workflows")) {
     dir.create(".github/workflows", recursive=TRUE)
@@ -174,6 +174,7 @@ jobs:
     container: ",containername,"
     env:
       SECRET_PAYLOAD: ${{ secrets.SECRET_PAYLOAD }}
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       PAYLOAD_REPO: ${{ vars.PAYLOAD_REPO }}
       INPUT_ID: ${{ github.event.inputs.ID }}
       INPUT_INVOKENAME: ${{ github.event.inputs.InvokeName }}
@@ -342,6 +343,7 @@ jobs:
     container: ",faasr$ActionContainers[[target]],"
     env:
       SECRET_PAYLOAD: ${{ secrets.SECRET_PAYLOAD }}
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       PAYLOAD_REPO: ${{ vars.PAYLOAD_REPO }}
       INPUT_ID: ${{ github.event.inputs.ID || \'",id,"\'  }}
       INPUT_INVOKENAME: ${{ github.event.inputs.InvokeName || \'",target,"\' }}
