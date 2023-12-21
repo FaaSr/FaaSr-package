@@ -286,8 +286,8 @@ faasr <- function(json_path, env_path=NULL){
 # replace fake values into real values
 faasr_replace_values <- function(faasr, cred){
   for (name in names(faasr)) {
-    # skip the FunctionList
-    if (name == "FunctionList") {
+    # skip the FunctionList/FunctionGitRepo/FunctionCRANPackage/FunctionGitHubPackage
+    if (name == "FunctionList" || name=="FunctionGitRepo" || name == "FunctionCRANPackage" || name == "FunctionGitHubPackage") {
       next
     }
     # If the value is a list, call this function recursively
