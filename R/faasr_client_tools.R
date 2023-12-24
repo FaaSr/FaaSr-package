@@ -48,9 +48,9 @@ faasr_register_workflow <- function(){
   setwd(faasr_wd)
 
   # register actions for openwhisk/github-actions/lambda by given json
-  faasr_register_workflow_ibmcloud_openwhisk(faasr,cred)
+  #faasr_register_workflow_ibmcloud_openwhisk(faasr,cred)
   faasr_register_workflow_github_actions(faasr,cred)
-  faasr_register_workflow_aws_lambda(faasr,cred)
+  #faasr_register_workflow_aws_lambda(faasr,cred)
   
 }
 .faasr_user$operations$register_workflow <- faasr_register_workflow
@@ -380,6 +380,11 @@ faasr_set_workflow_timer <- function(cron, target=NULL){
   }
 
   setwd(faasr_wd)
+
+  if (is.null(cron) || cron==""){
+    cat("\n\n[faasr_msg] No cron time provided\n")
+    stop()
+  }
 
   # set timer depending on the faas providers
   type <- faasr$ComputeServers[[faasr$FunctionList[[target]]$FaaSServer]]$FaaSType
