@@ -27,32 +27,30 @@
 # define a list for storing functions
 .faasr_user <- list()
 
+# defined variables
+faasr_gh_local_repo <- "faasr_gh_local_repo"
+faasr_data <- "faasr_data"
+basic_gh_image <- "ghcr.io/FaaSr/github-actions-tidyverse:latest"
+basic_ow_image <- "faasr/openwhisk-tidyverse:latest"
+basic_ld_image <- "somebody's user id should be here.dkr.ecr.us-east-1.amazonaws.com/aws-lambda-tidyverse:latest"
+
 # faasr_register_workflow function
 faasr_register_workflow <- function(){
   # get the "svc" by using "faasr_get_svc" and define the required variables.
   svc <- .faasr_get_svc()
-  cred <- svc$cred
+  faasr_wd <- svc$wd
+  if (!dir.exists(faasr_wd)){
+    faasr_wd <- getwd()
+  }
   faasr <- svc$json
-  json_path <- svc$json_path
-  cred <- faasr_collect_sys_env(faasr,cred)
+  cred <- faasr_collect_sys_env(faasr,svc$cred)
   
+  setwd(faasr_wd)
+
   # register actions for openwhisk/github-actions/lambda by given json
-  faasr_ow <- faasr_register_workflow_ibmcloud_openwhisk(faasr,cred)
-  if (is.list(faasr_ow)){
-    faasr<-faasr_ow
-  }
-  faasr_gh <- faasr_register_workflow_github_actions(faasr,cred)
-  if (is.list(faasr_gh)){
-    faasr<-faasr_gh
-  }
-  faasr_ld <- faasr_register_workflow_aws_lambda(faasr,cred)
-  if (is.list(faasr_ld)){
-    faasr<-faasr_ld
-  }
-  
-  # update the json and write an updated json file into the json path.
-  json_update <- jsonlite::toJSON(faasr, pretty=TRUE, auto_unbox=TRUE)
-  writeLines(json_update, json_path)
+  faasr_register_workflow_ibmcloud_openwhisk(faasr,cred)
+  faasr_register_workflow_github_actions(faasr,cred)
+  faasr_register_workflow_aws_lambda(faasr,cred)
   
 }
 .faasr_user$operations$register_workflow <- faasr_register_workflow
@@ -183,10 +181,11 @@ faasr_collect_sys_env <- function(faasr, cred){
 # faasr main function
 faasr <- function(json_path, env_path=NULL){
   # set the svc and environments
-  wd <- getwd()
+  faasr_wd <- getwd()
   svc <- .faasr_user$operations
   svc$cred <- list()
   svc$json <- jsonlite::fromJSON(json_path)
+  svc$wd <- faasr_wd
   
   # Check the ComputeServers
   for (faas_js in names(svc$json$ComputeServers)){
@@ -265,20 +264,14 @@ faasr <- function(json_path, env_path=NULL){
     }
   }
   
-  # create .faasr_json for saving the json.
-  if (!dir.exists(".faasr_json")){
-    dir.create(".faasr_json")
+  # create dir
+  if (!dir.exists(faasr_gh_local_repo)){
+    dir.create(faasr_gh_local_repo)
   }
-  # create a random number
-  rd_nb <- sample(1:1000000, size=1)
-  # define a json path
-  json_path <- paste0(wd,"/.faasr_json/.faasr_json_",rd_nb)
-  json_update <- jsonlite::toJSON(svc$json, pretty=TRUE, auto_unbox=TRUE)
-  # write a json file with json_path
-  writeLines(json_update, json_path)
-  # save the json_path into the svc list.
-  svc$json_path <- json_path
-  
+  if (!dir.exists(faasr_data)){
+    dir.create(faasr_data)
+  }
+
   return(svc)
 }
 
@@ -286,8 +279,8 @@ faasr <- function(json_path, env_path=NULL){
 # replace fake values into real values
 faasr_replace_values <- function(faasr, cred){
   for (name in names(faasr)) {
-    # skip the FunctionList
-    if (name == "FunctionList") {
+    # skip the FunctionList/FunctionGitRepo/FunctionCRANPackage/FunctionGitHubPackage
+    if (name == "FunctionList" || name=="FunctionGitRepo" || name == "FunctionCRANPackage" || name == "FunctionGitHubPackage") {
       next
     }
     # If the value is a list, call this function recursively
@@ -307,10 +300,14 @@ faasr_replace_values <- function(faasr, cred){
 faasr_invoke_workflow <- function(FunctionInvoke=NULL){
   # get the "svc" by using "faasr_get_svc" and define the required variables.
   svc <- .faasr_get_svc()
-  cred <- svc$cred
-  json_path <- svc$json_path
-  faasr <- jsonlite::fromJSON(json_path)
-  cred <- faasr_collect_sys_env(faasr,cred)
+  faasr_wd <- svc$wd
+  if (!dir.exists(faasr_wd)){
+    faasr_wd <- getwd()
+  }
+  faasr <- svc$json
+  cred <- faasr_collect_sys_env(faasr,svc$cred)
+  
+  setwd(faasr_wd)
   
   # if there's given function, it will be invoked.
   if (!is.null(FunctionInvoke)){
@@ -321,21 +318,14 @@ faasr_invoke_workflow <- function(FunctionInvoke=NULL){
   # define the required variables.
   faas_name <- faasr$FunctionList[[actionname]]$FaaSServer
   faas_type <- faasr$ComputeServers[[faas_name]]$FaaSType
-  functionname <- faasr$FunctionList[[actionname]]$FunctionName
-  
+
   switch(faas_type,
          # If first action is github actions, use github
          "GitHubActions"={
-           if (!endsWith(actionname,".yml") && !endsWith(actionname,".yaml")){
-            actionname_yml <- paste0(actionname,".yml")
-           }
-           gh_ref <- faasr$ComputeServers[[faas_name]]$Branch
-           repo <- paste0(faasr$ComputeServers[[faas_name]]$UserName,"/",faasr$ComputeServers[[faas_name]]$ActionRepoName)
-           command <- paste0("gh workflow run --repo ",repo," --ref ",gh_ref," ",actionname_yml," -f InvokeName=",actionname)
-           check <- system(command)
+            faasr_workflow_invoke_github(faasr, cred, faas_name, actionname)
          },
+         # If first action is aws-lambda, use lambda
          "Lambda"={
-           # If first action is aws-lambda, use lambda
            # json file with credentials will be created and after invocation, it will be removed.
            faasr_w_cred <- faasr_replace_values(faasr, cred)
            faasr_json <- jsonlite::toJSON(faasr_w_cred, auto_unbox=TRUE)
@@ -359,8 +349,8 @@ faasr_invoke_workflow <- function(FunctionInvoke=NULL){
            check <- system(command)
            file.remove(paste0("payload_ld_",rd_nb,".json"))
          },
+         # If first action is openwhisk, use ibmcloud
          "OpenWhisk"={
-           # If first action is openwhisk, use ibmcloud
            # json file with credentials will be created and after invocation, it will be removed.
            faasr_w_cred <- faasr_replace_values(faasr, cred)
            faasr_json <- jsonlite::toJSON(faasr_w_cred, auto_unbox=TRUE)
@@ -373,19 +363,24 @@ faasr_invoke_workflow <- function(FunctionInvoke=NULL){
 }
 .faasr_user$operations$invoke_workflow <- faasr_invoke_workflow
 
-
+# set the cron timer
 faasr_set_workflow_timer <- function(cron, target=NULL){
   svc <- .faasr_get_svc()
-  cred <- svc$cred
+  faasr_wd <- svc$wd
+  if (!dir.exists(faasr_wd)){
+    faasr_wd <- getwd()
+  }
   faasr <- svc$json
-  json_path <- svc$json_path
-  cred <- faasr_collect_sys_env(faasr,cred)
+  cred <- faasr_collect_sys_env(faasr,svc$cred)
   if (is.null(target)){
     target <- faasr$FunctionInvoke
   }
+
+  setwd(faasr_wd)
+
   type <- faasr$ComputeServers[[faasr$FunctionList[[target]]$FaaSServer]]$FaaSType
   if (type == "GitHubActions"){
-    faasr_set_workflow_timer_gh(faasr,target,cron)
+    faasr_set_workflow_timer_gh(faasr,cred,target,cron)
   } else if (type == "Lambda"){
     faasr_set_workflow_timer_ld(faasr,cred,target,cron)
   } else if (type == "OpenWhisk"){
@@ -396,16 +391,22 @@ faasr_set_workflow_timer <- function(cron, target=NULL){
 
 faasr_unset_workflow_timer <- function(target=NULL){
   svc <- .faasr_get_svc()
-  cred <- svc$cred
+  faasr_wd <- svc$wd
+  if (!dir.exists(faasr_wd)){
+    faasr_wd <- getwd()
+  }
   faasr <- svc$json
-  json_path <- svc$json_path
-  cred <- faasr_collect_sys_env(faasr,cred)
+  cred <- faasr_collect_sys_env(faasr,svc$cred)
+
+  setwd(faasr_wd)
+
   if (is.null(target)){
     target <- faasr$FunctionInvoke
   }
+
   type <- faasr$ComputeServers[[faasr$FunctionList[[target]]$FaaSServer]]$FaaSType
   if (type == "GitHubActions"){
-    faasr_set_workflow_timer_gh(faasr,target, cron=NULL, unset=TRUE)
+    faasr_set_workflow_timer_gh(faasr,cred, target, cron=NULL, unset=TRUE)
   } else if (type == "Lambda"){
     faasr_set_workflow_timer_ld(faasr,cred, target, cron=NULL, unset=TRUE)
   } else if (type == "OpenWhisk"){
@@ -413,5 +414,3 @@ faasr_unset_workflow_timer <- function(target=NULL){
   }
 }
 .faasr_user$operations$unset_workflow_timer <- faasr_unset_workflow_timer
-
-
