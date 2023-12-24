@@ -456,12 +456,12 @@ faasr_workflow_invoke_github <- function(faasr, cred, faas_name, actionname){
 }
 
 # set workflow timer
-faasr_set_workflow_timer_gh <- function(faasr,cred,actionname,cron=NULL,unset=TRUE){
+faasr_set_workflow_timer_gh <- function(faasr,cred,actionname,cron=NULL,unset=FALSE){
 
   # get env
   faas_name <- faasr$FunctionList[[actionname]]$FaaSServer
   ref <- faasr$ComputeServers[[faas_name]]$Branch
-  repo <- paste0(faasr$ComputeServers[[faas_name]]$ActionRepoName,"/",faasr$ComputeServers[[faas_name]]$UserName)
+  repo <- paste0(faasr$ComputeServers[[faas_name]]$UserName,"/",faasr$ComputeServers[[faas_name]]$ActionRepoName)
   path <- paste0(faasr_gh_local_repo, "/", repo)
   token <- cred[[paste0(faas_name,"_TOKEN")]]
   folder <- faasr$FaaSrLog
