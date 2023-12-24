@@ -129,13 +129,23 @@ faasr_trigger <- function(faasr) {
           target_server <- faasr$ComputeServers[[next_server]]
 
 	  # prepare env variables for lambda
-          Sys.setenv("AWS_ACCESS_KEY_ID"=target_server$AccessKey, "AWS_SECRET_ACCESS_KEY"=target_server$SecretKey, "AWS_DEFAULT_REGION"=target_server$Region, "AWS_SESSION_TOKEN" = "")
-
+          
 	  # set invoke request body, it should be a JSON. To pass the payload, toJSON is required.
-	  payload_json <- toJSON(faasr, auto_unbox = TRUE)
+	        payload_json <- toJSON(faasr, auto_unbox = TRUE)
 
 	  # Create a Lambda client using paws
-          lambda <- paws::lambda()
+          lambda <- paws::lambda(
+            config=list(
+	            credentials=list(
+	              creds=list(
+		              access_key_id=target_server$AccessKey,
+		              secret_access_key=target_server$SecretKey,
+                  session_token=""
+		            )
+	            ),
+	            region=target_server$Region
+	          )
+          )
 
 	  # Invoke next function with FunctionName and Payload, receive trigger response
           next_lambda_function_name <- invoke_next_function
