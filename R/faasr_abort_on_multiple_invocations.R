@@ -45,13 +45,16 @@ faasr_abort_on_multiple_invocations <- function(faasr, pre) {
   # This is done by checking if a file named "func.done" exists in S3, where func is the name of the predecessor
   # If all possible predecessors are "done", we continue to step 2: below to check which of those should execute
   # If not all predecessors are done, it means there are still predecessors pending, and it's safe for this one to abort
+
+  check_fn_done<-s3$list_objects_v2(Bucket=log_server$Bucket, Prefix=id_folder)
+  check_fn_done_list <- lapply(check_fn_done$Contents, function(x) x$Key)
+                               
   for (func in pre) {
     # check filename is "functionname.done"
     func_done <- paste0(id_folder,"/",func,".done")
-    check_fn_done<-s3$list_objects_v2(Bucket=log_server$Bucket, Prefix=func_done)
     # if object exists, do nothing.
     # if object doesn't exist, leave a log that this function should wait and will be discarded
-    if (length(check_fn_done$Contents) == 0){
+    if (!func_done %in% check_fn_done_list){
       res_msg <- paste0('{\"faasr_abort_on_multiple_invocations\":\"not the last trigger invoked - no flag\"}', "\n")
       cat(res_msg)
       faasr_log(res_msg)
