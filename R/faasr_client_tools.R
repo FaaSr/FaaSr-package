@@ -179,7 +179,12 @@ faasr_collect_sys_env <- function(faasr, cred){
 }
 
 # faasr main function
-faasr <- function(json_path, env_path=NULL){
+faasr <- function(json_path=NULL, env_path=NULL){
+
+  if (json_path=="" || is.null(json_path)){
+    cat("[faasr msg] JSON path is required")
+  }
+
   # set the svc and environments
   faasr_wd <- getwd()
   svc <- .faasr_user$operations
