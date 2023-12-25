@@ -26,6 +26,8 @@
 #' @return faasr_register_workflow_github_actions: "faasr" for list of the json
 #' @return faasr_register_workflow_github_repo_lists: "repo_list" for the list of servername:actionname pairs
 #' @return faasr_register_workflow_github_repo_exists: "exit_code" for the int
+
+
 faasr_register_workflow_github_actions <- function(faasr, cred, cron=NULL, runner=FALSE) {
 
   options(cli.progress_clear = FALSE)
@@ -51,6 +53,7 @@ faasr_register_workflow_github_actions <- function(faasr, cred, cron=NULL, runne
       ),
       total = 4
     )
+
     # check the repository
     response <- faasr_register_workflow_github_repo_exists(faasr_token,repo)
     # check user's request
@@ -73,10 +76,12 @@ faasr_register_workflow_github_actions <- function(faasr, cred, cron=NULL, runne
     }
     cli_alert_success("Create github workflow yml file")
     cli_progress_update()
+    
     # build local repositories
     faasr_register_workflow_git_local_repo(response,repo,ref)
     cli_alert_success("Create github local repository")
     cli_progress_update()
+    
     # build & push remote repositories
     result <- faasr_register_workflow_git_remote_repo(token,response,private,repo,ref)
     if (result==0){
@@ -88,9 +93,9 @@ faasr_register_workflow_github_actions <- function(faasr, cred, cron=NULL, runne
       #cat("\n\n[faasr_msg] Error: Failed to update the remote repository\n")
       stop()
     }
+    
     # set environments(variables, secrets)
     faasr_register_workflow_git_remote_env(repo, cred, token)
-    cli_alert_success("Set github environment-secrets/variable")
     cli_progress_update()
     cli_progress_done()
     #cat("\n\n[faasr_msg] successfully registed server: ", repo,"\n\n")
@@ -98,6 +103,8 @@ faasr_register_workflow_github_actions <- function(faasr, cred, cron=NULL, runne
   cli_text(col_cyan("{symbol$menu} {.strong Successfully registed all github actions}"))
   #cat("\n\n[faasr_msg] successfully registed all servers\n\n")
 }
+
+
 # help sending httr requests
 faasr_httr_request <- function(token, url, body=list(), type){
   library("httr")
@@ -122,6 +129,8 @@ faasr_httr_request <- function(token, url, body=list(), type){
   )
   return(response)
 }
+
+
 # make a repo list. like a key-value set, key is a server_name and value is a repository name
 faasr_register_workflow_github_repo_lists <- function(faasr) {
   # empty list
@@ -141,6 +150,8 @@ faasr_register_workflow_github_repo_lists <- function(faasr) {
   }
   return(repo_list)
 }
+
+
 # check github remote repository existence
 faasr_register_workflow_github_repo_exists <- function(faasr_token, repo) {
   # get env
@@ -157,6 +168,8 @@ faasr_register_workflow_github_repo_exists <- function(faasr_token, repo) {
     stop()
   }
 }
+
+
 faasr_register_workflow_github_repo_question <- function(check, repo){
   # get env
   private <- TRUE
@@ -201,6 +214,8 @@ faasr_register_workflow_github_repo_question <- function(check, repo){
   }
   return(private)
 }
+
+
 faasr_register_workflow_github_create_dir <- function(server,repo,cred){
   cwd <- getwd()
   setwd(faasr_gh_local_repo)
@@ -214,18 +229,24 @@ faasr_register_workflow_github_create_dir <- function(server,repo,cred){
   }
   setwd(cwd)
 }
+
+
 faasr_register_workflow_github_create_env <- function(server,repo,cred){
   # create a file ".gitignore"
   writeLines(paste0(".env\n*~\n*.swp\n*.swo\n.Rproj.user\n.Rhistory\n.RData\n.Ruserdata\n",
                     ".DS_Store\ncache\n*.o\n*.so\n",faasr_data,"\n",faasr_gh_local_repo),
              paste0(faasr_gh_local_repo,"/",repo,"/.gitignore"))
 }
+
+
 faasr_register_workflow_github_create_payload <- function(faasr, repo){
   # create a file named "payload.json"
   faasr_gh <- jsonlite::toJSON(faasr, auto_unbox=TRUE)
   faasr_gh_pt <- jsonlite::prettify(faasr_gh)
   write(faasr_gh_pt, paste0(faasr_gh_local_repo,"/",repo,"/payload.json"))
 }
+
+
 # create README.md file for repository description
 faasr_register_workflow_github_create_readme <- function(repo){
   # create a repository description
@@ -237,6 +258,8 @@ It is safe to delete this repository if you no longer need this workflow. It can
   path <- paste0(faasr_gh_local_repo,"/",repo,"/README.md")
   writeLines(contents, path)
 }
+
+
 # Create a yaml workflow file with the container name
 # TBD implement a native workflow pattern
 faasr_register_workflow_github_create_yml_file <- function(faasr, actionname, repo, cron=NULL, runner=FALSE){
@@ -272,10 +295,13 @@ faasr_register_workflow_github_create_yml_file <- function(faasr, actionname, re
   path <- paste0(faasr_gh_local_repo,"/",repo,"/.github/workflows/",actionname)
   writeLines(contents, path)
 }
+
+
 # create git local repository
 faasr_register_workflow_git_local_repo <- function(check,repo,ref){
   cwd <- getwd()
   setwd(paste0(faasr_gh_local_repo,"/",repo))
+  
   # create local git repo
   system("git init", ignore.stderr=TRUE, ignore.stdout=TRUE)
   system(paste0("git checkout -B ", ref), ignore.stderr=TRUE, ignore.stdout=TRUE)
@@ -284,6 +310,8 @@ faasr_register_workflow_git_local_repo <- function(check,repo,ref){
   system("git commit -m \'update repo\'", ignore.stderr=TRUE, ignore.stdout=TRUE)
   setwd(cwd)
 }
+
+
 # create / push git remote repository
 faasr_register_workflow_git_remote_repo <- function(token,check,private,repo,ref){
   cwd <- getwd()
@@ -314,6 +342,8 @@ faasr_register_workflow_git_remote_repo <- function(token,check,private,repo,ref
   setwd(cwd)
   return(check2)
 }
+
+
 # set env(secrets and variables)
 faasr_register_workflow_git_remote_env <- function(repo, cred, token){
   cwd <- getwd()
@@ -330,6 +360,7 @@ faasr_register_workflow_git_remote_env <- function(repo, cred, token){
     setwd(cwd)
     stop()
   }
+
   # encode key & secrets by using sodium & base64enc: library required
   secrets_json <- jsonlite::toJSON(cred, auto_unbox=TRUE)
   secrets_binary <- charToRaw(secrets_json)
@@ -348,6 +379,8 @@ faasr_register_workflow_git_remote_env <- function(repo, cred, token){
     setwd(cwd)
     stop()
   }
+
+
   # set the repo variable
   url <- paste0("repos/",repo,"/actions/variables")
   body <- list(name="PAYLOAD_REPO", value=paste0(repo,'/payload.json'))
@@ -376,8 +409,11 @@ faasr_register_workflow_git_remote_env <- function(repo, cred, token){
   }
   setwd(cwd)
 }
+
+
 # inovke workflow run
 faasr_workflow_invoke_github <- function(faasr, cred, faas_name, actionname){
+  
   # define the required variables.
   token <- cred[[paste0(faas_name,"_TOKEN")]]
   input_id <- faasr$InvocationID
@@ -389,6 +425,7 @@ faasr_workflow_invoke_github <- function(faasr, cred, faas_name, actionname){
   } else {
     workflow <- actionname
   }
+
   # send api request
   url <- paste0("repos/", repo, "/actions/workflows/", workflow, "/dispatches")
   body <- list(
@@ -400,6 +437,7 @@ faasr_workflow_invoke_github <- function(faasr, cred, faas_name, actionname){
     )
   )
   response <- faasr_httr_request(body=body, token=token, url=url, type="POST")
+  
   # check result
   if (status_code(response) == 204) {
     succ_msg <- paste0("faasr_register_workflow_github_invoke: GitHub Action: Successfully invoked:", actionname, "\n")
@@ -423,13 +461,21 @@ faasr_workflow_invoke_github <- function(faasr, cred, faas_name, actionname){
     #cat(err_msg)
   }
 }
+
+
 # set workflow timer
 faasr_set_workflow_timer_gh <- function(faasr,cred,actionname,cron=NULL,unset=FALSE){
   
   options(cli.progress_clear = FALSE)
   options(cli.spinner = "line")
   
-  cli_h1(paste0("Set github workflow timer"))
+  if (unset){
+    char <- "Unset"
+  } else {
+    char <- "Set"
+  }
+
+  cli_h1(paste0("{char} github workflow timer"))
   cli_progress_bar(
     format = paste0(
       "FaaSr {pb_spin} Set github workflow timer ",
@@ -437,6 +483,7 @@ faasr_set_workflow_timer_gh <- function(faasr,cred,actionname,cron=NULL,unset=FA
     ),
     total = 2
   )
+
   # get env
   faas_name <- faasr$FunctionList[[actionname]]$FaaSServer
   ref <- faasr$ComputeServers[[faas_name]]$Branch
@@ -450,6 +497,7 @@ faasr_set_workflow_timer_gh <- function(faasr,cred,actionname,cron=NULL,unset=FA
   } else {
     workflow <- actionname
   }
+
   # check local repo
   if (!dir.exists(path)){
     err_msg <- paste0("[faasr_msg] faasr_set_workflow_timer_gh: No local repository ",repo," found \n")
@@ -465,19 +513,20 @@ faasr_set_workflow_timer_gh <- function(faasr,cred,actionname,cron=NULL,unset=FA
     #cat(err_msg)
     stop()
   }
+
   # update yaml file
   # TBD cron timer for runner
   if (unset){
     faasr_register_workflow_github_create_yml_file(faasr, actionname, repo, cron=NULL, runner=FALSE)
-    char <- "unset"
   } else {
     faasr_register_workflow_github_create_yml_file(faasr, actionname, repo, cron=cron, runner=FALSE)
-    char <- "set"
   }
+
   # build local repositories
   faasr_register_workflow_git_local_repo(response,repo,ref)
   cli_alert_success("Update local git repository workflow")
   cli_progress_update()
+
   # build & push remote repositories
   result <- faasr_register_workflow_git_remote_repo(token,response,private=NULL,repo,ref)
   cli_alert_success("Update remote git repository workflow")
