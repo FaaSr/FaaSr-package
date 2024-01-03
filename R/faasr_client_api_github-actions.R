@@ -37,7 +37,7 @@ faasr_register_workflow_github_actions <- function(faasr, cred, cron=NULL, runne
   repo_list <- faasr_register_workflow_github_repo_lists(faasr)
   for (server in names(repo_list)) {
     # get env
-    faasr_token <- cred[[paste0(server,"_TOKEN")]]
+    token <- cred[[paste0(server,"_TOKEN")]]
     ref <- faasr$ComputeServers[[server]]$Branch
     repo <- paste0(faasr$ComputeServers[[server]]$UserName,"/",faasr$ComputeServers[[server]]$ActionRepoName)
     
@@ -55,7 +55,7 @@ faasr_register_workflow_github_actions <- function(faasr, cred, cron=NULL, runne
     )
 
     # check the repository
-    response <- faasr_register_workflow_github_repo_exists(faasr_token,repo)
+    response <- faasr_register_workflow_github_repo_exists(token,repo)
     # check user's request
     private <- faasr_register_workflow_github_repo_question(response)
     # create directories
