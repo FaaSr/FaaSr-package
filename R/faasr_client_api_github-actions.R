@@ -27,6 +27,7 @@
 #' @return faasr_register_workflow_github_repo_lists: "repo_list" for the list of servername:actionname pairs
 #' @return faasr_register_workflow_github_repo_exists: "exit_code" for the int
 
+library("cli")
 
 faasr_register_workflow_github_actions <- function(faasr, cred, cron=NULL, runner=FALSE) {
 
@@ -35,6 +36,10 @@ faasr_register_workflow_github_actions <- function(faasr, cred, cron=NULL, runne
 
   # get a repo list
   repo_list <- faasr_register_workflow_github_repo_lists(faasr)
+
+  if (length(repo_list)==0){
+    return("")
+  }
   for (server in names(repo_list)) {
     # get env
     token <- cred[[paste0(server,"_TOKEN")]]
@@ -100,7 +105,7 @@ faasr_register_workflow_github_actions <- function(faasr, cred, cron=NULL, runne
     cli_progress_done()
     #cat("\n\n[faasr_msg] successfully registed server: ", repo,"\n\n")
   }
-  cli_text(col_cyan("{symbol$menu} {.strong Successfully registed all github actions}"))
+  cli_text(col_cyan("{symbol$menu} {.strong Successfully registered all github actions}"))
   #cat("\n\n[faasr_msg] successfully registed all servers\n\n")
 }
 

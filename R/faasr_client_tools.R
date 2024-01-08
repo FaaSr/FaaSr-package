@@ -35,7 +35,7 @@ basic_ow_image <- "faasr/openwhisk-tidyverse:latest"
 basic_ld_image <- "somebody's user id should be here.dkr.ecr.us-east-1.amazonaws.com/aws-lambda-tidyverse:latest"
 
 # faasr_register_workflow function
-faasr_register_workflow <- function(){
+faasr_register_workflow <- function(...){
   # get the "svc" by using "faasr_get_svc" and define the required variables.
   svc <- .faasr_get_svc()
   faasr_wd <- svc$wd
@@ -48,8 +48,8 @@ faasr_register_workflow <- function(){
   setwd(faasr_wd)
 
   # register actions for openwhisk/github-actions/lambda by given json
-  #faasr_register_workflow_ibmcloud_openwhisk(faasr,cred)
-  faasr_register_workflow_github_actions(faasr,cred)
+  check <- faasr_register_workflow_openwhisk(faasr,cred,...)
+  check <- faasr_register_workflow_github_actions(faasr,cred)
   #faasr_register_workflow_aws_lambda(faasr,cred)
   
 }
@@ -303,7 +303,7 @@ faasr_replace_values <- function(faasr, cred){
 }
 
 # invoke first action
-faasr_invoke_workflow <- function(FunctionInvoke=NULL){
+faasr_invoke_workflow <- function(FunctionInvoke=NULL, ...){
   # get the "svc" by using "faasr_get_svc" and define the required variables.
   svc <- .faasr_get_svc()
   faasr_wd <- svc$wd
@@ -357,20 +357,13 @@ faasr_invoke_workflow <- function(FunctionInvoke=NULL){
          },
          # If first action is openwhisk, use ibmcloud
          "OpenWhisk"={
-           # json file with credentials will be created and after invocation, it will be removed.
-           faasr_w_cred <- faasr_replace_values(faasr, cred)
-           faasr_json <- jsonlite::toJSON(faasr_w_cred, auto_unbox=TRUE)
-           rd_nb <- sample(100000, size=1)
-           writeLines(faasr_json, paste0("payload_ow_",rd_nb,".json"))
-           command <- paste0("ibmcloud fn action invoke ",actionname," --blocking --param-file ",paste0("payload_ow_",rd_nb,".json"))
-           check <- system(command)
-           file.remove(paste0("payload_ow_",rd_nb,".json"))
+           faasr_workflow_invoke_openwhisk(faasr, cred, faas_name, actionname, ...)
          })
 }
 .faasr_user$operations$invoke_workflow <- faasr_invoke_workflow
 
 # set the cron timer
-faasr_set_workflow_timer <- function(cron, target=NULL){
+faasr_set_workflow_timer <- function(cron, target=NULL, ...){
 
   # get env
   svc <- .faasr_get_svc()
@@ -398,13 +391,13 @@ faasr_set_workflow_timer <- function(cron, target=NULL){
   } else if (type == "Lambda"){
     faasr_set_workflow_timer_ld(faasr,cred,target,cron)
   } else if (type == "OpenWhisk"){
-    faasr_set_workflow_timer_ow(faasr,cred,target,cron)
+    faasr_set_workflow_timer_ow(faasr,cred,target,cron, ...)
   }
 }
 .faasr_user$operations$set_workflow_timer <- faasr_set_workflow_timer
 
 # unset the timer
-faasr_unset_workflow_timer <- function(target=NULL){
+faasr_unset_workflow_timer <- function(target=NULL,...){
 
   # get env
   svc <- .faasr_get_svc()
@@ -428,7 +421,7 @@ faasr_unset_workflow_timer <- function(target=NULL){
   } else if (type == "Lambda"){
     faasr_set_workflow_timer_ld(faasr,cred, target, cron=NULL, unset=TRUE)
   } else if (type == "OpenWhisk"){
-    faasr_set_workflow_timer_ow(faasr,cred,target, cron=NULL, unset=TRUE)
+    faasr_set_workflow_timer_ow(faasr,cred,target, cron=NULL, unset=TRUE,...)
   }
 }
 .faasr_user$operations$unset_workflow_timer <- faasr_unset_workflow_timer
