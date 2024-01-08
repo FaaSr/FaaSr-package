@@ -151,9 +151,9 @@ faasr_trigger <- function(faasr) {
           next_lambda_function_name <- invoke_next_function
 
 	  # Invoke next function with FunctionName and Payload, receive trigger response
-          response <- lambda$invoke(
+          response <- lambda$invoke_async(
             FunctionName = next_lambda_function_name,
-            Payload = payload_json
+            InvokeArgs = payload_json
           )
 
 	  # Check if next function be invoked successfully
