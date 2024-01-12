@@ -7,7 +7,6 @@
 #' @param faasr list with parsed and validated Payload
 
 library("jsonlite")
-library("RCurl")
 library("httr")
 library("paws")
 
