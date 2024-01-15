@@ -52,7 +52,7 @@ faasr_register_workflow <- function(...){
   # register actions for openwhisk/github-actions/lambda by given json
   check <- faasr_register_workflow_openwhisk(faasr,cred,...)
   check <- faasr_register_workflow_github_actions(faasr,cred)
-  #faasr_register_workflow_aws_lambda(faasr,cred)
+  #check <- faasr_register_workflow_aws_lambda(faasr,cred)
   
 }
 .faasr_user$operations$register_workflow <- faasr_register_workflow
@@ -428,84 +428,3 @@ faasr_unset_workflow_timer <- function(target=NULL,...){
 }
 .faasr_user$operations$unset_workflow_timer <- faasr_unset_workflow_timer
 
-# save the config(instance)
-faasr_save_config <- function(file_name=NULL){
-
-  # get env
-  svc <- .faasr_get_svc()
-  faasr_wd <- svc$wd
-  if (!dir.exists(faasr_wd)){
-    faasr_wd <- getwd()
-  }
-  if (is.null(file_name)){
-    file_name <- svc$path$id
-  }
-
-  # current working directory should have "faasr_data" folder
-  if (!dir.exists(faasr_data)){
-    cat("\n\n[faasr_msg] No faasr_data folder found\n")
-    stop()
-  }
-
-  setwd(faasr_wd)
-
-  cat("\n\n[faasr_msg] Warning: configuration including SECRET will be stored in \"faasr_data\" folder\n")
-
-  # get env / name would only use file name (not whole path)
-  json_name <- basename(svc$path$json)
-  ctime <- Sys.time()
-  file_path <- paste0(faasr_data, "/", json_name, "/", file_name, ".rds")
-  if (!dir.exists(paste0(faasr_data, "/", json_name))){
-    dir.create(paste0(faasr_data, "/", json_name), recursive=TRUE)
-  }
-  # save the instance as a form of RDS
-  saveRDS(svc, file_path)
-
-  cat("\n\n[faasr_msg] Successfully save the instance, file path:",file_path,"\n")
-}
-.faasr_user$operations$save_config <- faasr_save_config
-
-# get config(instance) from "faasr_data" folder
-faasr_get_config <- function(json_name=NULL){
-
-  # current working directory should have "faasr_data" folder
-  if (!dir.exists(faasr_data)){
-    cat("\n\n[faasr_msg] No faasr_data folder found\n")
-    stop()
-  }
-  
-  # if no json_name is provided, get all RDS files.
-  if (is.null(json_name)){
-    file_list <- list.files(faasr_data)
-  } else {
-    file_list <- basename(json_name)
-  }
-  for (files in file_list){
-    rds_list <- list.files(paste0(faasr_data,"/",files))
-    if (length(rds_list) == 0 ) {
-      cat("\n[faasr_msg] No configurations in repo", files,"\n")
-    }
-
-    # get rds files / user defines variable name, defualt is its file name
-    for (rds in rds_list){
-      var_name <- gsub("\\.rds$", "", rds)
-      cat("\n[faasr_msg] Loading ",files,"/",var_name,", Please provide variable name:(\"stop\" to stop)\n")
-      while(TRUE) {
-        check <- readline()
-        if (!grepl("^\\.?[[:alpha:].][[:alnum:].]*$", check)) {
-          cat("\n[faasr_msg] Invalid variable name, please privode the valid name\n")
-        } else if (check == "stop"){
-          stop()
-        } else {
-          break
-        }
-      }
-
-      # read rds / save it as a global variable
-      rds_data <- readRDS(paste0(faasr_data,"/",files,"/",rds))
-      assign(check, rds_data, envir = .GlobalEnv)
-      # once read, file will be deleted
-      file.remove(paste0(faasr_data,"/",files,"/",rds))
-    }
-  }
-}
