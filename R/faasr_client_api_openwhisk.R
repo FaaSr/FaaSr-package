@@ -33,7 +33,7 @@
 library("cli")
 
 
-faasr_register_workflow_openwhisk <- function(faasr, cred, memory=1024, timeout=600000, ssl=TRUE) {
+faasr_register_workflow_openwhisk <- function(faasr, cred, memory=1024, timeout=600000) {
   
   options(cli.progress_clear = FALSE)
   options(cli.spinner = "line")
@@ -62,6 +62,12 @@ faasr_register_workflow_openwhisk <- function(faasr, cred, memory=1024, timeout=
     )
 
     faasr <- faasr_replace_values(faasr, cred)
+
+    if (is.null(faasr$ComputeServers[[server]]$SSL) || length(faasr$ComputeServers[[server]]$SSL)==0){
+      ssl <- TRUE
+    } else {
+      ssl <- as.logical(faasr$ComputeServers[[server]]$SSL)
+    }
 
     for (act in action_list[[server]]) {
       action <- paste0("actions/", act)
