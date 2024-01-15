@@ -56,10 +56,10 @@ faasr_trigger <- function(faasr) {
           #
           # TBD - need to differentiate from IBMcloud or plain OpenWhisk
           # Set the env values for the openwhisk action.
-	        endpoint <- faasr$ComputeServers[[next_server]]$Endpoint
+          endpoint <- faasr$ComputeServers[[next_server]]$Endpoint
           api_key <- faasr$ComputeServers[[next_server]]$API.key
           api_key <- strsplit(api_key, ":")[[1]]
-	        if (is.null(faasr$ComputeServers[[next_server]]$SSL) || faasr$ComputeServers[[next_server]]$SSL ==""){
+          if (is.null(faasr$ComputeServers[[next_server]]$SSL) || faasr$ComputeServers[[next_server]]$SSL ==""){
             ssl <- TRUE
           } else{
             ssl <- faasr$ComputeServers[[next_server]]$SSL
@@ -67,13 +67,11 @@ faasr_trigger <- function(faasr) {
           namespace <- faasr$ComputeServers[[next_server]]$Namespace
           actionname <- invoke_next_function
 
-	  
-	        if (!startsWith(endpoint, "https") && !startsWith(endpoint, "http")){
-	          endpoint <- paste0("https://", endpoint)
-	        }
-	        url_2 <- paste0(endpoint, "/api/v1/namespace/",namespace,"/actions/",actionname,"?blocking=false&result=false")
-	        # Openwhisk - Invoke next action - action name should be described.
- 
+          if (!startsWith(endpoint, "https") && !startsWith(endpoint, "http")){
+            endpoint <- paste0("https://", endpoint)
+          }
+          url_2 <- paste0(endpoint, "/api/v1/namespace/",namespace,"/actions/",actionname,"?blocking=false&result=false")
+          
           headers <- c(
             'accept' = 'application/json', 
             'Content-Type' = 'application/json'
@@ -99,31 +97,31 @@ faasr_trigger <- function(faasr) {
             cat(err_msg)
             faasr_log(err_msg)
           }
-	      },
+        },
 				
        	# if AWS Lambda - use Lambda API
-	"Lambda"={
+        "Lambda"={
           # AWS Lambda API handling
-	  # get next function server
+          # get next function server
           target_server <- faasr$ComputeServers[[next_server]]
 
-	  # prepare env variables for lambda
+          # prepare env variables for lambda
           
-	  # set invoke request body, it should be a JSON. To pass the payload, toJSON is required.
-	        payload_json <- toJSON(faasr, auto_unbox = TRUE)
+          # set invoke request body, it should be a JSON. To pass the payload, toJSON is required.
+          payload_json <- toJSON(faasr, auto_unbox = TRUE)
 
-	  # Create a Lambda client using paws
+          # Create a Lambda client using paws
           lambda <- paws::lambda(
             config=list(
-	            credentials=list(
-	              creds=list(
-		              access_key_id=target_server$AccessKey,
-		              secret_access_key=target_server$SecretKey,
+              credentials=list(
+                creds=list(
+                  access_key_id=target_server$AccessKey,
+                  secret_access_key=target_server$SecretKey,
                   session_token=""
-		            )
-	            ),
-	            region=target_server$Region
-	          )
+                )
+              ),
+              region=target_server$Region
+            )
           )
 
 	  # Invoke next function with FunctionName and Payload, receive trigger response
@@ -141,11 +139,11 @@ faasr_trigger <- function(faasr) {
             cat(succ_msg)
             faasr_log(succ_msg)
           } else {
-	          err_msg <- paste0("faasr_trigger: Error invoking: ",faasr$FunctionInvoke," reason:", response$StatusCode, "\n")
+            err_msg <- paste0("faasr_trigger: Error invoking: ",faasr$FunctionInvoke," reason:", response$StatusCode, "\n")
             cat(err_msg)
-	          faasr_log(err_msg)
+            faasr_log(err_msg)
           }
-      	},
+        },
 
       # if GitHub Actions - use GH Actions
         "GitHubActions"={
