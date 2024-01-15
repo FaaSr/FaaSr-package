@@ -29,6 +29,11 @@
 
 library("cli")
 
+workflow_basic_path <- "https://raw.githubusercontent.com/spark0510/FaaSr-package/branch35-trial/schema/workflow_template.yml"
+workflow_timer_path <- "https://raw.githubusercontent.com/spark0510/FaaSr-package/branch35-trial/schema/workflow_with_cron_template.yml"
+#TBD. workflow_runner_path <- ""
+#TBD. workflow_runner_w_timer_path <- ""
+
 faasr_register_workflow_github_actions <- function(faasr, cred, cron=NULL, runner=FALSE) {
 
   options(cli.progress_clear = FALSE)
@@ -92,10 +97,8 @@ faasr_register_workflow_github_actions <- function(faasr, cred, cron=NULL, runne
     if (result==0){
       cli_alert_success("Create github remote repository")
       cli_progress_update()
-      #cat("\n\n[faasr_msg] Successfully update the remote repository\n")
     } else{
       cli_alert_danger("Error: Failed to update the remote repository")
-      #cat("\n\n[faasr_msg] Error: Failed to update the remote repository\n")
       stop()
     }
     
@@ -103,10 +106,8 @@ faasr_register_workflow_github_actions <- function(faasr, cred, cron=NULL, runne
     faasr_register_workflow_git_remote_env(repo, cred, token)
     cli_progress_update()
     cli_progress_done()
-    #cat("\n\n[faasr_msg] successfully registed server: ", repo,"\n\n")
   }
   cli_text(col_cyan("{symbol$menu} {.strong Successfully registered all github actions}"))
-  #cat("\n\n[faasr_msg] successfully registed all servers\n\n")
 }
 
 
@@ -145,7 +146,8 @@ faasr_register_workflow_github_repo_lists <- function(faasr) {
     server_name <- faasr$FunctionList[[fn]]$FaaSServer
     # if FaaStype is Githubactions, add it to the list
     if (is.null(faasr$ComputeServers[[server_name]]$FaaSType)){
-      #cat("\n\n[faasr_msg] invalid server:", server_name," check server type\n\n")
+      err_msg <- paste0("\n\n[faasr_msg] invalid server:", server_name," check server type\n\n")
+      cli_alert_danger(err_msg)
       stop()
     }
     if (faasr$ComputeServers[[server_name]]$FaaSType == "GitHubActions") {
@@ -169,7 +171,6 @@ faasr_register_workflow_github_repo_exists <- function(faasr_token, repo) {
     return(FALSE)
   } else {
     cli_alert_danger(" faasr_register_workflow_github_repo_exists: Error - check configurations")
-    #cat("\n\n[faasr_msg] faasr_register_workflow_github_repo_exists: Error - check configurations\n\n")
     stop()
   }
 }
@@ -182,7 +183,6 @@ faasr_register_workflow_github_repo_question <- function(check, repo){
   if (check==FALSE) {
     # Ask user for the repository to be private or public
     cli_text("{symbol$fancy_question_mark}Enter repository visibility[private/public]")
-    #cat("[private/public]")
     while(TRUE) {
       check <- invisible(readline())
       if (check == "private") {
@@ -193,7 +193,6 @@ faasr_register_workflow_github_repo_question <- function(check, repo){
         break
       } else {
         cli_alert_warning("Enter \"private\" or \"public\": ")
-        #cat("Enter \"private\" or \"public\": \n")
       }
     }
     # if yes, update the repository
@@ -201,19 +200,15 @@ faasr_register_workflow_github_repo_question <- function(check, repo){
     # Ask user for the repository to be updated
     cli_alert_info("Repository already exists")
     cli_text("{symbol$fancy_question_mark} Update the repository?[y/n]")
-    #cat("\n\n[faasr_msg] Repository already exists\n")
-    #cat("[faasr_msg] Update the repository?[y/n]")
     while(TRUE) {
       check1 <- invisible(readline())
       if (check1=="y") {
         break
       } else if(check1 == "n") {
         cli_alert_danger("Stop the function")
-        #cat("\n\n[faasr_msg] Stop the function\n")
         stop()
       } else {
         cli_alert_warning("Enter \"y\" or \"n\": ")
-        #cat("Enter \"y\" or \"n\": ")
       }
     }
   }
@@ -279,15 +274,15 @@ faasr_register_workflow_github_create_yml_file <- function(faasr, actionname, re
   # check "runner" / "cron" and bring templates from github
   if (runner){
     if (is.null(cron)){
-      #contents_git <- readLines("runner yaml url")
+      #contents_git <- readLines(workflow_runner_path)
     } else {
-      #contents_git <- readLines("runner with cron yaml url")
+      #contents_git <- readLines(workflow_runner_w_timer_path)
     }
   } else {
     if (is.null(cron)){
-      contents_git <- readLines("https://raw.githubusercontent.com/spark0510/FaaSr-package/branch35-trial/schema/workflow_template.yml")
+      contents_git <- readLines(workflow_basic_path)
     } else {
-      contents_git <- readLines("https://raw.githubusercontent.com/spark0510/FaaSr-package/branch35-trial/schema/workflow_with_cron_template.yml")
+      contents_git <- readLines(workflow_timer_path)
     }
   }
   # create customized contents by using "glue"
@@ -333,10 +328,8 @@ faasr_register_workflow_git_remote_repo <- function(token,check,private,repo,ref
     response <- faasr_httr_request(body=body, token=token, url=url, type="POST")
     if (response$status_code==201){
       cli_alert_success("Successfully create the repo")
-      #cat("\n\n[faasr_msg] Successfully create the repo\n")
     } else {
       cli_alert_danger("Error: Failed to create the repo")
-      #cat("\n\n[faasr_msg] Error: Failed to create the repo\n")
       setwd(cwd)
       stop()
     }
@@ -361,7 +354,6 @@ faasr_register_workflow_git_remote_env <- function(repo, cred, token){
     key_id <- content(response)$key_id
   } else {
     cli_alert_danger("Error: Failed to get the public key")
-    #cat("\n\n[faasr_msg] Error: Failed to get the public key\n")
     setwd(cwd)
     stop()
   }
@@ -377,10 +369,8 @@ faasr_register_workflow_git_remote_env <- function(repo, cred, token){
   response <- faasr_httr_request(body=body, token=token, url=url, type="PUT")
   if (response$status_code==204 || response$status_code==201){
     cli_alert_success("Successfully set secrets")
-    #cat("\n\n[faasr_msg] Successfully set secrets\n")
   } else {
     cli_alert_danger("Error: Failed to set secrets")
-    #cat("\n\n[faasr_msg] Error: Failed to set secrets\n")
     setwd(cwd)
     stop()
   }
@@ -392,23 +382,19 @@ faasr_register_workflow_git_remote_env <- function(repo, cred, token){
   response <- faasr_httr_request(body=body, token=token, url=url, type="POST")
   if (response$status_code==201){
     cli_alert_success("Successfully set variables")
-    #cat("\n\n[faasr_msg] Successfully set variables\n")
   } else if (response$status_code==409){
     # if variable already exists, update the variable
     url <- paste0("repos/",repo,"/actions/variables/PAYLOAD_REPO")
     response <- faasr_httr_request(body=body, token=token, url=url, type="PATCH")
     if (response$status_code==204){
       cli_alert_success("Successfully set variables")
-      #cat("\n\n[faasr_msg] Successfully set variables\n")
     } else {
       cli_alert_danger("Error: Failed to set variables")
-      #cat("\n\n[faasr_msg] Error: Failed to set variables\n")
       setwd(cwd)
       stop()
     }
   } else {
     cli_alert_danger("Error: Failed to set variables")
-    #cat("\n\n[faasr_msg] Error: Failed to set variables\n")
     setwd(cwd)
     stop()
   }
@@ -447,23 +433,18 @@ faasr_workflow_invoke_github <- function(faasr, cred, faas_name, actionname){
   if (status_code(response) == 204) {
     succ_msg <- paste0("faasr_register_workflow_github_invoke: GitHub Action: Successfully invoked:", actionname, "\n")
     cli_alert_success(succ_msg)
-    #cat(succ_msg)
   } else if (status_code(response) == 401) {
     err_msg <- paste0("faasr_register_workflow_github_invoke: GitHub Action: Authentication failed, check the credentials\n")
     cli_alert_danger(err_msg)
-    #cat(err_msg)
   } else if (status_code(response) == 404) {
     err_msg <- paste0("faasr_register_workflow_github_invoke: GitHub Action: Cannot find the destination, check the repo name: \"",repo,"\" and workflow name: \"",workflow,"\"\n")
     cli_alert_danger(err_msg)
-    #cat(err_msg)
   } else if (status_code(response) == 422) {
     err_msg <- paste0("faasr_register_workflow_github_invoke: GitHub Action: Cannot find the destination, check the ref: ", actionname, "\n")
     cli_alert_danger(err_msg)
-    #cat(err_msg)
   } else {
     err_msg <- paste0("faasr_register_workflow_github_invoke: GitHub Action: unknown error happens when invoke next function\n")
     cli_alert_danger(err_msg)
-    #cat(err_msg)
   }
 }
 
@@ -507,7 +488,6 @@ faasr_set_workflow_timer_gh <- function(faasr,cred,actionname,cron=NULL,unset=FA
   if (!dir.exists(path)){
     err_msg <- paste0("[faasr_msg] faasr_set_workflow_timer_gh: No local repository ",repo," found \n")
     cli_alert_danger(err_msg)
-    #cat(err_msg)
     stop()
   }
   # check remote repo
@@ -515,7 +495,6 @@ faasr_set_workflow_timer_gh <- function(faasr,cred,actionname,cron=NULL,unset=FA
   if (!response){
     err_msg <- paste0("[faasr_msg] faasr_set_workflow_timer_gh: No remote repository ",repo," found \n")
     cli_alert_danger(err_msg)
-    #cat(err_msg)
     stop()
   }
 
@@ -538,10 +517,8 @@ faasr_set_workflow_timer_gh <- function(faasr,cred,actionname,cron=NULL,unset=FA
   if (result==0){
     cli_alert_success(paste0("Successfully ",char," the cron ",cron," timer to the repository ",repo))
     cli_progress_update()
-    #cat("\n\n[faasr_msg] Successfully",char,"the cron",cron,"timer to the repository",repo,"\n")
   } else{
     cli_alert_warning(paste0("Error: Failed to ",char," the cron ",cron," timer to the repository ",repo))
-    #cat("\n\n[faasr_msg] Error: Failed to",char,"the cron",cron,"timer to the repository",repo,"\n")
     stop()
   }
   cli_progress_done()
