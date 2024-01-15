@@ -150,7 +150,6 @@ faasr_register_workflow_openwhisk_check_exists <- function(ssl, action, server, 
   } else {
     err_msg <- paste0("Check ",action," exists Error: ", content(response)$error)
     cli_alert_danger(err_msg)
-    #cat("Check function exists Error: ", content(response)$error)
     stop()
   }
 }
@@ -158,11 +157,8 @@ faasr_register_workflow_openwhisk_check_exists <- function(ssl, action, server, 
 faasr_register_workflow_openwhisk_check_user_input <- function(check, actionname, type){
   # if given values already exists, ask the user to update the action
   if (check){
-    #cli_alert_info(paste0("Error: ",type," name:\"",actionname,"\"already exists"))
     cli_alert_info(paste0("Do you want to update the ",type,"?[y/n]"))
 
-    #cat("[faasr_msg]Error: ",type," name:\"",actionname,"\"already exists\n")
-    #cat("[faasr_msg]Do you want to update the ",type,"?[y/n]\n")
     while(TRUE) {
       check <- readline()
       if (check=="y") {
@@ -172,7 +168,6 @@ faasr_register_workflow_openwhisk_check_user_input <- function(check, actionname
         stop()
       } else {
         cli_alert_warning("Enter \"y\" or \"n\": ")
-        #cat("Enter \"y\" or \"n\": ")
       }
     }
   } else {
@@ -215,11 +210,9 @@ faasr_register_workflow_openwhisk_create_action <- function(ssl, actionname, ser
   if (response$status_code==200 || response$status_code==202){
     succ_msg <- paste0("Successfully ", action_performed," the function - ", actionname)
     cli_alert_success(succ_msg)
-    #cat("\n\n[faasr_msg] Successfully ", action_performed," the function - ", actionname,"\n\n")
   } else {
     err_msg <- paste0("Error  ", action_performed," the function - ", actionname,": ",content(response)$error)
     cli_alert_danger(err_msg)
-    #cat("\n\n[faasr_msg] Error  ", action_performed," the function - ", actionname,": ",content(response)$error,"\n\n")
     stop()
   }
   
@@ -232,13 +225,11 @@ faasr_workflow_invoke_openwhisk <- function(faasr, cred, faas_name, actionname, 
   body <- faasr
   response <- faasr_ow_httr_request(faasr, faas_name, action, type="POST", body=body, ssl)
   if (response$status_code==200 || response$status_code==202){
-    succ_msg <- paste0("Successfully invoke the function - ", actionname)
+    succ_msg <- paste0("Successfully invoke the function - ", actionname, ", activation ID: ", content(response)$activationId)
     cli_alert_success(succ_msg)
-    #cat("\n\n[faasr_msg] Successfully invoke the function - ", actionname,"\n\n")
   } else {
     err_msg <- paste0("Error invoke the function - ", actionname,": ",content(response)$error)
     cli_alert_danger(err_msg)
-    #cat("\n\n[faasr_msg] Error invoke the function - ", actionname,": ",content(response)$error,"\n\n")
     stop()
   }
 
@@ -275,11 +266,9 @@ faasr_set_workflow_timer_ow <- function(faasr, cred, target, cron, unset=FALSE, 
     if (response$status_code==200 || response$status_code==202){
       succ_msg <- paste0("Successfully ", action_performed," the trigger - ", trigger_name)
       cli_alert_success(succ_msg)
-      #cat("\n\n[faasr_msg] Successfully ", action_performed," the trigger - ", trigger_name,"\n\n")
     } else {
       err_msg <- paste0("Error  ", action_performed," the trigger - ", trigger_name,": ",content(response)$error)
       cli_alert_danger(err_msg)
-      #cat("\n\n[faasr_msg] Error  ", action_performed," the trigger - ", trigger_name,": ",content(response)$error,"\n\n")
       stop()
     }
 
@@ -298,11 +287,9 @@ faasr_set_workflow_timer_ow <- function(faasr, cred, target, cron, unset=FALSE, 
     if (response$status_code==200 || response$status_code==202){
       succ_msg <- paste0("Successfully fire the alarm")
       cli_alert_success(succ_msg)
-      #cat("\n\n[faasr_msg] Successfully fire the alarm \n\n")
     } else {
       err_msg <- paste0("Error fire the alarm: ",content(response)$error)
       cli_alert_danger(err_msg)
-      #cat("\n\n[faasr_msg] Error fire the alarm: ",content(response)$error,"\n\n")
       stop()
     }
 
@@ -325,11 +312,9 @@ faasr_set_workflow_timer_ow <- function(faasr, cred, target, cron, unset=FALSE, 
     if (response$status_code==200 || response$status_code==202){
       succ_msg <- paste0("Successfully ", action_performed," the rule - ", rule_name)
       cli_alert_success(succ_msg)
-      #cat("\n\n[faasr_msg] Successfully ", action_performed," the rule - ", rule_name,"\n\n")
     } else {
       err_msg <- paste0("Error  ", action_performed," the rule - ", rule_name,": ",content(response)$error)
       cli_alert_danger(err_msg)
-      #cat("\n\n[faasr_msg] Error  ", action_performed," the rule - ", rule_name,": ",content(response)$error,"\n\n")
       stop()
     }
 
@@ -342,7 +327,6 @@ faasr_set_workflow_timer_ow <- function(faasr, cred, target, cron, unset=FALSE, 
     if (!check){
       err_msg <- paste0("Error: No ",trigger_name," found")
       cli_alert_danger(err_msg)
-      #cat("\n\n[faasr_msg]Error: No ",trigger_name," found\n")
       stop()
     }
     
@@ -359,11 +343,9 @@ faasr_set_workflow_timer_ow <- function(faasr, cred, target, cron, unset=FALSE, 
     if (response$status_code==200 || response$status_code==202){
       succ_msg <- paste0("Successfully Stop the alarm")
       cli_alert_success(succ_msg)
-      #cat("\n\n[faasr_msg] Successfully Stop the alarm\n\n")
     } else {
       err_msg <- paste0("Error Stop the alarm: ",content(response)$error)
       cli_alert_danger(err_msg)
-      #cat("\n\n[faasr_msg] Error Stop the alarm: ",content(response)$error,"\n\n")
       stop()
     }
 
@@ -374,11 +356,9 @@ faasr_set_workflow_timer_ow <- function(faasr, cred, target, cron, unset=FALSE, 
     if (response$status_code==200 || response$status_code==202){
       succ_msg <- paste0("Successfully Delete the trigger - ", trigger_name)
       cli_alert_success(succ_msg)
-      #cat("\n\n[faasr_msg] Successfully Delete the trigger - ", trigger_name,"\n\n")
     } else {
       err_msg <- paste0("Error Delete the trigger - ", trigger_name,": ",content(response)$error)
       cli_alert_danger(err_msg)
-      #cat("\n\n[faasr_msg] Error Delete the trigger - ", trigger_name,": ",content(response)$error,"\n\n")
       stop()
     }
 
@@ -389,7 +369,6 @@ faasr_set_workflow_timer_ow <- function(faasr, cred, target, cron, unset=FALSE, 
     if (!check){
       err_msg <- paste0("Error: No ",rule_name," found")
       cli_alert_danger(err_msg)
-      #cat("\n\n[faasr_msg]Error: No ",rule_name," found\n")
       stop()
     }
     
@@ -405,11 +384,9 @@ faasr_set_workflow_timer_ow <- function(faasr, cred, target, cron, unset=FALSE, 
     if (response$status_code==200 || response$status_code==202){
       succ_msg <- paste0("Successfully Delete the rule - ", rule_name)
       cli_alert_success(succ_msg)
-      #cat("\n\n[faasr_msg] Successfully Delete the rule - ", rule_name,"\n\n")
     } else {
       err_msg <- paste0("Error Delete the rule - ", rule_name,": ",content(response)$error)
       cli_alert_danger(err_msg)
-      #cat("\n\n[faasr_msg] Error Delete the rule - ", rule_name,": ",content(response)$error,"\n\n")
       stop()
     }
   }
