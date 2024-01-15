@@ -201,7 +201,7 @@ faasr_register_workflow_github_repo_question <- function(check, repo){
     cli_alert_info("Repository already exists")
     cli_text("{symbol$fancy_question_mark} Update the repository?[y/n]")
     while(TRUE) {
-      check1 <- invisible(readline())
+      check1 <- readline()
       if (check1=="y") {
         break
       } else if(check1 == "n") {
