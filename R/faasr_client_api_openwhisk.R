@@ -48,8 +48,8 @@ faasr_register_workflow_openwhisk <- function(faasr, cred, memory=1024, timeout=
   # check servers and actions, create actions
   for (server in names(action_list)) {
 
-    cli_h1(paste0("Registering workflow for openwhisk: ", server))
-    cli_progress_bar(
+    cli::cli_h1(paste0("Registering workflow for openwhisk: ", server))
+    cli::cli_progress_bar(
       format = paste0(
         "FaaSr {pb_spin} Registering workflow openwhisk ",
         "{cli::pb_bar} {cli::pb_percent} [{pb_current}/{pb_total}]   ETA:{pb_eta}"
