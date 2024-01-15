@@ -299,12 +299,15 @@ faasr <- function(json_path=NULL, env_path=NULL){
     cli_alert_success(succ_msg)
   }
 
-  cli_alert_success("Ready to start FaaSr client tools:")
+  cli_alert_success("Ready to use FaaSr client tools:")
+  cli_ol()
   ulid <- cli_ul()
   cli_li("$register_workflow")
   cli_li("$invoke_workflow")
   cli_li("$set_workflow_timer")
   cli_li("$unset_workflow_timer")
+  cli_end(ulid)
+  cli_end()
 
   return(svc)
 }
