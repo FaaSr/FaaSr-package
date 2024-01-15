@@ -1,0 +1,32 @@
+name: Running Action- <<actionname>>
+on:
+  schedule:
+    - cron: '<<cron>>'
+  workflow_dispatch:
+    inputs:
+      ID:
+        description: 'InvocationID'
+        required: false
+      InvokeName:
+        description: 'FunctionInvoke'
+        required: true
+      FaaSrLog:
+        description: 'FaaSrLog'
+        required: false
+
+jobs:
+  run_docker_image:
+    runs-on: ubuntu-latest
+    container: <<container_name>>
+    env:
+      SECRET_PAYLOAD: ${{ secrets.SECRET_PAYLOAD }}
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      PAYLOAD_REPO: ${{ vars.PAYLOAD_REPO }}
+      INPUT_ID: ${{ github.event.inputs.ID || '<<id>>'  }}
+      INPUT_INVOKENAME: ${{ github.event.inputs.InvokeName || '<<actionname>>' }}
+      INPUT_FAASRLOG: ${{ github.event.inputs.FaaSrLog || '<<folder>>'  }}
+    steps:
+    - name: run Rscript
+      run: |
+        cd /action
+        Rscript faasr_start_invoke_github-actions.R
