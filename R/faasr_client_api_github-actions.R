@@ -27,7 +27,7 @@
 #' @return faasr_register_workflow_github_repo_lists: "repo_list" for the list of servername:actionname pairs
 #' @return faasr_register_workflow_github_repo_exists: "exit_code" for the int
 
-library("cli")
+
 
 workflow_basic_path <- "https://raw.githubusercontent.com/FaaSr/FaaSr-package/main/schema/workflow_template.yml"
 workflow_timer_path <- "https://raw.githubusercontent.com/FaaSr/FaaSr-package/main/schema/workflow_with_cron_template.yml"
@@ -51,8 +51,8 @@ faasr_register_workflow_github_actions <- function(faasr, cred, cron=NULL, runne
     ref <- faasr$ComputeServers[[server]]$Branch
     repo <- paste0(faasr$ComputeServers[[server]]$UserName,"/",faasr$ComputeServers[[server]]$ActionRepoName)
     
-    cli_h1(paste0("Registering workflow github actions for repo: ", server))
-    cli_progress_bar(
+    cli::cli_h1(paste0("Registering workflow github actions for repo: ", server))
+    cli::cli_progress_bar(
       format = paste0(
         "FaaSr {pb_spin} Registering workflow github actions ",
         "{cli::pb_bar} {cli::pb_percent} [{pb_current}/{pb_total}]   ETA:{pb_eta}"
@@ -404,7 +404,7 @@ faasr_register_workflow_git_remote_env <- function(repo, cred, token){
 
 # inovke workflow run
 faasr_workflow_invoke_github <- function(faasr, cred, faas_name, actionname){
-  
+
   # define the required variables.
   token <- cred[[paste0(faas_name,"_TOKEN")]]
   input_id <- faasr$InvocationID
@@ -451,7 +451,7 @@ faasr_workflow_invoke_github <- function(faasr, cred, faas_name, actionname){
 
 # set workflow timer
 faasr_set_workflow_timer_gh <- function(faasr,cred,actionname,cron=NULL,unset=FALSE){
-  
+
   options(cli.progress_clear = FALSE)
   options(cli.spinner = "line")
   

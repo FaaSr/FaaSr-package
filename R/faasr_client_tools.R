@@ -24,8 +24,6 @@
 #' @return faasr: "svc" for a list containing "operations", "json", "json_path", and "cred"
 #' @return faasr_replace_values: "faasr" for a list containing both json structure and credentials.
 
-library("cli")
-
 # define a list for storing functions
 .faasr_user <- list()
 
@@ -38,6 +36,9 @@ basic_ld_image <- "145342739029.dkr.ecr.us-east-1.amazonaws.com/aws-lambda-tidyv
 
 # faasr_register_workflow function
 faasr_register_workflow <- function(...){
+
+  library("cli")
+
   # get the "svc" by using "faasr_get_svc" and define the required variables.
   svc <- .faasr_get_svc()
   faasr_wd <- svc$wd
@@ -60,6 +61,8 @@ faasr_register_workflow <- function(...){
 
 # collect system envrionment
 faasr_collect_sys_env <- function(faasr, cred){
+  library("cli")
+
   # Check the computeservers.
   for (faas_cred in names(faasr$ComputeServers)){
     # if it is github actions, use key type for "Token"
@@ -74,7 +77,8 @@ faasr_collect_sys_env <- function(faasr, cred){
       if (is.null(cred[[cred_name]])){
         real_cred <- Sys.getenv(cred_name)
         if (real_cred == ""){
-          cat("\n\n[faasr_msg] ",cred_name," requires values\n\n")
+          err_msg <- paste0("faasr_collect_sys_env: ",cred_name," requires values")
+          cli_alert_warning(err_msg)
         } else{
           cred[[cred_name]] <- real_cred
         }
@@ -92,7 +96,8 @@ faasr_collect_sys_env <- function(faasr, cred){
       if (is.null(cred[[cred_name]])){
         real_cred <- Sys.getenv(cred_name)
         if (real_cred == ""){
-          cat("\n\n[faasr_msg] ",cred_name," requires values\n\n")
+          err_msg <- paste0("faasr_collect_sys_env: ",cred_name," requires values")
+          cli_alert_warning(err_msg)
         } else{
           cred[[cred_name]] <- real_cred
         }
@@ -110,7 +115,8 @@ faasr_collect_sys_env <- function(faasr, cred){
       if (is.null(cred[[cred_name_ac]])){
         real_cred <- Sys.getenv(cred_name_ac)
         if (real_cred == ""){
-          cat("\n\n[faasr_msg] ",cred_name_ac," requires values\n\n")
+          err_msg <- paste0("faasr_collect_sys_env: ",cred_name_ac," requires values")
+          cli_alert_warning(err_msg)
         } else{
           cred[[cred_name_ac]] <- real_cred
         }
@@ -123,7 +129,8 @@ faasr_collect_sys_env <- function(faasr, cred){
       if (is.null(cred[[cred_name_sc]])){
         real_cred <- Sys.getenv(cred_name_sc)
         if (real_cred == ""){
-          cat("\n\n[faasr_msg] ",cred_name_sc," requires values\n\n")
+          err_msg <- paste0("faasr_collect_sys_env: ",cred_name_sc," requires values")
+          cli_alert_warning(err_msg)
         } else{
           cred[[cred_name_sc]] <- real_cred
         }
@@ -144,7 +151,8 @@ faasr_collect_sys_env <- function(faasr, cred){
     if (is.null(cred[[cred_name_ac]])){
       real_cred <- Sys.getenv(cred_name_ac)
       if (real_cred == ""){
-        cat("\n\n[faasr_msg] ",cred_name_ac," requires values\n\n")
+        err_msg <- paste0("faasr_collect_sys_env: ",cred_name_ac," requires values")
+          cli_alert_warning(err_msg)
       } else{
         cred[[cred_name_ac]] <- real_cred
       }
@@ -156,7 +164,8 @@ faasr_collect_sys_env <- function(faasr, cred){
     if (is.null(cred[[cred_name_sc]])){
       real_cred <- Sys.getenv(cred_name_sc)
       if (real_cred == ""){
-        cat("\n\n[faasr_msg] ",cred_name_sc," requires values\n\n")
+        err_msg <- paste0("faasr_collect_sys_env: ",cred_name_sc," requires values")
+          cli_alert_warning(err_msg)
       } else{
         cred[[cred_name_sc]] <- real_cred
       }
@@ -182,9 +191,13 @@ faasr_collect_sys_env <- function(faasr, cred){
 
 # faasr main function
 faasr <- function(json_path=NULL, env_path=NULL){
+  library("cli")
+
+  cli::cli_h1(paste0("Start FaaSr client tools"))
 
   if (json_path=="" || is.null(json_path)){
-    cat("[faasr msg] JSON path is required")
+    cli_alert_danger("faasr: JSON path is required")
+    return("")
   }
 
   # set the svc and environments
@@ -271,14 +284,27 @@ faasr <- function(json_path=NULL, env_path=NULL){
       }
     }
   }
-  
+  succ_msg <- paste0("Successfully get configuration from ", json_path, " and ", env_path)
+  cli_alert_success(succ_msg)
+
   # create dir
   if (!dir.exists(faasr_gh_local_repo)){
     dir.create(faasr_gh_local_repo)
+    succ_msg <- paste0("Create the FaaSr directory: ", faasr_gh_local_repo)
+    cli_alert_success(succ_msg)
   }
   if (!dir.exists(faasr_data)){
     dir.create(faasr_data)
+    succ_msg <- paste0("Create the FaaSr directory: ", faasr_data)
+    cli_alert_success(succ_msg)
   }
+
+  cli_alert_success("Ready to start FaaSr client tools:")
+  ulid <- cli_ul()
+  cli_li("$register_workflow")
+  cli_li("$invoke_workflow")
+  cli_li("$set_workflow_timer")
+  cli_li("$unset_workflow_timer")
 
   return(svc)
 }
@@ -306,6 +332,8 @@ faasr_replace_values <- function(faasr, cred){
 
 # invoke first action
 faasr_invoke_workflow <- function(FunctionInvoke=NULL, ...){
+  library("cli")
+
   # get the "svc" by using "faasr_get_svc" and define the required variables.
   svc <- .faasr_get_svc()
   faasr_wd <- svc$wd
@@ -366,6 +394,7 @@ faasr_invoke_workflow <- function(FunctionInvoke=NULL, ...){
 
 # set the cron timer
 faasr_set_workflow_timer <- function(cron, target=NULL, ...){
+  library("cli")
 
   # get env
   svc <- .faasr_get_svc()
@@ -382,7 +411,7 @@ faasr_set_workflow_timer <- function(cron, target=NULL, ...){
   setwd(faasr_wd)
 
   if (is.null(cron) || cron==""){
-    cat("\n\n[faasr_msg] No cron time provided\n")
+    cli_alert_danger("faasr_set_workflow_timer: No cron time provided")
     stop()
   }
 
@@ -400,6 +429,7 @@ faasr_set_workflow_timer <- function(cron, target=NULL, ...){
 
 # unset the timer
 faasr_unset_workflow_timer <- function(target=NULL,...){
+  library("cli")
 
   # get env
   svc <- .faasr_get_svc()
