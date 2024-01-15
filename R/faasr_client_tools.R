@@ -24,6 +24,8 @@
 #' @return faasr: "svc" for a list containing "operations", "json", "json_path", and "cred"
 #' @return faasr_replace_values: "faasr" for a list containing both json structure and credentials.
 
+library("cli")
+
 # define a list for storing functions
 .faasr_user <- list()
 
