@@ -198,6 +198,9 @@ faasr <- function(json_path=NULL, env_path=NULL){
   if (json_path=="" || is.null(json_path)){
     cli_alert_danger("faasr: JSON path is required")
     return("")
+  } else if (!file.exists(json_path)){
+    cli_alert_danger("faasr: JSON path is invalid")
+    return("")
   }
 
   # set the svc and environments
