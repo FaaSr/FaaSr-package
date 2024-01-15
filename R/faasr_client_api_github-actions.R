@@ -133,7 +133,7 @@ faasr_register_workflow_github_create_env <- function(server_name, repo_name, cr
   # create a file ".env"
   writeLines(contents, ".env")
   # create a file ".gitignore"
-  writeLines(".env",".gitignore")
+  writeLines(".env\n*~\n*.swp\n*.swo",".gitignore")
   # create a directory ".github/workflows"
   if (!dir.exists(".github/workflows")) {
     dir.create(".github/workflows", recursive=TRUE)
@@ -174,6 +174,7 @@ jobs:
     container: ",containername,"
     env:
       SECRET_PAYLOAD: ${{ secrets.SECRET_PAYLOAD }}
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       PAYLOAD_REPO: ${{ vars.PAYLOAD_REPO }}
       INPUT_ID: ${{ github.event.inputs.ID }}
       INPUT_INVOKENAME: ${{ github.event.inputs.InvokeName }}
@@ -221,6 +222,7 @@ faasr_register_workflow_github_gh_setup <- function(check, repo, ref) {
     system("git init")
     msg <- paste0("git branch -m ", ref)
     system(msg)
+    system("git rm -r git rm -r --cached .")
     system("git add .")
     system("git commit -m \'build repo\'")
     cat("\n\n[faasr_msg] Create the repository\n")
@@ -253,6 +255,7 @@ faasr_register_workflow_github_gh_setup <- function(check, repo, ref) {
     system("git init")
     msg <- paste0("git checkout -B ", ref)
     system(msg)
+    system("git rm -r git rm -r --cached .")
     system("git add .")
     system("git commit -m \'update repo\'")
     # push it to the remote git repository
@@ -342,6 +345,7 @@ jobs:
     container: ",faasr$ActionContainers[[target]],"
     env:
       SECRET_PAYLOAD: ${{ secrets.SECRET_PAYLOAD }}
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       PAYLOAD_REPO: ${{ vars.PAYLOAD_REPO }}
       INPUT_ID: ${{ github.event.inputs.ID || \'",id,"\'  }}
       INPUT_INVOKENAME: ${{ github.event.inputs.InvokeName || \'",target,"\' }}
@@ -369,6 +373,7 @@ jobs:
   system("git init")
   msg <- paste0("git checkout -B ", ref)
   system(msg)
+  system("git rm -r git rm -r --cached .")
   system("git add .")
   system("git commit -m \'update repo\'")
   command <- paste0("git push -f http://github.com/", repo, " ", ref)
