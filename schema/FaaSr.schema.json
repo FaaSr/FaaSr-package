@@ -17,8 +17,7 @@
     },
     "LoggingDataStore": {
       "description": "The name of the logging server to use - must match an S3 server defined under DataStores",
-      "type": "string",
-      "minLength": 1
+      "type": "string"
     },
     "DefaultDataStore": {
       "description": "The name of the default server to use - must match an S3 server defined under DataStores",
@@ -68,7 +67,8 @@
             "UserName":{"type":"string","minLenght": 1},
             "ActionRepoName":{"type":"string","minLenght": 1},            
             "Token":{"type":"string","minLength": 1},
-            "Branch":{"type":"string","minLength": 1}
+            "Branch":{"type":"string"},
+            "SSL":{"type":"string","minLength": 1}
           },
           "additionalProperties":false,
           "allOf":[
@@ -78,7 +78,7 @@
                 "required":["FaaSType"]
               },
               "then": {
-                "required":["Region", "Endpoint", "Namespace", "API.key"]
+                "required":["Endpoint", "Namespace", "API.key"]
               }
             },
             {
@@ -96,7 +96,7 @@
                 "required":["FaaSType"]
               },
               "then": {
-                "required":["UserName", "ActionRepoName", "Token", "Branch"]
+                "required":["UserName", "ActionRepoName", "Token"]
               }
             }
           ]

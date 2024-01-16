@@ -27,32 +27,33 @@
 # define a list for storing functions
 .faasr_user <- list()
 
+# defined variables
+faasr_gh_local_repo <- "faasr_gh_local_repo"
+faasr_data <- "faasr_data"
+basic_gh_image <- "ghcr.io/faasr/github-actions-tidyverse:latest"
+basic_ow_image <- "faasr/openwhisk-tidyverse:latest"
+basic_ld_image <- "145342739029.dkr.ecr.us-east-1.amazonaws.com/aws-lambda-tidyverse:latest"
+
 # faasr_register_workflow function
-faasr_register_workflow <- function(){
+faasr_register_workflow <- function(...){
+
+  library("cli")
+
   # get the "svc" by using "faasr_get_svc" and define the required variables.
   svc <- .faasr_get_svc()
-  cred <- svc$cred
+  faasr_wd <- svc$wd
+  if (!dir.exists(faasr_wd)){
+    faasr_wd <- getwd()
+  }
   faasr <- svc$json
-  json_path <- svc$json_path
-  cred <- faasr_collect_sys_env(faasr,cred)
+  cred <- faasr_collect_sys_env(faasr,svc$cred)
   
+  setwd(faasr_wd)
+
   # register actions for openwhisk/github-actions/lambda by given json
-  faasr_ow <- faasr_register_workflow_ibmcloud_openwhisk(faasr,cred)
-  if (is.list(faasr_ow)){
-    faasr<-faasr_ow
-  }
-  faasr_gh <- faasr_register_workflow_github_actions(faasr,cred)
-  if (is.list(faasr_gh)){
-    faasr<-faasr_gh
-  }
-  faasr_ld <- faasr_register_workflow_aws_lambda(faasr,cred)
-  if (is.list(faasr_ld)){
-    faasr<-faasr_ld
-  }
-  
-  # update the json and write an updated json file into the json path.
-  json_update <- jsonlite::toJSON(faasr, pretty=TRUE, auto_unbox=TRUE)
-  writeLines(json_update, json_path)
+  check <- faasr_register_workflow_openwhisk(faasr,cred,...)
+  check <- faasr_register_workflow_github_actions(faasr,cred)
+  #check <- faasr_register_workflow_aws_lambda(faasr,cred)
   
 }
 .faasr_user$operations$register_workflow <- faasr_register_workflow
@@ -60,6 +61,8 @@ faasr_register_workflow <- function(){
 
 # collect system envrionment
 faasr_collect_sys_env <- function(faasr, cred){
+  library("cli")
+
   # Check the computeservers.
   for (faas_cred in names(faasr$ComputeServers)){
     # if it is github actions, use key type for "Token"
@@ -74,7 +77,8 @@ faasr_collect_sys_env <- function(faasr, cred){
       if (is.null(cred[[cred_name]])){
         real_cred <- Sys.getenv(cred_name)
         if (real_cred == ""){
-          cat("\n\n[faasr_msg] ",cred_name," requires values\n\n")
+          err_msg <- paste0("faasr_collect_sys_env: ",cred_name," requires values")
+          cli_alert_warning(err_msg)
         } else{
           cred[[cred_name]] <- real_cred
         }
@@ -92,7 +96,8 @@ faasr_collect_sys_env <- function(faasr, cred){
       if (is.null(cred[[cred_name]])){
         real_cred <- Sys.getenv(cred_name)
         if (real_cred == ""){
-          cat("\n\n[faasr_msg] ",cred_name," requires values\n\n")
+          err_msg <- paste0("faasr_collect_sys_env: ",cred_name," requires values")
+          cli_alert_warning(err_msg)
         } else{
           cred[[cred_name]] <- real_cred
         }
@@ -110,7 +115,8 @@ faasr_collect_sys_env <- function(faasr, cred){
       if (is.null(cred[[cred_name_ac]])){
         real_cred <- Sys.getenv(cred_name_ac)
         if (real_cred == ""){
-          cat("\n\n[faasr_msg] ",cred_name_ac," requires values\n\n")
+          err_msg <- paste0("faasr_collect_sys_env: ",cred_name_ac," requires values")
+          cli_alert_warning(err_msg)
         } else{
           cred[[cred_name_ac]] <- real_cred
         }
@@ -123,7 +129,8 @@ faasr_collect_sys_env <- function(faasr, cred){
       if (is.null(cred[[cred_name_sc]])){
         real_cred <- Sys.getenv(cred_name_sc)
         if (real_cred == ""){
-          cat("\n\n[faasr_msg] ",cred_name_sc," requires values\n\n")
+          err_msg <- paste0("faasr_collect_sys_env: ",cred_name_sc," requires values")
+          cli_alert_warning(err_msg)
         } else{
           cred[[cred_name_sc]] <- real_cred
         }
@@ -144,7 +151,8 @@ faasr_collect_sys_env <- function(faasr, cred){
     if (is.null(cred[[cred_name_ac]])){
       real_cred <- Sys.getenv(cred_name_ac)
       if (real_cred == ""){
-        cat("\n\n[faasr_msg] ",cred_name_ac," requires values\n\n")
+        err_msg <- paste0("faasr_collect_sys_env: ",cred_name_ac," requires values")
+          cli_alert_warning(err_msg)
       } else{
         cred[[cred_name_ac]] <- real_cred
       }
@@ -156,7 +164,8 @@ faasr_collect_sys_env <- function(faasr, cred){
     if (is.null(cred[[cred_name_sc]])){
       real_cred <- Sys.getenv(cred_name_sc)
       if (real_cred == ""){
-        cat("\n\n[faasr_msg] ",cred_name_sc," requires values\n\n")
+        err_msg <- paste0("faasr_collect_sys_env: ",cred_name_sc," requires values")
+          cli_alert_warning(err_msg)
       } else{
         cred[[cred_name_sc]] <- real_cred
       }
@@ -181,12 +190,26 @@ faasr_collect_sys_env <- function(faasr, cred){
 }
 
 # faasr main function
-faasr <- function(json_path, env_path=NULL){
+faasr <- function(json_path=NULL, env_path=NULL){
+  library("cli")
+
+  cli::cli_h1(paste0("Start FaaSr client tools"))
+
+  if (json_path=="" || is.null(json_path)){
+    cli_alert_danger("faasr: JSON path is required")
+    return("")
+  } else if (!file.exists(json_path)){
+    cli_alert_danger("faasr: JSON path is invalid")
+    return("")
+  }
+
   # set the svc and environments
-  wd <- getwd()
+  faasr_wd <- getwd()
   svc <- .faasr_user$operations
   svc$cred <- list()
   svc$json <- jsonlite::fromJSON(json_path)
+  svc$path <- list(json=json_path, env=env_path, id=paste0("faasr_",sample(100000, size=1)))
+  svc$wd <- faasr_wd
   
   # Check the ComputeServers
   for (faas_js in names(svc$json$ComputeServers)){
@@ -264,21 +287,31 @@ faasr <- function(json_path, env_path=NULL){
       }
     }
   }
-  
-  # create .faasr_json for saving the json.
-  if (!dir.exists(".faasr_json")){
-    dir.create(".faasr_json")
+  succ_msg <- paste0("Successfully get configuration from ", json_path, " and ", env_path)
+  cli_alert_success(succ_msg)
+
+  # create dir
+  if (!dir.exists(faasr_gh_local_repo)){
+    dir.create(faasr_gh_local_repo)
+    succ_msg <- paste0("Create the FaaSr directory: ", faasr_gh_local_repo)
+    cli_alert_success(succ_msg)
   }
-  # create a random number
-  rd_nb <- sample(1:1000000, size=1)
-  # define a json path
-  json_path <- paste0(wd,"/.faasr_json/.faasr_json_",rd_nb)
-  json_update <- jsonlite::toJSON(svc$json, pretty=TRUE, auto_unbox=TRUE)
-  # write a json file with json_path
-  writeLines(json_update, json_path)
-  # save the json_path into the svc list.
-  svc$json_path <- json_path
-  
+  if (!dir.exists(faasr_data)){
+    dir.create(faasr_data)
+    succ_msg <- paste0("Create the FaaSr directory: ", faasr_data)
+    cli_alert_success(succ_msg)
+  }
+
+  cli_alert_success("Ready to use FaaSr client tools:")
+  cli_ol()
+  ulid <- cli_ul()
+  cli_li("$register_workflow")
+  cli_li("$invoke_workflow")
+  cli_li("$set_workflow_timer")
+  cli_li("$unset_workflow_timer")
+  cli_end(ulid)
+  cli_end()
+
   return(svc)
 }
 
@@ -304,13 +337,19 @@ faasr_replace_values <- function(faasr, cred){
 }
 
 # invoke first action
-faasr_invoke_workflow <- function(FunctionInvoke=NULL){
+faasr_invoke_workflow <- function(FunctionInvoke=NULL, ...){
+  library("cli")
+
   # get the "svc" by using "faasr_get_svc" and define the required variables.
   svc <- .faasr_get_svc()
-  cred <- svc$cred
-  json_path <- svc$json_path
-  faasr <- jsonlite::fromJSON(json_path)
-  cred <- faasr_collect_sys_env(faasr,cred)
+  faasr_wd <- svc$wd
+  if (!dir.exists(faasr_wd)){
+    faasr_wd <- getwd()
+  }
+  faasr <- svc$json
+  cred <- faasr_collect_sys_env(faasr,svc$cred)
+  
+  setwd(faasr_wd)
   
   # if there's given function, it will be invoked.
   if (!is.null(FunctionInvoke)){
@@ -321,21 +360,14 @@ faasr_invoke_workflow <- function(FunctionInvoke=NULL){
   # define the required variables.
   faas_name <- faasr$FunctionList[[actionname]]$FaaSServer
   faas_type <- faasr$ComputeServers[[faas_name]]$FaaSType
-  functionname <- faasr$FunctionList[[actionname]]$FunctionName
-  
+
   switch(faas_type,
          # If first action is github actions, use github
          "GitHubActions"={
-           if (!endsWith(actionname,".yml") && !endsWith(actionname,".yaml")){
-            actionname_yml <- paste0(actionname,".yml")
-           }
-           gh_ref <- faasr$ComputeServers[[faas_name]]$Branch
-           repo <- paste0(faasr$ComputeServers[[faas_name]]$UserName,"/",faasr$ComputeServers[[faas_name]]$ActionRepoName)
-           command <- paste0("gh workflow run --repo ",repo," --ref ",gh_ref," ",actionname_yml," -f InvokeName=",actionname)
-           check <- system(command)
+            faasr_workflow_invoke_github(faasr, cred, faas_name, actionname)
          },
+         # If first action is aws-lambda, use lambda
          "Lambda"={
-           # If first action is aws-lambda, use lambda
            # json file with credentials will be created and after invocation, it will be removed.
            faasr_w_cred <- faasr_replace_values(faasr, cred)
            faasr_json <- jsonlite::toJSON(faasr_w_cred, auto_unbox=TRUE)
@@ -359,59 +391,76 @@ faasr_invoke_workflow <- function(FunctionInvoke=NULL){
            check <- system(command)
            file.remove(paste0("payload_ld_",rd_nb,".json"))
          },
+         # If first action is openwhisk, use ibmcloud
          "OpenWhisk"={
-           # If first action is openwhisk, use ibmcloud
-           # json file with credentials will be created and after invocation, it will be removed.
-           faasr_w_cred <- faasr_replace_values(faasr, cred)
-           faasr_json <- jsonlite::toJSON(faasr_w_cred, auto_unbox=TRUE)
-           rd_nb <- sample(100000, size=1)
-           writeLines(faasr_json, paste0("payload_ow_",rd_nb,".json"))
-           command <- paste0("ibmcloud fn action invoke ",actionname," --blocking --param-file ",paste0("payload_ow_",rd_nb,".json"))
-           check <- system(command)
-           file.remove(paste0("payload_ow_",rd_nb,".json"))
+           faasr_workflow_invoke_openwhisk(faasr, cred, faas_name, actionname, ...)
          })
 }
 .faasr_user$operations$invoke_workflow <- faasr_invoke_workflow
 
+# set the cron timer
+faasr_set_workflow_timer <- function(cron, target=NULL, ...){
+  library("cli")
 
-faasr_set_workflow_timer <- function(cron, target=NULL){
+  # get env
   svc <- .faasr_get_svc()
-  cred <- svc$cred
+  faasr_wd <- svc$wd
+  if (!dir.exists(faasr_wd)){
+    faasr_wd <- getwd()
+  }
   faasr <- svc$json
-  json_path <- svc$json_path
-  cred <- faasr_collect_sys_env(faasr,cred)
+  cred <- faasr_collect_sys_env(faasr,svc$cred)
   if (is.null(target)){
     target <- faasr$FunctionInvoke
   }
+
+  setwd(faasr_wd)
+
+  if (is.null(cron) || cron==""){
+    cli_alert_danger("faasr_set_workflow_timer: No cron time provided")
+    stop()
+  }
+
+  # set timer depending on the faas providers
   type <- faasr$ComputeServers[[faasr$FunctionList[[target]]$FaaSServer]]$FaaSType
   if (type == "GitHubActions"){
-    faasr_set_workflow_timer_gh(faasr,target,cron)
+    faasr_set_workflow_timer_gh(faasr,cred,target,cron)
   } else if (type == "Lambda"){
     faasr_set_workflow_timer_ld(faasr,cred,target,cron)
   } else if (type == "OpenWhisk"){
-    faasr_set_workflow_timer_ow(faasr,cred,target,cron)
+    faasr_set_workflow_timer_ow(faasr,cred,target,cron, ...)
   }
 }
 .faasr_user$operations$set_workflow_timer <- faasr_set_workflow_timer
 
-faasr_unset_workflow_timer <- function(target=NULL){
+# unset the timer
+faasr_unset_workflow_timer <- function(target=NULL,...){
+  library("cli")
+
+  # get env
   svc <- .faasr_get_svc()
-  cred <- svc$cred
+  faasr_wd <- svc$wd
+  if (!dir.exists(faasr_wd)){
+    faasr_wd <- getwd()
+  }
   faasr <- svc$json
-  json_path <- svc$json_path
-  cred <- faasr_collect_sys_env(faasr,cred)
+  cred <- faasr_collect_sys_env(faasr,svc$cred)
+
+  setwd(faasr_wd)
+
   if (is.null(target)){
     target <- faasr$FunctionInvoke
   }
+
+  # unset the timer depending on the faas providers
   type <- faasr$ComputeServers[[faasr$FunctionList[[target]]$FaaSServer]]$FaaSType
   if (type == "GitHubActions"){
-    faasr_set_workflow_timer_gh(faasr,target, cron=NULL, unset=TRUE)
+    faasr_set_workflow_timer_gh(faasr,cred, target, cron=NULL, unset=TRUE)
   } else if (type == "Lambda"){
     faasr_set_workflow_timer_ld(faasr,cred, target, cron=NULL, unset=TRUE)
   } else if (type == "OpenWhisk"){
-    faasr_set_workflow_timer_ow(faasr,cred,target, cron=NULL, unset=TRUE)
+    faasr_set_workflow_timer_ow(faasr,cred,target, cron=NULL, unset=TRUE,...)
   }
 }
 .faasr_user$operations$unset_workflow_timer <- faasr_unset_workflow_timer
-
 

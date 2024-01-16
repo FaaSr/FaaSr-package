@@ -7,7 +7,6 @@
 #' @param faasr list with parsed and validated Payload
 
 library("jsonlite")
-library("RCurl")
 library("httr")
 library("paws")
 
@@ -57,93 +56,81 @@ faasr_trigger <- function(faasr) {
           #
           # TBD - need to differentiate from IBMcloud or plain OpenWhisk
           # Set the env values for the openwhisk action.
-	  endpoint <- faasr$ComputeServers[[next_server]]$Endpoint
+          endpoint <- faasr$ComputeServers[[next_server]]$Endpoint
           api_key <- faasr$ComputeServers[[next_server]]$API.key
-	  region <- faasr$ComputeServers[[next_server]]$Region
+          api_key <- strsplit(api_key, ":")[[1]]
+          if (is.null(faasr$ComputeServers[[next_server]]$SSL) || faasr$ComputeServers[[next_server]]$SSL ==""){
+            ssl <- TRUE
+          } else{
+            ssl <- faasr$ComputeServers[[next_server]]$SSL
+          }
           namespace <- faasr$ComputeServers[[next_server]]$Namespace
           actionname <- invoke_next_function
 
-	  if (endpoint == "" || grepl("cloud.ibm.com", endpoint)){
-	    # Openwhisk with IBM cloud - Get a token by using the API key
-	    # URL is the ibmcloud's iam center.
-	    url <- "https://iam.cloud.ibm.com/identity/token"
+          if (!startsWith(endpoint, "https") && !startsWith(endpoint, "http")){
+            endpoint <- paste0("https://", endpoint)
+          }
+          url_2 <- paste0(endpoint, "/api/v1/namespace/",namespace,"/actions/",actionname,"?blocking=false&result=false")
+          
+          headers <- c(
+            'accept' = 'application/json', 
+            'Content-Type' = 'application/json'
+          )
 
-	    # Body contains authorization type and api key
-	    body <- list(grant_type = "urn:ibm:params:oauth:grant-type:apikey",apikey=api_key)
+          # send the REST request(POST/GET/PUT/PATCH)
+          response <- POST(
+            url = url_2,
+            authenticate(api_key[1], api_key[2]),
+            add_headers(.headers = headers),
+            body=faasr,
+            encode="json",
+            config(ssl_verifypeer = ssl, ssl_verifyhost = ssl),
+            accept_json()
+          )
 
-	    # Header is HTTR request's header.
-	    headers <- c("Content-Type"="application/x-www-form-urlencoded")
-
-            # Use httr::POST to send the POST request to the IBMcloud iam centers to get a token.
-	    response <- POST(url = url,body = body,encode = "form",add_headers(.headers = headers))
-
-	    # Parse the result to get a token.
-	    result <- content(response, as = "parsed")
-
-	    # if result returns no error(length is 0), define token.
-	    if (length(result$errorMessage) == 0) {
-	      token <- paste("Bearer",result$access_token)
-	      # if result returns an error, return an error message and stop.
-	    } else {
-	      err_msg <- paste0('{\"faasr_trigger\":\"unable to invoke next action, authentication error\"}', "\n")
-	      cat(err_msg)
-	      faasr_log(err_msg)
-	      break
-	    }
-
-	    url_2 <- paste0("https://",region,".functions.cloud.ibm.com/api/v1/namespaces/",namespace,"/actions/",actionname,"?blocking=false&result=false")
-	    
-	    # header is HTTR request headers
-	    headers_2 <- c("accept"="application/json", "authorization"=token, "content-type"="application/json")
-	    # data is a body and it should be a JSON. To pass the payload, toJSON is required.
-	    data_2 <- toJSON(faasr, auto_unbox=TRUE)
-		  
-	    # Make one option for invoking RCurl
-	    curl_opts_2 <- list(post=TRUE, httpheader=headers_2, postfields=data_2)
-		  
-	  } else {
-	    if (!startsWith(endpoint, "https") && !startsWith(endpoint, "http")){
-	      endpoint <- paste0("https://", endpoint)
-	    }
-	    url_2 <- paste0(endpoint, "/api/v1/namespace/",namespace,"/actions/",actionname,"?blocking=false&result=false")
-	    # Openwhisk - Invoke next action - action name should be described.
-	    # Reference: https://cloud.ibm.com/apidocs/functions
-	    # URL is a form of "https://region.functions.cloud.ibm.cloud/api/v1/namespaces/namespace/actions/actionname",
-	    # blocking=TRUE&result=TRUE is optional
-	  
-	    # data is a body and it should be a JSON. To pass the payload, toJSON is required.
-	    data_2 <- toJSON(faasr, auto_unbox=TRUE)
-
-	    # Make one option for invoking RCurl
-	    curl_opts_2 <- list(post=TRUE, httpheader=headers_2, postfields=data_2, userpwd=api_key)
-	  }
-
-	  # Perform RCurl::curlPerform to send the POST request to IBMcloud function server.
-	  response_2 <- curlPerform(url=url_2, .opts=curl_opts_2)
-	},
+          if (response$status_code==200 || response$status_code==202){
+            succ_msg <- paste0('{\"faasr_trigger\":\"OpenWhisk: Successfully invoked: ', faasr$FunctionInvoke, '\"}\n')
+            cat(succ_msg)
+            faasr_log(succ_msg)
+          } else {
+            err_msg <- paste0('{\"faasr_trigger\":\"OpenWhisk: Error invoking: ', faasr$FunctionInvoke, ' - ', content(response)$error,'\"}\n')
+            cat(err_msg)
+            faasr_log(err_msg)
+          }
+        },
 				
        	# if AWS Lambda - use Lambda API
-	"Lambda"={
+        "Lambda"={
           # AWS Lambda API handling
-	  # get next function server
+          # get next function server
           target_server <- faasr$ComputeServers[[next_server]]
 
-	  # prepare env variables for lambda
-          Sys.setenv("AWS_ACCESS_KEY_ID"=target_server$AccessKey, "AWS_SECRET_ACCESS_KEY"=target_server$SecretKey, "AWS_DEFAULT_REGION"=target_server$Region, "AWS_SESSION_TOKEN" = "")
+          # prepare env variables for lambda
+          
+          # set invoke request body, it should be a JSON. To pass the payload, toJSON is required.
+          payload_json <- toJSON(faasr, auto_unbox = TRUE)
 
-	  # set invoke request body, it should be a JSON. To pass the payload, toJSON is required.
-	  payload_json <- toJSON(faasr, auto_unbox = TRUE)
-
-	  # Create a Lambda client using paws
-          lambda <- paws::lambda()
+          # Create a Lambda client using paws
+          lambda <- paws::lambda(
+            config=list(
+              credentials=list(
+                creds=list(
+                  access_key_id=target_server$AccessKey,
+                  secret_access_key=target_server$SecretKey,
+                  session_token=""
+                )
+              ),
+              region=target_server$Region
+            )
+          )
 
 	  # Invoke next function with FunctionName and Payload, receive trigger response
           next_lambda_function_name <- invoke_next_function
 
 	  # Invoke next function with FunctionName and Payload, receive trigger response
-          response <- lambda$invoke(
+          response <- lambda$invoke_async(
             FunctionName = next_lambda_function_name,
-            Payload = payload_json
+            InvokeArgs = payload_json
           )
 
 	  # Check if next function be invoked successfully
@@ -152,11 +139,11 @@ faasr_trigger <- function(faasr) {
             cat(succ_msg)
             faasr_log(succ_msg)
           } else {
-	    err_msg <- paste0("faasr_trigger: Error invoking: ",faasr$FunctionInvoke," reason:", response$StatusCode, "\n")
+            err_msg <- paste0("faasr_trigger: Error invoking: ",faasr$FunctionInvoke," reason:", response$StatusCode, "\n")
             cat(err_msg)
-	    faasr_log(err_msg)
+            faasr_log(err_msg)
           }
-      	},
+        },
 
       # if GitHub Actions - use GH Actions
         "GitHubActions"={

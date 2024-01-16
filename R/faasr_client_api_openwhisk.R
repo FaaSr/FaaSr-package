@@ -30,29 +30,94 @@
 #' @return faasr_register_workflow_ibmcloud_create_namespace:
 #' "name_id" for the string of namespace id
 
-faasr_register_workflow_ibmcloud_openwhisk <- function(faasr, cred) {
+faasr_register_workflow_openwhisk <- function(faasr, cred, memory=1024, timeout=600000) {
   
+  options(cli.progress_clear = FALSE)
+  options(cli.spinner = "line")
+
   # create a server-action set
-  action_list <- faasr_register_workflow_ibmcloud_action_lists(faasr)
+  action_list <- faasr_register_workflow_openwhisk_action_lists(faasr)
   
   if (length(action_list)==0){
-    return(FALSE)
+    return("")
   }
-  
+
   # check servers and actions, create actions
   for (server in names(action_list)) {
-    faasr_register_workflow_ibmcloud_target_group()
-    name_id <- faasr_register_workflow_ibmcloud_target_namespace(server, faasr)
-    faasr$ComputeServers[[server]]$Namespace <- name_id
+
+    cli::cli_h1(paste0("Registering workflow for openwhisk: ", server))
+    cli::cli_progress_bar(
+      format = paste0(
+        "FaaSr {pb_spin} Registering workflow openwhisk ",
+        "{cli::pb_bar} {cli::pb_percent} [{pb_current}/{pb_total}]   ETA:{pb_eta}"
+      ),
+      format_done = paste0(
+        "{col_yellow(symbol$checkbox_on)} Successfully registered actions for server {server} ",
+        "in {pb_elapsed}."
+      ),
+      total = length(action_list[[server]]) * 2
+    )
+
+    faasr <- faasr_replace_values(faasr, cred)
+
+    if (is.null(faasr$ComputeServers[[server]]$SSL) || length(faasr$ComputeServers[[server]]$SSL)==0){
+      ssl <- TRUE
+    } else {
+      ssl <- as.logical(faasr$ComputeServers[[server]]$SSL)
+    }
+
     for (act in action_list[[server]]) {
-      faasr_register_workflow_ibmcloud_create_action(act, faasr)
+      action <- paste0("actions/", act)
+      check <- faasr_register_workflow_openwhisk_check_exists(ssl, action, server, faasr)
+      cli_progress_update()
+      faasr_register_workflow_openwhisk_create_action(ssl, act, server, faasr,  memory, timeout, check)
+      cli_progress_update()
     }
   }
-  return(faasr)
+  cli_text(col_cyan("{symbol$menu} {.strong Successfully registered all openwhisk actions}"))
+}
+
+# help sending httr requests
+faasr_ow_httr_request <- function(faasr, server, action, type, body=list(), ssl=TRUE, namespace=NULL){
+
+  library("httr")
+
+  endpoint <- faasr$ComputeServers[[server]]$Endpoint
+  if (!startsWith(endpoint, "https://")){
+    endpoint <- paste0("https://", endpoint)
+  }
+  if (is.null(namespace)){
+    namespace <- faasr$ComputeServers[[server]]$Namespace
+  }
+  
+  api_key <- faasr$ComputeServers[[server]]$API.key
+
+  # get functions depending on "type"
+  func <- get(type)
+  api_key <- strsplit(api_key, ":")[[1]]
+
+  # write headers
+  headers <- c(
+    'accept' = 'application/json', 
+    'Content-Type' = 'application/json'
+  )
+
+  # send the REST request(POST/GET/PUT/PATCH)
+  response <- func(
+    url = paste0(endpoint, "/api/v1/namespaces/", namespace, "/", action),
+    authenticate(api_key[1], api_key[2]),
+    add_headers(.headers = headers),
+    body=body,
+    encode="json",
+    config(ssl_verifypeer = ssl, ssl_verifyhost = ssl),
+    accept_json()
+  )
+
+  return(response)
 }
 
 
-faasr_register_workflow_ibmcloud_action_lists <- function(faasr) {
+faasr_register_workflow_openwhisk_action_lists <- function(faasr) {
   # empty list
   action_list <- list()
   # for each function, iteratively collect server names and action names
@@ -60,7 +125,8 @@ faasr_register_workflow_ibmcloud_action_lists <- function(faasr) {
     server_name <- faasr$FunctionList[[fn]]$FaaSServer
     # if FaaStype is Openwhisk, add it to the list
     if (is.null(faasr$ComputeServers[[server_name]]$FaaSType)){
-      cat("\n\n[faasr_msg]invalid server:", server_name," check server type\n\n")
+      err_msg <- paste0("Invalid server:", server_name," check server type")
+      cli_alert_danger(err_msg)
       stop()
     }
     if (faasr$ComputeServers[[server_name]]$FaaSType == "OpenWhisk") {
@@ -71,195 +137,260 @@ faasr_register_workflow_ibmcloud_action_lists <- function(faasr) {
   return(action_list)
 }
 
-faasr_register_workflow_ibmcloud_target_group <- function(){
-  command <- paste0()
-  cat("[faasr_msg]Target Resource group(Type \"Enter\" to proceed with default value): ")
-  check <- readline()
-  if (check==""){
-    command <- paste0("ibmcloud target -g Default")
-  } else{
-    command <- paste0("ibmcloud target -g ",check)
-  }
+faasr_register_workflow_openwhisk_check_exists <- function(ssl, action, server, faasr){
   
-  response <- system(command, ignore.stdout=TRUE, ignore.stderr=TRUE)
+  response <- faasr_ow_httr_request(faasr, server, action, type="GET", ssl=ssl)
   
-  if (response==0){
-    cat("\n\n[faasr_msg]Target Resource group Success\n\n")
-  } else{
-    cat("\n\n[faasr_msg]Target Resource group Failed, please check resource group\n\n")
+  ######### NEED TO BE SPECIFIED
+  if (response$status_code==200){
+    succ_msg <- paste0("Check ",action," exists: TRUE - Found")
+    cli_alert_warning(succ_msg)
+    return(TRUE)
+  } else if (response$status_code==404){
+    alert_msg <- paste0("Check ",action," exists: FALSE - Create New")
+    cli_alert_success(alert_msg)
+    return(FALSE)
+  } else {
+    err_msg <- paste0("Check ",action," exists Error: ", content(response)$error)
+    cli_alert_danger(err_msg)
     stop()
   }
 }
 
-# create a namespace
-faasr_register_workflow_ibmcloud_create_namespace <- function(name) {
-  command <- paste0("ibmcloud fn namespace create ",name)
-  cat("[faasr_msg]creating a new namespace\n")
-  system(command,ignore.stdout=TRUE, ignore.stderr=TRUE)
-  # get the id of the namespace
-  command <- paste0("ibmcloud fn namespace get ",name," --properties")
-  response <- system(command, intern=TRUE)
-  # parse only ID from the response
-  name_id <- sub("^ID:\\s*", "", grep("^ID:", response, value = TRUE))
-  return(name_id)
-}
+faasr_register_workflow_openwhisk_check_user_input <- function(check, actionname, type){
+  # if given values already exists, ask the user to update the action
+  if (check){
+    cli_alert_info(paste0("Do you want to update the ",type,"?[y/n]"))
 
-# target a namespace
-faasr_register_workflow_ibmcloud_target_namespace <- function(server,faasr) {
-  namespace<-faasr$ComputeServers[[server]]$Namespace
-  command <- paste("ibmcloud fn namespace target",namespace)
-  cat("\n\n[faasr_msg][faasr_msg]targetting a namespace:",namespace,"\n\n")
-  check <- system(command,ignore.stdout=TRUE, ignore.stderr=TRUE)
-  # if check == 0, i.e., no errors, return TRUE, retrieve ID in case that a user only doesn't provide ID
-  if (check==0) {
-    command <- paste0("ibmcloud fn namespace get ",namespace," --properties")
-    response <- system(command, intern=TRUE)
-    # parse only ID from the response
-    name_id <- sub("^ID:\\s*", "", grep("^ID:", response, value = TRUE))
-    return(name_id)
-    # if check != 0, i.e., errors, ask the user to create a new one
-  } else {
-    cat("\n\n[faasr_msg]Invalid Namespace\n")
-    cat("[faasr_msg]Create a new Namespace?[y/n]\n")
     while(TRUE) {
       check <- readline()
       if (check=="y") {
-        cat("\n\n[faasr_msg]type Namespace name: ")
-        # receive the user's input for the namespace name
-        name <- readline()
-        # create a new namespace
-        namespace <- faasr_register_workflow_ibmcloud_create_namespace(name)
-        # save the result to the json file
-        faasr$ComputeServers[[server]]$Namespace <- namespace
-        cat("\n\n[faasr_msg]creating namespace successful", "\n")
-        cat("\n\n[faasr_msg]New Namespace name is: ",namespace)
+        overwrite <- "true"
         break
       } else if(check=="n") {
-        cat("\n\n[faasr_msg]stop the function\n")
         stop()
       } else {
-        cat("Enter \"y\" or \"n\": ")
+        cli_alert_warning("Enter \"y\" or \"n\": ")
       }
     }
-    # recursively target a namespace
-    faasr_register_workflow_ibmcloud_target_namespace(server,faasr)
+  } else {
+    overwrite <- "false"
   }
+  return(overwrite)
 }
 
-# Not going to be used
-# TBD find better way to use this
-# login to the ibm cloud by using api keys
-#faasr_register_workflow_ibmcloud_login_ibm <- function(server,cred) {
-  # retrieve api key and try login by using it
-  #api_key <- cred[[paste0(server,"_API_KEY")]]
-  #command <- paste("ibmcloud login --apikey",api_key)
-  #check <- system(command,ignore.stdout=TRUE, ignore.stderr=TRUE, input="y")
-  # if check == 0, i.e., no errors, return TRUE
-  #if (check==0) {
-    #cat("\n\n[faasr/msg] Login Success\n\n")
-    #return(TRUE)
-    # if check != 0, i.e., errors, ask the user to create a new one
-  #} else {
-    #cat("\n\nInvalid API key\n\n")
-    #stop()
-  #}
-#}
-
-
 # create an action
-faasr_register_workflow_ibmcloud_create_action <- function(actionname, faasr) {
+faasr_register_workflow_openwhisk_create_action <- function(ssl, actionname, server, faasr, memory, timeout, check) {
+  
+  overwrite <- faasr_register_workflow_openwhisk_check_user_input(check, actionname, type="action")
+  if (overwrite == "true"){
+    action_performed <- "Update"
+  } else{
+    action_performed <- "Create"
+  }
+
   # actioncontainer can be either default or user-customized
   if (length(faasr$ActionContainers[[actionname]])==0 || faasr$ActionContainers[[actionname]] == "") {
-    actioncontainer <- "faasr/openwhisk-tidyverse"
+    actioncontainer <- "faasr/openwhisk-tidyverse:latest"
   } else {
     actioncontainer <- faasr$ActionContainers[[actionname]]
   }
   # create a function with maximum timeout and 512MB memory space
-  command <- paste("ibmcloud fn action create",actionname,"--docker",actioncontainer,"--timeout 600000 --memory 2048")
-  cat("\n\n[faasr_msg]creating a new action\n")
-  check <- system(command,ignore.stdout=TRUE, ignore.stderr=TRUE)
-  # if action already exists, ask the user to update the action
-  if (check[1]==153) {
-    cat("[faasr_msg]Error: action name:\"",actionname,"\"already exists\n")
-    cat("[faasr_msg]Do you want to update the action?[y/n]\n")
-    while(TRUE) {
-      check <- readline()
-      if (check=="y") {
-        # update the action
-        command <- paste("ibmcloud fn action update",actionname,"--docker",actioncontainer,"--timeout 600000 --memory 2048")
-        cat("\n[faasr_msg]updating an action\n")
-        system(command,ignore.stdout=TRUE, ignore.stderr=TRUE)
-        cat("[faasr_msg]successful", "\n")
-        break
-      } else if(check=="n") {
-        stop()
-      } else {
-        cat("Enter \"y\" or \"n\": ")
-      }
-    }
+
+  body <- list(
+    exec = list(
+      kind = "blackbox",
+      image = actioncontainer
+    ),
+    limits = list(
+      timeout = as.numeric(timeout),
+      memory = as.numeric(memory)
+    )
+  )
+
+  action <- paste0("actions/", actionname, "?overwrite=", overwrite)
+  response <- faasr_ow_httr_request(faasr, server, action, type="PUT", body=body, ssl)
+  if (response$status_code==200 || response$status_code==202){
+    succ_msg <- paste0("Successfully ", action_performed," the function - ", actionname)
+    cli_alert_success(succ_msg)
+  } else {
+    err_msg <- paste0("Error  ", action_performed," the function - ", actionname,": ",content(response)$error)
+    cli_alert_danger(err_msg)
+    stop()
   }
+  
+}
+
+faasr_workflow_invoke_openwhisk <- function(faasr, cred, faas_name, actionname, ssl=TRUE){
+
+  action <- paste0("actions/", actionname, "?blocking=false&result=false")
+  faasr <- faasr_replace_values(faasr, cred)
+  body <- faasr
+  response <- faasr_ow_httr_request(faasr, faas_name, action, type="POST", body=body, ssl)
+  if (response$status_code==200 || response$status_code==202){
+    succ_msg <- paste0("Successfully invoke the function - ", actionname, ", activation ID: ", content(response)$activationId)
+    cli_alert_success(succ_msg)
+  } else {
+    err_msg <- paste0("Error invoke the function - ", actionname,": ",content(response)$error)
+    cli_alert_danger(err_msg)
+    stop()
+  }
+
 }
 
 # set workflow timer for openwhisk
-faasr_set_workflow_timer_ow <- function(faasr, cred, target, cron, unset=FALSE){
+faasr_set_workflow_timer_ow <- function(faasr, cred, target, cron, unset=FALSE, ssl=TRUE){
 
   # set variables
-  endpoint <- faasr$ComputeServers[[faasr$FunctionList[[target]]$FaaSServer]]$Endpoint
-  faasr_w_cred <- FaaSr::faasr_replace_values(faasr, cred)
-  faasr_json <- jsonlite::toJSON(faasr_w_cred, auto_unbox=TRUE)
-  faasr_json <- toString(faasr_json)
-  # json file should get out two layers, so escaping letter should be twice
-  faasr_json <- gsub("\"", "\\\\\\\"", faasr_json)
+  server <- faasr$FunctionList[[target]]$FaaSServer
+  trigger_name <- paste0(target,"_trigger")
+  rule_name <- paste0(target,"_rule")
+  api_key <- faasr$ComputeServers[[server]]$API.key
+  namespace <- faasr$ComputeServers[[server]]$Namespace
+
+  # json should get out two layers, so escaping letter should be twice
+  faasr <- FaaSr::faasr_replace_values(faasr, cred)
+   
   # if unset==TRUE, delete the rule and trigger
   if (unset==TRUE){
-    # if endpoint is empty or contains "cloud.ibm.com", use "ibmcloud fn" cli
-    if (endpoint == "" || grepl("cloud.ibm.com", endpoint)){
-      command <- paste0("ibmcloud fn trigger delete ",target,"_trigger")
-      result <- system(command)
-      if (result!=0){
-        cat("[faasr_msg] Error: cannot delete trigger")
-        stop()
-      }
-      command <- paste0("ibmcloud fn rule delete ",target,"_rule")
-      result <- system(command)
-      if (result!=0){
-        cat("[faasr_msg] Error: cannot delete rule")
-        stop()
-      }
-    # if not, use "wsk" cli
-    } else {
-      command <- paste0("wsk trigger delete ",target,"_trigger")
-      system(command)
-      command <- paste0("wsk rule delete ",target,"_rule")
-      system(command)
+    action <- paste0("triggers/", trigger_name) 
+    check <- faasr_register_workflow_openwhisk_check_exists(ssl, action, server,faasr)
+    
+    overwrite <- faasr_register_workflow_openwhisk_check_user_input(check, trigger_name, type="trigger")
+    if (overwrite == "true"){
+      action_performed <- "Create"
+    } else{
+      action_performed <- "Update"
     }
+
+    action <- paste0(action, "?overwrite=",overwrite)
+    response <- faasr_ow_httr_request(faasr, server, action, type="PUT", ssl)
+    ####response handling: status code
+    if (response$status_code==200 || response$status_code==202){
+      succ_msg <- paste0("Successfully ", action_performed," the trigger - ", trigger_name)
+      cli_alert_success(succ_msg)
+    } else {
+      err_msg <- paste0("Error  ", action_performed," the trigger - ", trigger_name,": ",content(response)$error)
+      cli_alert_danger(err_msg)
+      stop()
+    }
+
+    ## fire the alarm
+    namespace_system <- "whisk.system"
+    action <- paste0("actions/alarms/alarm?blocking=false&result=false")
+    body <- list(
+      authKey = api_key,
+      cron = cron,
+      trigger_payload = faasr,
+      lifecycleEvent = "CREATE",
+      triggerName = trigger_name
+    )
+    response <- faasr_ow_httr_request(faasr, server, action, type="POST", body=body, ssl, namespace=namespace_system)
+    ####response handling: status code
+    if (response$status_code==200 || response$status_code==202){
+      succ_msg <- paste0("Successfully fire the alarm")
+      cli_alert_success(succ_msg)
+    } else {
+      err_msg <- paste0("Error fire the alarm: ",content(response)$error)
+      cli_alert_danger(err_msg)
+      stop()
+    }
+
+    # check the rule
+    action <- paste0("rules/", rule_name) 
+    check <- faasr_register_workflow_openwhisk_check_exists(ssl, action, server,faasr)
+    
+    overwrite <- "true"
+    
+    # create the rule
+    action <- paste0(action, "?overwrite=",overwrite)
+    body <- list(
+      name = rule_name,
+      status = "",
+      trigger = paste0("/", namespace, "/", trigger_name),
+      action = paste0("/", namespace, "/", target)
+    )
+    response <- faasr_ow_httr_request(faasr, server, action, type="PUT", body=body, ssl)
+    ####response handling: status code
+    if (response$status_code==200 || response$status_code==202){
+      succ_msg <- paste0("Successfully ", action_performed," the rule - ", rule_name)
+      cli_alert_success(succ_msg)
+    } else {
+      err_msg <- paste0("Error  ", action_performed," the rule - ", rule_name,": ",content(response)$error)
+      cli_alert_danger(err_msg)
+      stop()
+    }
+
+
   # if unset=FALSE, set the rule and trigger
   } else {
-    # if endpoint is empty or contains "cloud.ibm.com", use "ibmcloud fn" cli
-    if (endpoint == "" || grepl("cloud.ibm.com", endpoint)){
-      # create the trigger with cron and faasr json payload
-      command <- paste0("ibmcloud fn trigger create ",target,"_trigger --feed /whisk.system/alarms/alarm --param cron \"",cron,"\" --param trigger_payload \"",faasr_json,"\"")
-      result <- system(command)
-      if (result!=0){
-        cat("[faasr_msg] Error: cannot create trigger")
-        stop()
-      }
-      # create the rule, rule links the trigger and the function
-      command <- paste0("ibmcloud fn rule create ",target,"_rule ",target,"_trigger ",target)
-      result <- system(command)
-      if (result!=0){
-        cat("[faasr_msg] Error: cannot create rule")
-        stop()
-      }
-    # if not, use the "wsk" cli
+    
+    action <- paste0("triggers/", trigger_name) 
+    check <- faasr_register_workflow_openwhisk_check_exists(ssl, action, server,faasr)
+    if (!check){
+      err_msg <- paste0("Error: No ",trigger_name," found")
+      cli_alert_danger(err_msg)
+      stop()
+    }
+    
+    ## stop the alarm
+    namespace <- "whisk.system"
+    action <- paste0("actions/alarms/alarm?blocking=false&result=false")
+    body <- list(
+      authKey = api_key,
+      lifecycleEvent = "DELETE",
+      triggerName = trigger_name
+    )
+    response <- faasr_ow_httr_request(faasr, server, action, type="POST", body=body, ssl, namespace=namespace)
+    ####response handling: status code
+    if (response$status_code==200 || response$status_code==202){
+      succ_msg <- paste0("Successfully Stop the alarm")
+      cli_alert_success(succ_msg)
     } else {
-      command <- paste0("wsk trigger create ",target,"_trigger --feed /whisk.system/alarms/alarm --param cron \"",cron,"\" --param trigger_payload \"",faasr_json,"\"")
-      system(command)
-      command <- paste0("wsk rule create ",target,"_rule ",target,"_trigger ",target)
-      system(command)
-      command <- paste0("wsk trigger fire ",target,"_trigger")
-      system(command)
+      err_msg <- paste0("Error Stop the alarm: ",content(response)$error)
+      cli_alert_danger(err_msg)
+      stop()
+    }
+
+    # delete the trigger
+    action <- paste0("triggers/", trigger_name) 
+    response <- faasr_ow_httr_request(faasr, server, action, type="DELETE", ssl)
+    ####response handling: status code
+    if (response$status_code==200 || response$status_code==202){
+      succ_msg <- paste0("Successfully Delete the trigger - ", trigger_name)
+      cli_alert_success(succ_msg)
+    } else {
+      err_msg <- paste0("Error Delete the trigger - ", trigger_name,": ",content(response)$error)
+      cli_alert_danger(err_msg)
+      stop()
+    }
+
+
+    # check the rule
+    action <- paste0("rules/", rule_name) 
+    check <- faasr_register_workflow_openwhisk_check_exists(ssl, action, server,faasr)
+    if (!check){
+      err_msg <- paste0("Error: No ",rule_name," found")
+      cli_alert_danger(err_msg)
+      stop()
+    }
+    
+    # disable the rule
+    action <- paste0(action, "?overwrite=true")
+    body <- list(
+      status = "inactive",
+      trigger = "null",
+      action = "null"
+    )
+    response <- faasr_ow_httr_request(faasr, server, action, type="POST", body=body, ssl)
+    ####response handling: status code
+    if (response$status_code==200 || response$status_code==202){
+      succ_msg <- paste0("Successfully Delete the rule - ", rule_name)
+      cli_alert_success(succ_msg)
+    } else {
+      err_msg <- paste0("Error Delete the rule - ", rule_name,": ",content(response)$error)
+      cli_alert_danger(err_msg)
+      stop()
     }
   }
 }
-
