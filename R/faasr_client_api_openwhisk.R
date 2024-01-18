@@ -109,7 +109,7 @@ faasr_ow_httr_request <- function(faasr, server, action, type, body=list(), ssl=
     add_headers(.headers = headers),
     body=body,
     encode="json",
-    config(ssl_verifypeer = ssl, ssl_verifyhost = ssl),
+    httr::config(ssl_verifypeer = ssl, ssl_verifyhost = ssl),
     accept_json()
   )
 
