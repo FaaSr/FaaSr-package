@@ -60,12 +60,6 @@ faasr_register_workflow_openwhisk <- function(faasr, cred, memory=1024, timeout=
 
     faasr <- faasr_replace_values(faasr, cred)
 
-    if (is.null(faasr$ComputeServers[[server]]$SSL) || length(faasr$ComputeServers[[server]]$SSL)==0){
-      ssl <- TRUE
-    } else {
-      ssl <- as.logical(faasr$ComputeServers[[server]]$SSL)
-    }
-
     for (act in action_list[[server]]) {
       action <- paste0("actions/", act)
       check <- faasr_register_workflow_openwhisk_check_exists(ssl, action, server, faasr)
@@ -88,6 +82,10 @@ faasr_ow_httr_request <- function(faasr, server, action, type, body=list(), ssl=
   }
   if (is.null(namespace)){
     namespace <- faasr$ComputeServers[[server]]$Namespace
+  }
+
+  if (!is.null(faasr$ComputeServers[[server]]$SSL) && length(faasr$ComputeServers[[server]]$SSL)!=0){
+      ssl <- as.logical(faasr$ComputeServers[[server]]$SSL)
   }
   
   api_key <- faasr$ComputeServers[[server]]$API.key
