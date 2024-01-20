@@ -84,7 +84,7 @@ faasr_trigger <- function(faasr) {
             add_headers(.headers = headers),
             body=faasr,
             encode="json",
-            config(ssl_verifypeer = ssl, ssl_verifyhost = ssl),
+            httr::config(ssl_verifypeer = ssl, ssl_verifyhost = ssl),
             accept_json()
           )
 
