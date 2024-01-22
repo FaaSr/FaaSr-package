@@ -62,7 +62,7 @@ faasr_trigger <- function(faasr) {
           if (is.null(faasr$ComputeServers[[next_server]]$SSL) || faasr$ComputeServers[[next_server]]$SSL ==""){
             ssl <- TRUE
           } else{
-            ssl <- faasr$ComputeServers[[next_server]]$SSL
+            ssl <- as.logical(toupper(faasr$ComputeServers[[next_server]]$SSL))
           }
           namespace <- faasr$ComputeServers[[next_server]]$Namespace
           actionname <- invoke_next_function
