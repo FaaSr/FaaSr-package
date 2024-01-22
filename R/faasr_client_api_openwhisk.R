@@ -30,7 +30,7 @@
 #' @return faasr_register_workflow_ibmcloud_create_namespace:
 #' "name_id" for the string of namespace id
 
-faasr_register_workflow_openwhisk <- function(faasr, cred, memory=1024, timeout=600000) {
+faasr_register_workflow_openwhisk <- function(faasr, cred, ssl=TRUE, memory=1024, timeout=600000) {
   
   options(cli.progress_clear = FALSE)
   options(cli.spinner = "line")
