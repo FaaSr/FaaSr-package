@@ -70,7 +70,7 @@ faasr_trigger <- function(faasr) {
           if (!startsWith(endpoint, "https") && !startsWith(endpoint, "http")){
             endpoint <- paste0("https://", endpoint)
           }
-          url_2 <- paste0(endpoint, "/api/v1/namespace/",namespace,"/actions/",actionname,"?blocking=false&result=false")
+          url_2 <- paste0(endpoint, "/api/v1/namespaces/",namespace,"/actions/",actionname,"?blocking=false&result=false")
           
           headers <- c(
             'accept' = 'application/json', 
