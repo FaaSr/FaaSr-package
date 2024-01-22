@@ -85,7 +85,7 @@ faasr_ow_httr_request <- function(faasr, server, action, type, body=list(), ssl=
   }
 
   if (!is.null(faasr$ComputeServers[[server]]$SSL) && length(faasr$ComputeServers[[server]]$SSL)!=0){
-      ssl <- as.logical(faasr$ComputeServers[[server]]$SSL)
+      ssl <- as.logical(toupper(faasr$ComputeServers[[server]]$SSL))
   }
   
   api_key <- faasr$ComputeServers[[server]]$API.key
