@@ -30,7 +30,7 @@
 #' @return faasr_register_workflow_ibmcloud_create_namespace:
 #' "name_id" for the string of namespace id
 
-faasr_register_workflow_openwhisk <- function(faasr, cred, memory=1024, timeout=600000) {
+faasr_register_workflow_openwhisk <- function(faasr, cred, ssl=TRUE, memory=1024, timeout=600000) {
   
   options(cli.progress_clear = FALSE)
   options(cli.spinner = "line")
@@ -85,7 +85,7 @@ faasr_ow_httr_request <- function(faasr, server, action, type, body=list(), ssl=
   }
 
   if (!is.null(faasr$ComputeServers[[server]]$SSL) && length(faasr$ComputeServers[[server]]$SSL)!=0){
-      ssl <- as.logical(faasr$ComputeServers[[server]]$SSL)
+      ssl <- as.logical(toupper(faasr$ComputeServers[[server]]$SSL))
   }
   
   api_key <- faasr$ComputeServers[[server]]$API.key
