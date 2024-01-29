@@ -45,8 +45,8 @@
 
 
 # specify global variables
-#faasr_defined_image_lambda <- "145342739029.dkr.ecr.us-east-1.amazonaws.com/aws-lambda-tidyverse:latest"
-faasr_defined_image_lambda <- basic_ld_image
+faasr_defined_image_lambda <- "145342739029.dkr.ecr.us-east-1.amazonaws.com/aws-lambda-tidyverse:latest"
+# faasr_defined_image_lambda <- basic_ld_image
 
 faasr_register_workflow_aws_lambda <- function(faasr, cred){
 
