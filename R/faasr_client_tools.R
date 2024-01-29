@@ -53,7 +53,7 @@ faasr_register_workflow <- function(...){
   # register actions for openwhisk/github-actions/lambda by given json
   check <- faasr_register_workflow_openwhisk(faasr,cred,...)
   check <- faasr_register_workflow_github_actions(faasr,cred)
-  #check <- faasr_register_workflow_aws_lambda(faasr,cred)
+  check <- faasr_register_workflow_aws_lambda(faasr,cred)
   
 }
 .faasr_user$operations$register_workflow <- faasr_register_workflow
@@ -368,27 +368,27 @@ faasr_invoke_workflow <- function(FunctionInvoke=NULL, ...){
          },
          # If first action is aws-lambda, use lambda
          "Lambda"={
+           aws_region <- faasr$ComputeServers[[faas_name]]$Region
+           aws_instance <- paws::lambda(
+              config=list(
+              credentials=list(
+                creds=list(
+                  access_key_id=cred$lambda_a_ACCESS_KEY,
+                  secret_access_key=cred$lambda_a_SECRET_KEY,
+                  session_token=""
+                )
+              ),
+              region=aws_region
+            )
+           )
            # json file with credentials will be created and after invocation, it will be removed.
            faasr_w_cred <- faasr_replace_values(faasr, cred)
            faasr_json <- jsonlite::toJSON(faasr_w_cred, auto_unbox=TRUE)
            rd_nb <- sample(100000, size=1)
            writeLines(faasr_json, paste0("payload_ld_",rd_nb,".json"))
 
-           # get lambda function timeout
-           check_lambda_config_command <- paste0("aws lambda get-function-configuration --function-name ", actionname)
-           check_lambda_config_result <- system(check_lambda_config_command, intern = TRUE)
+           aws_instance$invoke_async(FunctionName = actionname, InvokeArgs = faasr_json)
 
-           status_code <- attr(check_lambda_config_result, "status")
-           if (!is.null(status_code) && status_code == 254){
-             lambda_func_time_out <- 120
-           } else {
-            json_string <- paste(check_lambda_config_result, collapse = "")
-            json_data <- jsonlite::fromJSON(json_string)
-            lambda_func_time_out <- json_data$Timeout
-          }
-          
-           command <- paste0("aws lambda invoke --function-name ",actionname," --cli-connect-timeout ", lambda_func_time_out ," --cli-binary-format raw-in-base64-out --invocation-type RequestResponse --payload file://",paste0("payload_ld_",rd_nb,".json")," lambda_outputfile.txt")
-           check <- system(command)
            file.remove(paste0("payload_ld_",rd_nb,".json"))
          },
          # If first action is openwhisk, use ibmcloud

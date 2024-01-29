@@ -44,30 +44,42 @@
 #' 
 
 
+# specify global variables
+#faasr_defined_image_lambda <- "145342739029.dkr.ecr.us-east-1.amazonaws.com/aws-lambda-tidyverse:latest"
+faasr_defined_image_lambda <- basic_ld_image
+
 faasr_register_workflow_aws_lambda <- function(faasr, cred){
+
+  # get region from faasr
+  for (faas in names(faasr$ComputeServers)){
+    if(faasr$ComputeServers[[faas]]$FaaSType == "Lambda"){
+      aws_region <- faasr$ComputeServers[[faas]]$Region
+      break
+    }
+  }
   
   
   # get aws lambda function list
-  lambda_function_info <- faasr_register_workflow_lambda_function_lists(faasr)
+  lambda_function_info <- faasr_register_workflow_lambda_function_lists(faasr, cred, aws_region)
   if (length(lambda_function_info)==0){
     return(FALSE)
   }
   # get aws lambda function image list
   function_image_list <- faasr_register_workflow_lambda_function_image(faasr)
   # build aws ECR repo
-  aws_ecr_repo_name <- faasr_register_workflow_aws_ecr_build(faasr)
+  aws_ecr_repo_name <- faasr_register_workflow_aws_ecr_build(faasr, cred, aws_region)
   #create aws lambda function role
-  aws_lambda_role_name <- faasr_register_workflow_aws_lambda_role_create(faasr)
+  aws_lambda_role_name <- faasr_register_workflow_aws_lambda_role_create(faasr, cred, aws_region)
   # upload ECR repo image
-  function_image_list_update <- faasr_register_workflow_aws_ecr_image_build(function_image_list,aws_ecr_repo_name)
+  function_image_list_update <- faasr_register_workflow_aws_ecr_image_build(function_image_list,aws_ecr_repo_name, cred, aws_region)
   # create aws lambda functions
-  faasr_register_workflow_aws_lambda_function_build(lambda_function_info, function_image_list_update, aws_lambda_role_name)
+  faasr_register_workflow_aws_lambda_function_build(lambda_function_info, function_image_list_update, aws_lambda_role_name, cred, aws_region)
   
   return(faasr)
 }
 
 # Get aws lambda function list
-faasr_register_workflow_lambda_function_lists <- function(faasr){
+faasr_register_workflow_lambda_function_lists <- function(faasr,cred, aws_region){
   
   function_list <- faasr$FunctionList
   compute_servers <- faasr$ComputeServers
@@ -91,7 +103,7 @@ faasr_register_workflow_lambda_function_lists <- function(faasr){
     }
   }
   for(action_name in names(lambda_function_info)){
-    if(check_lambda_exists(action_name)){
+    if(check_lambda_exists(action_name, cred, aws_region)){
       cat("\n\n[faasr_msg] lambda function -- ", action_name, "already exists.\n")
       cat("[faasr_msg] Do you want to update it?[y/n]\n")
       while(TRUE) {
@@ -135,7 +147,7 @@ faasr_register_workflow_lambda_function_image <- function(faasr){
       if (!action_name %in% names(function_image_list)) {
         action_name_value <- faasr$ActionContainers[[action_name]]
         if(length(action_name_value)== 0 || action_name_value == ""){
-          image_path <- "faasr/aws-lambda-tidyverse"
+          image_path <- faasr_defined_image_lambda
         } else {
           image_path <- faasr$ActionContainers[[action_name]]
         }
@@ -148,14 +160,24 @@ faasr_register_workflow_lambda_function_image <- function(faasr){
 
 
 # Build aws ecr repository
-faasr_register_workflow_aws_ecr_build <- function(faasr){
-  # get the AWS account ID
-  get_account_id_command <- "aws sts get-caller-identity --query Account --output text"
-  aws_account_id <- system(get_account_id_command, intern = TRUE)
+faasr_register_workflow_aws_ecr_build <- function(faasr, cred, aws_region){
+  sts_instance <- paws::sts(
+    config=list(
+      credentials=list(
+        creds=list(
+          access_key_id=cred$lambda_a_ACCESS_KEY,
+          secret_access_key=cred$lambda_a_SECRET_KEY,
+          session_token=""
+        )
+      ),
+      region=aws_region
+    )
+  )
+
+  aws_account_id <- sts_instance$get_caller_identity()$Account
+  # print("aws_account_id")
+  # print(aws_account_id)
   
-  # get the AWS region
-  get_region_command <- "aws configure get region"
-  aws_region <- system(get_region_command, intern = TRUE)
   
   # ask user to acquire ecr repo name
   cat("\n\n[faasr_msg]The ECR Repositery you want to create or use: [for example: lambda-script]\n")
@@ -169,25 +191,49 @@ faasr_register_workflow_aws_ecr_build <- function(faasr){
   
   # create AWS ECR repo
   # check if this repo has exist
-  check_command <- paste0("aws ecr describe-repositories --repository-names ", aws_ecr_repo_name, " --region ", aws_region)
-  check_result <- system(check_command, intern = TRUE)
-  # access the status code
-  status_code <- attr(check_result, "status")
-  # if the repository does not exist, create it
-  if (!is.null(status_code) && status_code == 254) {
-    
+
+  ecr_instance <- paws::ecr(
+    config=list(
+      credentials=list(
+        creds=list(
+          access_key_id=cred$lambda_a_ACCESS_KEY,
+          secret_access_key=cred$lambda_a_SECRET_KEY,
+          session_token=""
+        )
+      ),
+      region=aws_region
+    )
+  )
+  
+  # Using tryCatch to handle exceptions
+  check_result <- tryCatch({
+    result <- ecr_instance$describe_repositories(registryId = aws_account_id, repositoryNames = aws_ecr_repo_name)
+  }, error = function(e) {
+    # Check if the error is a RepositoryNotFoundException
+    if(grepl("HTTP 400", e$message)) {
+      return(400)
+    } else {
+      stop(e)  # Re-throw other errors
+    }
+  })
+  # check response
+
+  if(length(check_result)== 1 && check_result == 400){
     cat("\n[faasr_msg] will create new ecr repo ", aws_ecr_repo_name, "\n")
-    create_command <- paste0("aws ecr create-repository --repository-name ", aws_ecr_repo_name, " --region ", aws_region)
-    create_result <- system(create_command, intern = TRUE)
+
+    create_result <- ecr_instance$create_repository(registryId = aws_account_id, repositoryName = aws_ecr_repo_name)
+
     print(create_result)
-  } else {
+  }else{
     print(paste0("Repository ", aws_ecr_repo_name, " already exists."))
   }
+  
+
   return (aws_ecr_repo_name)
 }
 
 # create lambda role
-faasr_register_workflow_aws_lambda_role_create <- function(faasr){
+faasr_register_workflow_aws_lambda_role_create <- function(faasr, cred, aws_region){
   
   # ask user to acuqire aws lambda role name
   cat("\n[faasr_msg] The name of AWS lambda role that you want to create or use: [for example: faasr-lambda]\n")
@@ -199,30 +245,36 @@ faasr_register_workflow_aws_lambda_role_create <- function(faasr){
     }
   }
   # aws command to list all roles
-  list_roles_command <- "aws iam list-roles"
-  roles_output_json <- system(list_roles_command, intern = TRUE, ignore.stderr = TRUE)
+  iam_instance <- paws::iam(
+    config=list(
+      credentials=list(
+        creds=list(
+          access_key_id=cred$lambda_a_ACCESS_KEY,
+          secret_access_key=cred$lambda_a_SECRET_KEY,
+          session_token=""
+        )
+      ),
+      region=aws_region
+    )
+  )
+  roles_output_json <- iam_instance$list_roles()
   
-  parsed_roles <- jsonlite::fromJSON(paste(roles_output_json, collapse = ""))
-  
+  #parsed_roles <- jsonlite::fromJSON(roles_output_json)
+  list_role_names <- sapply(roles_output_json$Roles, function(x) x$RoleName)
   # check this role name exist
-  role_exists <- aws_lambda_role_name %in% parsed_roles$Roles$RoleName
-  
+  role_exists <- aws_lambda_role_name %in% list_role_names
   # if the role does not exist, create it
   if (!role_exists) {
     # define the trust policy
     trust_policy <- '{"Version": "2012-10-17","Statement": [{ "Effect": "Allow", "Principal": {"Service": "lambda.amazonaws.com"}, "Action": "sts:AssumeRole"}]}'
     
     # aws command to create role with the trust policy
-    create_role_command <- paste0('aws iam create-role --role-name ', aws_lambda_role_name, ' --assume-role-policy-document ', shQuote(trust_policy))
-    
-    create_role_output <- system(create_role_command, intern = TRUE)
+    create_role_output <- iam_instance$create_role(RoleName = aws_lambda_role_name, AssumeRolePolicyDocument = trust_policy)
     
     print(paste("Created role:", aws_lambda_role_name))
     
     # attach policy to role
-    attach_policy_command <- paste0("aws iam attach-role-policy --policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole --role-name ", aws_lambda_role_name)
-    
-    system(attach_policy_command, intern = TRUE)
+    iam_instance$attach_role_policy(RoleName = aws_lambda_role_name, PolicyArn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole")
     print("attach AWSLambdaBasicExecutionRole policy to new role")
     
   } else {
@@ -233,52 +285,72 @@ faasr_register_workflow_aws_lambda_role_create <- function(faasr){
 }
 
 # Build docker image
-faasr_register_workflow_aws_ecr_image_build <- function(function_image_list,aws_ecr_repo_name ){
+faasr_register_workflow_aws_ecr_image_build <- function(function_image_list,aws_ecr_repo_name, cred, aws_region){
+
+  sts_instance <- paws::sts(
+    config=list(
+      credentials=list(
+        creds=list(
+          access_key_id=cred$lambda_a_ACCESS_KEY,
+          secret_access_key=cred$lambda_a_SECRET_KEY,
+          session_token=""
+        )
+      ),
+      region=aws_region
+    )
+  )
+  aws_account_id <- sts_instance$get_caller_identity()$Account
   
-  # get the AWS account ID
-  get_account_id_command <- "aws sts get-caller-identity --query Account --output text"
-  aws_account_id <- system(get_account_id_command, intern = TRUE)
-  
-  # get the AWS region
-  get_region_command <- "aws configure get region"
-  aws_region <- system(get_region_command, intern = TRUE)
-  
-  # connect aws ECR and Docker
-  ecr_docker_connect_cmd <- 
-    paste0("aws ecr get-login-password --region ", aws_region, " | docker login --username AWS --password-stdin ",aws_account_id,".dkr.ecr.",aws_region,".amazonaws.com")
-  pipe_conn <- pipe(ecr_docker_connect_cmd)
-  pipe_output <- readLines(pipe_conn)
-  #pipe_output <- readline(pipe_conn)
-  close(pipe_conn)
+  docker_aws_connected <- FALSE
   
   # upload images to aws ecr repo
   for(image_name in names(function_image_list)){
     source_img_url <- function_image_list[[image_name]]
-    #pull from docker hub
-    system(paste0("docker pull ", source_img_url))
-    # give it a tag for ecr repo
-    aws_ecr_img_url <- paste0(aws_account_id, ".dkr.ecr.", aws_region, ".amazonaws.com/", aws_ecr_repo_name, ":",image_name)
-    
-    system(paste0("docker tag ", source_img_url, " ", aws_ecr_img_url))
-    
-    # push an image to Amazon ECR
-    system(paste0("docker push ", aws_ecr_img_url))
-    function_image_list[[image_name]] <- aws_ecr_img_url
+    # check if image provided by client or faasr, if provided by client, then pull from docker hub, if provided by faasr, then use the image name
+    if(source_img_url != faasr_defined_image_lambda){
+      if(!docker_aws_connected){
+      # connect aws ECR and Docker
+        ecr_docker_connect_cmd <- 
+          paste0("aws ecr get-login-password --region ", aws_region, " | docker login --username AWS --password-stdin ",aws_account_id,".dkr.ecr.",aws_region,".amazonaws.com")
+        pipe_conn <- pipe(ecr_docker_connect_cmd)
+        pipe_output <- readLines(pipe_conn)
+        #pipe_output <- readline(pipe_conn)
+        close(pipe_conn)
+        docker_aws_connected <- TRUE
+      }
+      #pull from docker hub
+      system(paste0("docker pull ", source_img_url))
+      # give it a tag for ecr repo
+      aws_ecr_img_url <- paste0(aws_account_id, ".dkr.ecr.", aws_region, ".amazonaws.com/", aws_ecr_repo_name, ":",image_name)
+      
+      system(paste0("docker tag ", source_img_url, " ", aws_ecr_img_url))
+      
+      # push an image to Amazon ECR
+      system(paste0("docker push ", aws_ecr_img_url))
+      function_image_list[[image_name]] <- aws_ecr_img_url
+    }else{
+      function_image_list[[image_name]] <- source_img_url
+    }
   }
   
   return (function_image_list)
 }
 
 # Create aws lambda functions
-faasr_register_workflow_aws_lambda_function_build <- function(lambda_function_info, function_image_list, aws_lambda_role_name){
-  
-  # get the AWS account ID
-  get_account_id_command <- "aws sts get-caller-identity --query Account --output text"
-  aws_account_id <- system(get_account_id_command, intern = TRUE)
-  
-  # get the AWS region
-  get_region_command <- "aws configure get region"
-  aws_region <- system(get_region_command, intern = TRUE)
+faasr_register_workflow_aws_lambda_function_build <- function(lambda_function_info, function_image_list, aws_lambda_role_name, cred, aws_region){
+  sts_instance <- paws::sts(
+    config=list(
+      credentials=list(
+        creds=list(
+          access_key_id=cred$lambda_a_ACCESS_KEY,
+          secret_access_key=cred$lambda_a_SECRET_KEY,
+          session_token=""
+        )
+      ),
+      region=aws_region
+    )
+  )
+  aws_account_id <- sts_instance$get_caller_identity()$Account
   
   # set configuration for new lambda function
   # ask user to specify the function timeout and memory size
@@ -315,6 +387,20 @@ faasr_register_workflow_aws_lambda_function_build <- function(lambda_function_in
   
   #build lambda role arn
   lambda_role_arn <- paste0("arn:aws:iam::",aws_account_id,":role/", aws_lambda_role_name)
+
+  # build paws lambda instance
+  lambda_instance <- paws::lambda(
+    config=list(
+      credentials=list(
+        creds=list(
+          access_key_id=cred$lambda_a_ACCESS_KEY,
+          secret_access_key=cred$lambda_a_SECRET_KEY,
+          session_token=""
+        )
+      ),
+      region=aws_region
+    )
+  )
   
   #update lambda function configuration if needed
   for (function_name in names(lambda_function_info)){
@@ -322,11 +408,10 @@ faasr_register_workflow_aws_lambda_function_build <- function(lambda_function_in
     function_image_name <- lambda_function_info[[function_name]]$image
     function_image_url <- function_image_list[[function_image_name]]
     
+    
     if(lambda_function_info[[function_name]]$action == "update"){
       cat("\n[faasr_msg] Will update lambda function configuration", function_name, "\n")
-      update_lambda__config_command <- paste0("aws lambda update-function-configuration --function-name ",function_name," --role ",lambda_role_arn," --timeout ",aws_lambda_timeout," --memory-size ",aws_lambda_memory)
-      print(update_lambda__config_command)
-      return_status <- system(update_lambda__config_command, intern = TRUE)
+      lambda_instance$update_function_configuration(FunctionName = function_name, Role = lambda_role_arn, Timeout = aws_lambda_timeout, MemorySize = aws_lambda_memory)
       #print(return_status)
       
     }
@@ -337,31 +422,51 @@ faasr_register_workflow_aws_lambda_function_build <- function(lambda_function_in
     
     function_image_name <- lambda_function_info[[function_name]]$image
     function_image_url <- function_image_list[[function_image_name]]
-    
+
     if(lambda_function_info[[function_name]]$action == "update"){
       cat("\n[faasr_msg] Will update lambda function image", function_name, "\n")
       update_lambda_command <- paste0("aws lambda update-function-code --function-name ",function_name," --image-uri ", function_image_url)
       print(update_lambda_command)
-      #system(update_lambda_command, intern = TRUE)
-      execute_command_with_retry(update_lambda_command)
+      execute_command_with_retry(function_name, function_image_url, cred, aws_region)
       
     } else if(lambda_function_info[[function_name]]$action == "create"){
       cat("\n[faasr_msg] Will create lambda function", function_name, "\n")
-      create_lambda_command <- paste0("aws lambda create-function --region ",aws_region," --function-name ",function_name," --package-type Image --code ImageUri=",function_image_url," --role ",lambda_role_arn ," --timeout ",aws_lambda_timeout," --memory-size ",aws_lambda_memory)
-      print(create_lambda_command)
-      system(create_lambda_command, intern = TRUE)
+      # create lambda function
+      lambda_instance$create_function(FunctionName = function_name, PackageType = "Image", Code = list(ImageUri = function_image_url), Role = lambda_role_arn, Timeout = aws_lambda_timeout, MemorySize = aws_lambda_memory)  
+
     }
   }
 }
 
 
 # check if a Lambda function exists
-check_lambda_exists <- function(function_name) {
+check_lambda_exists <- function(function_name, cred, aws_region) {
   # aws command check if a function exist
-  check_command <- paste0("aws lambda get-function --function-name ", function_name)
-  check_result <- system(check_command, intern = TRUE, ignore.stderr = TRUE)
-  
-  if (length(check_result) == 0) {
+
+  lambda_instance <- paws::lambda(
+    config=list(
+      credentials=list(
+        creds=list(
+          access_key_id=cred$lambda_a_ACCESS_KEY,
+          secret_access_key=cred$lambda_a_SECRET_KEY,
+          session_token=""
+        )
+      ),
+      region=aws_region
+    )
+  )
+  check_result <- tryCatch({
+    result <- lambda_instance$get_function(FunctionName = function_name)
+  }, error = function(e) {
+    # Check if the error is a RepositoryNotFoundException
+    if(grepl("HTTP 404", e$message)) {
+      return(404)
+    } else {
+      stop(e)
+    }
+  })
+  # check if the function exists
+  if (length(check_result) == 1 && check_result == 404) {
     # function does not exist
     return(FALSE)
   } else {
@@ -371,25 +476,44 @@ check_lambda_exists <- function(function_name) {
 }
 
 # check if aws command run successfully, and retry
-execute_command_with_retry <- function(command, max_retries = 3, sleep_seconds = 3) {
+
+execute_command_with_retry <- function(function_name, function_image_url, cred, aws_region, max_retries = 3, sleep_seconds = 3) {
+
+  lambda_instance <- paws::lambda(
+    config=list(
+      credentials=list(
+        creds=list(
+          access_key_id=cred$lambda_a_ACCESS_KEY,
+          secret_access_key=cred$lambda_a_SECRET_KEY,
+          session_token=""
+        )
+      ),
+      region=aws_region
+    )
+  )
+
+  print("update function code: execute_command_with_retry")
   
+
   for (i in 1:max_retries) {
-    command_output <- system(command, intern = TRUE)
-    status_code <- attr(command_output, "status")
-    
+    check_result <- tryCatch({
+     result <- lambda_instance$update_function_code(FunctionName = function_name, ImageUri = function_image_url)
+     
+      }, error = function(e) {
+        # Check if the error is a RepositoryNotFoundException
+        if(grepl("HTTP 409", e$message)) {
+          return(409)
+        } else {
+          stop(e)
+        }
+      })
     # check the status code to see if command failed
-    if (!is.null(status_code) && status_code == 254) {
-      cat("[faasr_msg] Command failed with status code 254. Retrying in", sleep_seconds, "seconds...\n")
+    if (length(check_result)== 1 && check_result == 409) {
+      cat("[faasr_msg] Command failed with status code 409. Retrying in", sleep_seconds, "seconds...\n")
     } else {
-      
-      json_output <- try(jsonlite::fromJSON(paste(command_output, collapse = "")), silent = TRUE)
-      
-      if (!inherits(json_output, "try-error") && json_output$LastUpdateStatus %in% c("InProgress", "Complete")) {
         cat("[faasr_msg] Update is in progress or completed successfully.\n")
         return(TRUE)
-      } else {
-        cat("[faasr_msg] LastUpdateStatus is not as expected. Retrying in", sleep_seconds, "seconds...\n")
-      }
+
     }
     
     # Pause before retrying
@@ -401,35 +525,74 @@ execute_command_with_retry <- function(command, max_retries = 3, sleep_seconds =
 
 # set workflow timer for lambda
 faasr_set_workflow_timer_ld <- function(faasr, cred, target, cron, unset=FALSE){
+
+  # get region from faasr
+  for (faas in names(faasr$ComputeServers)){
+    if(faasr$ComputeServers[[faas]]$FaaSType == "Lambda"){
+      aws_region <- faasr$ComputeServers[[faas]]$Region
+      break
+    }
+  }
   
-  faasr_w_cred <- FaaSr::faasr_replace_values(faasr, cred)
+  faasr_w_cred <- faasr_replace_values(faasr, cred)
   faasr_payload_json <- jsonlite::toJSON(faasr_w_cred, auto_unbox = TRUE)
   
-  # get the AWS account ID
-  get_account_id_command <- "aws sts get-caller-identity --query Account --output text"
-  aws_account_id <- system(get_account_id_command, intern = TRUE)
-  
-  # get the AWS region
-  aws_region <- faasr$ComputeServers[[faasr$FunctionList[[target]]$FaaSServer]]$Region
+    sts_instance <- paws::sts(
+    config=list(
+      credentials=list(
+        creds=list(
+          access_key_id=cred$lambda_a_ACCESS_KEY,
+          secret_access_key=cred$lambda_a_SECRET_KEY,
+          session_token=""
+        )
+      ),
+      region=aws_region
+    )
+  )
+
+  aws_account_id <- sts_instance$get_caller_identity()$Account
   
   # get the lambda function name
   lambda_function_name <- faasr$FunctionInvoke
+
+  lambda_instance <- paws::lambda(
+    config=list(
+      credentials=list(
+        creds=list(
+          access_key_id=cred$lambda_a_ACCESS_KEY,
+          secret_access_key=cred$lambda_a_SECRET_KEY,
+          session_token=""
+        )
+      ),
+      region=aws_region
+    )
+  )
+
+  eventbridge_instance <- paws::eventbridge(
+    config=list(
+      credentials=list(
+        creds=list(
+          access_key_id=cred$lambda_a_ACCESS_KEY,
+          secret_access_key=cred$lambda_a_SECRET_KEY,
+          session_token=""
+        )
+      ),
+      region=aws_region
+    )
+  )
   
   if (unset==TRUE){
 
     event_rule_name <- paste0('FaaSr-scheduled-cron-rule-', lambda_function_name)
 
     # remove event permission from lambda
-    unset_lambda_permission_command <- paste0('aws lambda remove-permission --function-name ', lambda_function_name, ' --statement-id ',event_rule_name)
-    unset_lambda_permission_result <- system(unset_lambda_permission_command, intern = TRUE)
+    unset_lambda_permission_result <- lambda_instance$remove_permission(FunctionName = lambda_function_name, StatementId = event_rule_name)
     
     # remove target from event
-    unset_event_target_command <- paste0('aws events remove-targets --rule ',event_rule_name,' --ids 1')
-    unset_event_target_result <- system(unset_event_target_command, intern = TRUE)
+    unset_event_target_result <- eventbridge_instance$remove_targets(Rule = event_rule_name, Ids = "1")
     
     # remove event rule
-    unset_events_put_rules_command <- paste0('aws events delete-rule --name ',event_rule_name)
-    unset_events_put_rules_result <- system(unset_events_put_rules_command, intern = TRUE)
+    unset_events_put_rules_result <- eventbridge_instance$delete_rule(Name = event_rule_name)
     
   } else{
     
@@ -440,18 +603,22 @@ faasr_set_workflow_timer_ld <- function(faasr, cred, target, cron, unset=FALSE){
     
     # set event rule name based on lambda function name
     event_rule_name <- paste0('FaaSr-scheduled-cron-rule-', lambda_function_name)
-    set_events_put_rules_command <- paste0('aws events put-rule --name ',event_rule_name,' --schedule-expression "cron(',  event_cron_rule, ')"')
-    set_events_put_rules_result <- system(set_events_put_rules_command, intern = TRUE)
+
+    set_events_put_rules_result <- eventbridge_instance$put_rule(Name = event_rule_name, ScheduleExpression = paste0("cron(",  event_cron_rule, ")"))
+
     
     # add permission to lambda
-    set_lambda_permission_command <- paste0('aws lambda add-permission --function-name ', lambda_function_name, ' --statement-id ',event_rule_name,' --action "lambda:InvokeFunction" --principal events.amazonaws.com --source-arn arn:aws:events:', aws_region, ':', aws_account_id, ':rule/',event_rule_name)
-    set_lambda_permission_result <- system(set_lambda_permission_command, intern = TRUE)
-    
-    
-    # access the status code
-    status_code <- attr(set_lambda_permission_result, "status")
+
+    set_lambda_permission_result <- 0
+    tryCatch({
+      lambda_instance$add_permission(FunctionName = lambda_function_name, StatementId = event_rule_name, Action = "lambda:InvokeFunction", Principal = "events.amazonaws.com", SourceArn = paste0("arn:aws:events:", aws_region, ":", aws_account_id, ":rule/",event_rule_name))
+    }, error = function(e) {
+      # the error is a RepositoryNotFoundException
+      set_lambda_permission_result <- 409
+    })
+
     # check if the permission statement already exist
-    if (!is.null(status_code) && status_code == 254){
+    if (length(set_lambda_permission_result) == 1  && set_lambda_permission_result == 409){
       print("permission statement already exist")
     }
     
@@ -473,8 +640,9 @@ faasr_set_workflow_timer_ld <- function(faasr, cred, target, cron, unset=FALSE){
     write(targets_json, file = "faasr_lambda_event_targets.json")
     
     # set event target with the faasr_lambda_event_targets.json
-    set_lambda_timer_command <- "aws events put-targets --rule FaaSr-scheduled-cron-rule --targets file://faasr_lambda_event_targets.json"
-    set_lambda_timer_result <- system(set_lambda_timer_command, intern = TRUE)
+
+    set_lambda_timer_result <- eventbridge_instance$put_targets(Rule = event_rule_name, Targets = targets)
+    
     
     file.remove("faasr_lambda_event_targets.json")
   }
