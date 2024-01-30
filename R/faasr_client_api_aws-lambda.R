@@ -649,5 +649,37 @@ faasr_set_workflow_timer_ld <- function(faasr, cred, target, cron, unset=FALSE){
   
 }
 
+faasr_workflow_invoke_lambda <- function(faasr, cred, faas_name, actionname){
+    aws_region <- faasr$ComputeServers[[faas_name]]$Region
+    aws_instance <- paws::lambda(
+      config=list(
+      credentials=list(
+        creds=list(
+          access_key_id=cred$lambda_a_ACCESS_KEY,
+          secret_access_key=cred$lambda_a_SECRET_KEY,
+          session_token=""
+        )
+      ),
+      region=aws_region
+    )
+    )
+    # json file with credentials will be created and after invocation, it will be removed.
+    faasr_w_cred <- faasr_replace_values(faasr, cred)
+    faasr_json <- jsonlite::toJSON(faasr_w_cred, auto_unbox=TRUE)
+    rd_nb <- sample(100000, size=1)
+    writeLines(faasr_json, paste0("payload_ld_",rd_nb,".json"))
+    cat("waiting for invoke...\n")
+    response <- aws_instance$invoke(FunctionName = actionname, Payload = faasr_json)
+    if (response$StatusCode == 200) {
+    succ_msg <- paste0("Successfully invoked:", actionname, "\n")
+    cat(succ_msg)
+    
+  } else {
+    err_msg <- paste0("Error invoking: ",actionname," reason:", response$StatusCode, "\n")
+    cat(err_msg)
+    
+  }
 
+    file.remove(paste0("payload_ld_",rd_nb,".json"))
+}
                            

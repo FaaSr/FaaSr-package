@@ -368,28 +368,7 @@ faasr_invoke_workflow <- function(FunctionInvoke=NULL, ...){
          },
          # If first action is aws-lambda, use lambda
          "Lambda"={
-           aws_region <- faasr$ComputeServers[[faas_name]]$Region
-           aws_instance <- paws::lambda(
-              config=list(
-              credentials=list(
-                creds=list(
-                  access_key_id=cred$lambda_a_ACCESS_KEY,
-                  secret_access_key=cred$lambda_a_SECRET_KEY,
-                  session_token=""
-                )
-              ),
-              region=aws_region
-            )
-           )
-           # json file with credentials will be created and after invocation, it will be removed.
-           faasr_w_cred <- faasr_replace_values(faasr, cred)
-           faasr_json <- jsonlite::toJSON(faasr_w_cred, auto_unbox=TRUE)
-           rd_nb <- sample(100000, size=1)
-           writeLines(faasr_json, paste0("payload_ld_",rd_nb,".json"))
-
-           aws_instance$invoke_async(FunctionName = actionname, InvokeArgs = faasr_json)
-
-           file.remove(paste0("payload_ld_",rd_nb,".json"))
+           faasr_workflow_invoke_lambda(faasr, cred, faas_name, actionname)
          },
          # If first action is openwhisk, use ibmcloud
          "OpenWhisk"={
