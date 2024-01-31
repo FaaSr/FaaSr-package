@@ -45,8 +45,7 @@
 
 
 # specify global variables
-faasr_defined_image_lambda <- "145342739029.dkr.ecr.us-east-1.amazonaws.com/aws-lambda-tidyverse:latest"
-# faasr_defined_image_lambda <- basic_ld_image
+# faasr_defined_image_lambda <- "145342739029.dkr.ecr.us-east-1.amazonaws.com/aws-lambda-tidyverse:latest"
 
 faasr_register_workflow_aws_lambda <- function(faasr, cred){
 
@@ -147,7 +146,7 @@ faasr_register_workflow_lambda_function_image <- function(faasr){
       if (!action_name %in% names(function_image_list)) {
         action_name_value <- faasr$ActionContainers[[action_name]]
         if(length(action_name_value)== 0 || action_name_value == ""){
-          image_path <- faasr_defined_image_lambda
+          image_path <- basic_ld_image
         } else {
           image_path <- faasr$ActionContainers[[action_name]]
         }
@@ -307,7 +306,7 @@ faasr_register_workflow_aws_ecr_image_build <- function(function_image_list,aws_
   for(image_name in names(function_image_list)){
     source_img_url <- function_image_list[[image_name]]
     # check if image provided by client or faasr, if provided by client, then pull from docker hub, if provided by faasr, then use the image name
-    if(source_img_url != faasr_defined_image_lambda){
+    if(source_img_url != basic_ld_image){
       if(!docker_aws_connected){
       # connect aws ECR and Docker
         ecr_docker_connect_cmd <- 
