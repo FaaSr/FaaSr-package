@@ -134,12 +134,12 @@ faasr_trigger <- function(faasr) {
           )
 
 	  # Check if next function be invoked successfully
-          if (response$StatusCode == 200) {
+          if (response$Status == 202) {
             succ_msg <- paste0("faasr_trigger: Successfully invoked:", faasr$FunctionInvoke, "\n")
             cat(succ_msg)
             faasr_log(succ_msg)
           } else {
-            err_msg <- paste0("faasr_trigger: Error invoking: ",faasr$FunctionInvoke," reason:", response$StatusCode, "\n")
+            err_msg <- paste0("faasr_trigger: Error invoking: ",faasr$FunctionInvoke," reason:", response$Status, "\n")
             cat(err_msg)
             faasr_log(err_msg)
           }
