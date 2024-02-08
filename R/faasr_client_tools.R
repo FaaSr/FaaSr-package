@@ -32,7 +32,8 @@ faasr_gh_local_repo <- "faasr_gh_local_repo"
 faasr_data <- "faasr_data"
 basic_gh_image <- "ghcr.io/faasr/github-actions-tidyverse:latest"
 basic_ow_image <- "faasr/openwhisk-tidyverse:latest"
-basic_ld_image <- "145342739029.dkr.ecr.us-east-1.amazonaws.com/aws-lambda-tidyverse:latest"
+basic_ld_image_account <- "145342739029.dkr.ecr."
+basic_ld_image_tag <- ".amazonaws.com/aws-lambda-tidyverse:latest"
 
 # faasr_register_workflow function
 faasr_register_workflow <- function(...){
