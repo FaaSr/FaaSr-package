@@ -99,7 +99,7 @@ faasr_register_workflow_aws_lambda <- function(faasr, cred){
   # get aws lambda function image list
   function_image_list <- faasr_register_workflow_lambda_function_image(faasr, lambda_server_info)
 
-  print(function_image_list)
+  #print(function_image_list)
 
 
   #create aws lambda function role
