@@ -212,6 +212,7 @@ faasr_register_workflow_lambda_function_image <- function(faasr, lambda_server_i
       }
     }
   }
+  cli_alert_success("Get the ECR image information")
   return (function_image_list)
 }
 
