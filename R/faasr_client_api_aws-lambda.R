@@ -150,7 +150,7 @@ faasr_register_workflow_lambda_function_lists <- function(faasr,cred, lambda_ser
     current_lambda_server_info <- lambda_server_info[[server_name]]
 
     if(check_lambda_exists(action_name, cred, current_lambda_server_info)){
-      cli_alert_info(paste0("lambda function -- ", action_name, "already exists."))
+      cli_alert_info(paste0("lambda function - {.strong", action_name, "} already exists."))
       cli_alert_info("Do you want to update?")
       while(TRUE) {
         check <- readline()
@@ -254,7 +254,7 @@ check_user_image_exist <- function(faasr, action_name, server_name, user_image_u
     return(TRUE)
   }else{
     err_msg <- paste0("image tag ", image_tag, " not exist, please check")
-    cli_alert_warning(msg)
+    cli_alert_warning(err_msg)
     return(FALSE)
   }
 }
