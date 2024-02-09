@@ -329,7 +329,7 @@ faasr_register_workflow_aws_lambda_function_build <- function(faasr, lambda_func
   aws_lambda_memory <- as.numeric(memory)
 
   # Check if the input is numeric and between 256 and 10240
-  if(memory_numeric_input >= 10240 && memory_numeric_input <= 256){
+  if(aws_lambda_memory >= 10240 && aws_lambda_memory <= 256){
     cli_aler_danger("Invalid memory size. Please provide a numeric value between 256 and 10240")
     stop()
   }
