@@ -265,7 +265,13 @@ It is safe to delete this repository if you no longer need this workflow. It can
 faasr_register_workflow_github_create_yml_file <- function(faasr, actionname, repo, cron=NULL, runner=FALSE){
   # get env
   folder <- faasr$FaaSrLog
+  if (is.null(folder)){
+    folder <- ""
+  }
   id <- faasr$InvocationID
+  if (is.null(id)){
+    id <- ""
+  }
   if (length(faasr$ActionContainers[[actionname]]) == 0 || faasr$ActionContainers[[actionname]] == "") {
     container_name <- basic_gh_image
   } else {
