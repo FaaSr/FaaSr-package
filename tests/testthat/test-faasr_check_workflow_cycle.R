@@ -50,12 +50,14 @@ test_that("check workflow cycle", {
   faasr$FunctionList$F4 <- list()
   
   ## result should be defined to compare it.
-  ## result is the relationship between nodes.
-  ## result$[departure] <- [destination]
+  ## result is the predecessors of the given FunctionInvoke
   result <- list()
   result$F1 <- c("F2","F3")
   result$F2 <- "F4"
   result$F3 <- "F4"
+  pre <- faasr_predecessors_list(faasr, result)
+  result <- pre[[faasr$FunctionInvoke]]
+
   # Now use "expect_equal". 
   expect_equal(faasr_check_workflow_cycle(faasr), result)
   

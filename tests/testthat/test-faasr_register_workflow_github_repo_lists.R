@@ -2,15 +2,15 @@ test_that("register_github_repository_list", {
   ## This function extracts a list of [server name: actionname] pairs
   ## input is the list "faasr"
   ## "faasr" requires "FunctionList" and "ComputeServers"
-  ## In "FunctionList", "FaaSServer" and "Actionname" should be defined.
+  ## In "FunctionList", "FaaSServer" and "FunctionName" should be defined.
   faasr <- list()
   faasr$FunctionList$F1$FaaSServer <- "Github_Account_1"
   faasr$FunctionList$F2$FaaSServer <- "Github_Account_2"
   faasr$FunctionList$F3$FaaSServer <- "Github_Account_3"
   
-  faasr$FunctionList$F1$Actionname <- "F1_action"
-  faasr$FunctionList$F2$Actionname <- "F2_action"
-  faasr$FunctionList$F3$Actionname <- "F3_action"
+  faasr$FunctionList$F1$FunctionName <- "F1_function"
+  faasr$FunctionList$F2$FunctionName <- "F2_function"
+  faasr$FunctionList$F3$FunctionName <- "F3_function"
   
   ## In "ComputeServers", "FaaSType" should be defined with the name matched.
   faasr$ComputeServers$Github_Account_1$FaaSType <- "GitHubActions"
@@ -18,18 +18,19 @@ test_that("register_github_repository_list", {
   faasr$ComputeServers$Github_Account_3$FaaSType <- "GitHubActions"
   
   ## Execute the function and save the result to the list "result"
+  result <- list()
   result <- faasr_register_workflow_github_repo_lists(faasr)
   
   ## Check the result by picking up some values
   ## Key is server name, Value is Actionname
-  expect_equal(result$Github_Account_1, "F1_action")
-  expect_equal(result$Github_Account_2, "F2_action")
+  expect_equal(result$Github_Account_1, "F1")
+  expect_equal(result$Github_Account_2, "F2")
   
   #############################################################################
   #############################################################################
   ## We can also assume that "Github_Account_2"'s FaaSType is accidentally empty NULL
   faasr$ComputeServers$Github_Account_2$FaaSType <- NULL
-
+  
   ## Execute the function.
   ## We can expect it'll return the error
   expect_error(faasr_register_workflow_github_repo_lists(faasr))
