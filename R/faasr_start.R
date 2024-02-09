@@ -1,4 +1,5 @@
-#' @title Entry point to start execution of a FaaSr action
+#' @name faasr_start
+#' @title faasr_start
 #' @description
 #' This is the entry-point FaaSr Function that is invoked by a FaaS platform when an Action is instantiated
 #' Terminology to clarify the various modules involved:
@@ -21,7 +22,11 @@
 #' * Update the logs folder to assert that this User Function has completed
 #' * Generate triggers to start Actions that will run the next User Functions, if there are any in the User Workflow
 #' @param faasr_payload JSON Payload provided upon Action invocation by the FaaS platform
+#' @import paws
+#' @importFrom "utils" "write.table"
+#' @export
 
+globalVariables(".faasr")
 library("paws")
 
 faasr_start <- function(faasr_payload) {

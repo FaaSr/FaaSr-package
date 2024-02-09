@@ -1,10 +1,16 @@
-#' @title Triggers the next User Functions of the Workflow, if any
-#' @description Uses FaaS-specific APIs to generate triggers to execute downstream User Function
+#' @name faasr_trigger
+#' @title faasr_trigger
+#' @description 
+#' Uses FaaS-specific APIs to generate triggers to execute downstream User Function
 #' Currently supports:
 #' * Apache OpenWhisk
 #' * AWS Lambda
 #' * GitHub Actions
 #' @param faasr list with parsed and validated Payload
+#' @import jsonlite
+#' @import httr
+#' @import paws
+#' @export
 
 library("jsonlite")
 library("httr")

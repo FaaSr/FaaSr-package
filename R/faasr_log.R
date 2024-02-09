@@ -1,10 +1,16 @@
-#' @title Appends to the user's log file in an S3 bucket
-#' @description Helper function to append to the log file residing in an S3 bucket
+#' @name faasr_log
+#' @title faasr_log
+#' @description 
+#' Helper function to append to the log file residing in an S3 bucket
 #' the name of the S3 server is implicit from the validated JSON payload, key LoggingServer
 #' the log file is a concatenation of folder "logs" and file name "faasr_log_" + InvocationID + ".txt"
 #' @param faasr list with parsed and validated Payload
 #' @param log_message string message to be appended to the log
+#' @import paws
+#' @importFrom "utils" "write.table"
+#' @export
 
+globalVariables(".faasr")
 library("paws")
 
 faasr_log <- function(log_message) {

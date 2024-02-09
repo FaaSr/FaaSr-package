@@ -1,7 +1,10 @@
-#' @title Check if the Workflow has any cycles
-#' @description Uses graph depth-first search algorithm to detect cycles
+#' @name faasr_check_workflow_cycle
+#' @title faasr_check_workflow_cycle
+#' @description 
+#' Uses graph depth-first search algorithm to detect cycles
 #' @param faasr list with parsed and validated Payload
 #' @return graph a graph representation of the Workflow
+#' @export
 
 # workflow implementation - check loop iteratively, predecessors.
 faasr_check_workflow_cycle <- function(faasr){

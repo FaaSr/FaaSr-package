@@ -1,5 +1,5 @@
-Package: FaaSr
 Type: Package
+Package: FaaSr
 Title: FaaS (Function as a Service) Package for R
 Version: 1.0.8.0
 Authors@R: c(person("Figueiredo", "Renato", role = c("aut", "cre", "ths"),
@@ -28,20 +28,25 @@ Description: A package that allows users to create and deploy workflows with mul
     GitHub Actions <https://github.com/features/actions>
     Amazon Web Services ('AWS') Lambda <https://aws.amazon.com/lambda/>
     Supported cloud data storage for persistent storage:
-    Amazon Web Services ('AWS') Simple Storage Service ('S3') <https://aws.amazon.com/s3/>
-License: MIT
+    Amazon Web Services ('AWS') Simple Storage Service ('S3') <https://aws.amazon.com/s3/>.
+License: MIT + file LICENSE
 URL: https://github.com/FaaSr/FaaSr-package
 BugReports: https://github.com/FaaSr/FaaSr-package/issues
+Depends:
+    R (>= 3.5.0)
 Imports:
     jsonlite,
-    jsonvalidate,
-    RCurl,
     httr,
     uuid,
     paws,
-    arrow,
     cli,
+    arrow,
+    glue,
+    jsonvalidate
+Suggests:
+    testthat,
+    base64enc,
     sodium,
-    base64enc
 Encoding: UTF-8
 LazyData: true
+RoxygenNote: 7.2.3

@@ -1,6 +1,8 @@
-#' @title Implements functions to support locking primitives
-#' @description Uses locking algorithm with S3 to enforce single User Function execution when there are multiple predecessors
-#' TBD: describe each function
+#' @name faasr_lock
+#' @title faasr_rsm
+#' @description 
+#' Uses locking algorithm with S3 to enforce single User Function execution when there are multiple predecessors
+#' @import paws
 #' @param faasr list with parsed and validated Payload
 
 library("paws")

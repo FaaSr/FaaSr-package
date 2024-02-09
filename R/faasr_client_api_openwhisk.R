@@ -1,34 +1,20 @@
-#' @title Client tool for registering openwhisk actions.
-#' @description faasr_register_workflow_ibmcloud_openwhisk: 
-#' starts to register functions in the JSON file for OpenWhisk
-#' @description faasr_register_workflow_ibmcloud_action_lists: 
-#' creates a list of Server and Action name pairs               
-#' @description faasr_register_workflow_ibmcloud_target_group: 
-#' targets a group: ibmcloud openwhisk needs to target group/default is "Default"             
-#' @description faasr_register_workflow_ibmcloud_create_namespace: 
-#' creates a new namespace if given namespace doesn't exist  
-#' @description faasr_register_workflow_ibmcloud_target_namespace: 
-#' targets a namespace with the given namespace              
-#' @description faasr_register_workflow_ibmcloud_create_action:
-#' registers the functions with ibmcloud API              
-#'
-#' @param faasr_register_workflow_ibmcloud_openwhisk: 
-#' "faasr" for list of the json, "cred" for the list of credentials       
-#' @param faasr_register_workflow_ibmcloud_action_lists:
-#' "faasr" for list of the json
-#' @param faasr_register_workflow_ibmcloud_create_namespace:
-#' "faasr" for list of the json 
-#' @param faasr_register_workflow_ibmcloud_target_namespace: 
-#' "name" for the string
-#' @param faasr_register_workflow_ibmcloud_create_action:
-#' "actionname" for the string, "faasr" for list of the json 
-#' 
-#' @return faasr_register_workflow_ibmcloud_openwhisk: 
-#' "faasr" for list of the json
-#' @return faasr_register_workflow_ibmcloud_action_lists: 
-#' "action_list" for the list of servername:actionname pairs
-#' @return faasr_register_workflow_ibmcloud_create_namespace:
-#' "name_id" for the string of namespace id
+#' @name faasr_register_workflow_openwhisk
+#' @title faasr_register_workflow_openwhisk
+#' @description 
+#' register the workflow for openwhisk.
+#' parse faasr to get the server list and actions.
+#' create a actions for the FaaSr actions.
+#' @param faasr a list form of the JSON file
+#' @param cred a list form of the credentials
+#' @param ssl SSL CA check; for the SSL certificate: FALSE
+#' @param memory an integer for the max size of memory
+#' @param timeout an integer for the max length of timeout
+#' @import httr
+#' @import cli
+#' @export
+
+library("cli")
+library("httr")
 
 faasr_register_workflow_openwhisk <- function(faasr, cred, ssl=TRUE, memory=1024, timeout=600000) {
   
@@ -71,10 +57,25 @@ faasr_register_workflow_openwhisk <- function(faasr, cred, ssl=TRUE, memory=1024
   cli_text(col_cyan("{symbol$menu} {.strong Successfully registered all openwhisk actions}"))
 }
 
+
+#' @title faasr_ow_httr_request
+#' @description 
+#' the help function to send the curl request to the openwhisk
+#' by using the "httr" library. 
+#' @param faasr a list form of the JSON file
+#' @param server a string for the target server
+#' @param action a string for the target action: /actions, /triggers, /rules
+#' @param type REST API values; GET/PUT/DELETE/PATCH/POST
+#' @param body a list of body
+#' @param ssl SSL CA check; for the SSL certificate: FALSE
+#' @param namespace a string for the specific namespace e.g., /whisk.system
+#' @return an integer value for the response
+#' @import httr
+#' @import cli
+#' @export
+
 # help sending httr requests
 faasr_ow_httr_request <- function(faasr, server, action, type, body=list(), ssl=TRUE, namespace=NULL){
-
-  library("httr")
 
   endpoint <- faasr$ComputeServers[[server]]$Endpoint
   if (!startsWith(endpoint, "https://")){
@@ -115,6 +116,17 @@ faasr_ow_httr_request <- function(faasr, server, action, type, body=list(), ssl=
 }
 
 
+#' @title faasr_register_workflow_openwhisk_action_lists
+#' @description 
+#' Parse the faasr and get the list of function:server
+#' Find actions which is using "OpenWhisk"
+#' return value's key is action and value is server name.
+#' @param faasr a list form of the JSON file
+#' @return an list of "action name: server name" pairs
+#' @import httr
+#' @import cli
+#' @export
+
 faasr_register_workflow_openwhisk_action_lists <- function(faasr) {
   # empty list
   action_list <- list()
@@ -135,6 +147,22 @@ faasr_register_workflow_openwhisk_action_lists <- function(faasr) {
   return(action_list)
 }
 
+
+#' @title faasr_register_workflow_openwhisk_check_exists
+#' @description 
+#' Check the remote repository is existing on the openwhisk
+#' by sending the GET request.
+#' If it exists, return TRUE, doesn't exist, return FALSE
+#' @param ssl SSL CA check; for the SSL certificate: FALSE
+#' @param action a string for the target action: /actions, /triggers, /rules
+#' @param server a string for the target server
+#' @param faasr a list form of the JSON file
+#' @return a logical value; if exists, return TRUE, 
+#' doesn't exist, return FALSE
+#' @import httr
+#' @import cli
+#' @export
+
 faasr_register_workflow_openwhisk_check_exists <- function(ssl, action, server, faasr){
   
   response <- faasr_ow_httr_request(faasr, server, action, type="GET", ssl=ssl)
@@ -154,6 +182,18 @@ faasr_register_workflow_openwhisk_check_exists <- function(ssl, action, server, 
     stop()
   }
 }
+
+
+#' @title faasr_register_workflow_openwhisk_check_user_input
+#' @description 
+#' Ask user input for the openwhisk
+#' @param check a logical value for target existence
+#' @param actionname a string for the target action name
+#' @param type a string for the action type; actions/triggers/rules
+#' @return a logical value for the overwrite
+#' @import httr
+#' @import cli
+#' @export
 
 faasr_register_workflow_openwhisk_check_user_input <- function(check, actionname, type){
   # if given values already exists, ask the user to update the action
@@ -176,6 +216,22 @@ faasr_register_workflow_openwhisk_check_user_input <- function(check, actionname
   }
   return(overwrite)
 }
+
+
+#' @title faasr_register_workflow_openwhisk_create_action
+#' @description 
+#' Create an action
+#' if it already exists and user wants, update the action
+#' @param ssl SSL CA check; for the SSL certificate: FALSE
+#' @param actionname a string for the target action name
+#' @param server a string for the target server
+#' @param faasr a list form of the JSON file
+#' @param memory an integer for the max size of memory
+#' @param timeout an integer for the max length of timeout
+#' @param check a logical value for target existence
+#' @import httr
+#' @import cli
+#' @export
 
 # create an action
 faasr_register_workflow_openwhisk_create_action <- function(ssl, actionname, server, faasr, memory, timeout, check) {
@@ -219,6 +275,20 @@ faasr_register_workflow_openwhisk_create_action <- function(ssl, actionname, ser
   
 }
 
+
+#' @title faasr_workflow_invoke_openwhisk
+#' @description 
+#' Invoke a workflow for the openwhisk
+#' this function is invoked by faasr_workflow_invoke
+#' @param faasr a list form of the JSON file
+#' @param cred a list form of the credentials
+#' @param faas_name a string for the target server
+#' @param actionname a string for the target action name
+#' @param ssl SSL CA check; for the SSL certificate: FALSE
+#' @import httr
+#' @import cli
+#' @export
+
 faasr_workflow_invoke_openwhisk <- function(faasr, cred, faas_name, actionname, ssl=TRUE){
 
   action <- paste0("actions/", actionname, "?blocking=false&result=false")
@@ -235,6 +305,20 @@ faasr_workflow_invoke_openwhisk <- function(faasr, cred, faas_name, actionname, 
   }
 
 }
+
+
+#' @title faasr_set_workflow_timer_ow
+#' @description 
+#' # set/unset workflow cron timer for openwhisk
+#' @param faasr a list form of the JSON file
+#' @param cred a list form of the credentials
+#' @param target a string for the target action
+#' @param cron a string for cron data e.g., */5 * * * *
+#' @param unset a logical value; set timer(FALSE) or unset timer(TRUE)
+#' @param ssl SSL CA check; for the SSL certificate: FALSE
+#' @import httr
+#' @import cli
+#' @export
 
 # set workflow timer for openwhisk
 faasr_set_workflow_timer_ow <- function(faasr, cred, target, cron, unset=FALSE, ssl=TRUE){

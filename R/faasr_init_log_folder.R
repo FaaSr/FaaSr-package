@@ -1,9 +1,15 @@
-#' @title Creates a logs folder in S3 and assigns a unique invocation ID to a Workflow if not provided by the user
-#' @description This function creates an initial log folder in S3; it is called only at the entry point of a Workflow
-#'              The folder name is a concatenation of FaaSrLog and InvocationID from the Payload.
-#'              The folder name needs to be a unique ID. If the user doesn't provide InvocationID, generate a UUID
-#'              If the folder already exists, abort with an error
+#' @name faasr_init_log_folder
+#' @title faasr_init_log_folder
+#' @description 
+#' This function creates an initial log folder in S3; it is called only at the entry point of a Workflow
+#' The folder name is a concatenation of FaaSrLog and InvocationID from the Payload.
+#' The folder name needs to be a unique ID. If the user doesn't provide InvocationID, generate a UUID
+#' If the folder already exists, abort with an error
 #' @param faasr list with parsed and validated Payload
+#' @return faasr a list of json file, UUID updated.
+#' @import uuid
+#' @import paws
+#' @export
 
 library("uuid")
 library("paws")
