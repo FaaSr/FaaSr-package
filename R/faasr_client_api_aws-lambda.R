@@ -245,7 +245,7 @@ check_user_image_exist <- function(faasr, action_name, server_name, user_image_u
   }, error = function(e) {
     # Check if the error is a RepositoryNotFoundException
     if(grepl("HTTP 400", e$message)) {
-      cli_aler_danger(paste0("Check repository error: ", e$message))
+      cli_alert_danger(paste0("Check repository error: ", e$message))
       stop()  
     }
   })
@@ -323,7 +323,7 @@ faasr_register_workflow_aws_lambda_function_build <- function(faasr, lambda_func
   aws_lambda_timeout <- as.numeric(timeout)
 
   if(aws_lambda_timeout >= 900 && aws_lambda_timeout <= 60){
-    cli_aler_danger("Invalid timeout Please provide a numeric value between 60 and 900")
+    cli_alert_danger("Invalid timeout Please provide a numeric value between 60 and 900")
     stop()
   }  
   
@@ -331,7 +331,7 @@ faasr_register_workflow_aws_lambda_function_build <- function(faasr, lambda_func
 
   # Check if the input is numeric and between 256 and 10240
   if(aws_lambda_memory >= 10240 && aws_lambda_memory <= 256){
-    cli_aler_danger("Invalid memory size. Please provide a numeric value between 256 and 10240")
+    cli_alert_danger("Invalid memory size. Please provide a numeric value between 256 and 10240")
     stop()
   }
   
@@ -545,7 +545,7 @@ faasr_set_workflow_timer_ld <- function(faasr, cred, target, cron, unset=FALSE){
 
     # check if the permission statement already exist
     if (length(set_lambda_permission_result) == 1  && set_lambda_permission_result == 409){
-      cli_aler_info("permission statement already exist")
+      cli_alert_info("permission statement already exist")
     }
     
     # set event target and input payload
