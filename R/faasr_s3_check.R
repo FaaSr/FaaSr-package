@@ -44,7 +44,7 @@ faasr_s3_check <- function(faasr){
 	  )
     )
     check <- try(s3$list_buckets(), silent=TRUE)
-    if(class(check)=="list"){
+    if(is.list(check)){
       bucket_names <- lapply(check$Buckets, function(bucket) bucket$Name)
       if(!(faasr$DataStores[[server]]$Bucket %in% bucket_names)){
         msg <- paste0('{\"faasr_s3_check\":\"S3 server ',server,' failed with message: No such bucket\"}', "\n")

@@ -9,8 +9,6 @@
 #' @import httr
 #' @export 
 
-library("cli")
-
 # define a list for storing functions
 .faasr_user <- list()
 
@@ -369,7 +367,6 @@ faasr_replace_values <- function(faasr, cred){
 
 # invoke first action
 faasr_invoke_workflow <- function(FunctionInvoke=NULL, ...){
-  library("cli")
 
   # get the "svc" by using "faasr_get_svc" and define the required variables.
   svc <- .faasr_get_svc()
