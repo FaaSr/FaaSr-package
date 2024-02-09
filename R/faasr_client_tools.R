@@ -54,7 +54,7 @@ faasr_register_workflow <- function(...){
   # register actions for openwhisk/github-actions/lambda by given json
   check <- faasr_register_workflow_openwhisk(faasr,cred,...)
   check <- faasr_register_workflow_github_actions(faasr,cred)
-  check <- faasr_register_workflow_aws_lambda(faasr,cred)
+  check <- faasr_register_workflow_aws_lambda(faasr,cred,...)
   
 }
 .faasr_user$operations$register_workflow <- faasr_register_workflow

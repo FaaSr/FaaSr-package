@@ -47,7 +47,7 @@
 
 
 
-faasr_register_workflow_aws_lambda <- function(faasr, cred){
+faasr_register_workflow_aws_lambda <- function(faasr, cred, memory=1024, timeout=600){
   # collect lambda server information
   lambda_server_info <- list()
   aws_account_checked <- FALSE
@@ -115,7 +115,7 @@ faasr_register_workflow_aws_lambda <- function(faasr, cred){
   cli_progress_update()
 
   # create aws lambda functions
-  faasr_register_workflow_aws_lambda_function_build(faasr, lambda_function_info, function_image_list, aws_lambda_role_name, cred, lambda_server_info)
+  faasr_register_workflow_aws_lambda_function_build(faasr, lambda_function_info, function_image_list, aws_lambda_role_name, cred, lambda_server_info, memory, timeout)
   cli_progress_update()
 
   cli_text(col_cyan("{symbol$menu} {.strong Successfully registered all lambda actions}"))
@@ -312,33 +312,27 @@ faasr_register_workflow_aws_lambda_role_create <- function(faasr, cred, lambda_s
 
 
 # Create aws lambda functions
-faasr_register_workflow_aws_lambda_function_build <- function(faasr, lambda_function_info, function_image_list, aws_lambda_role_name, cred, lambda_server_info, aws_lambda_memory=1024, aws_lambda_timeout=600){
+faasr_register_workflow_aws_lambda_function_build <- function(faasr, lambda_function_info, function_image_list, aws_lambda_role_name, cred, lambda_server_info, memory=1024, timeout=600){
   
   # set configuration for new lambda function
   # ask user to specify the function timeout and memory size
   has_create <- any(sapply(lambda_function_info, function(x) x$action == "create"))
   #if(has_create){
   
-  if(aws_lambda_timeout != "" && !is.na(timeout_numeric_input) && timeout_numeric_input >= 60 && timeout_numeric_input <= 900){
-    break
-  } else {
+  aws_lambda_timeout <- as.numeric(timeout)
+
+  if(aws_lambda_timeout >= 900 && aws_lambda_timeout <= 60){
     cli_aler_danger("Invalid timeout Please provide a numeric value between 60 and 900")
     stop()
-  }
+  }  
+  
+  aws_lambda_memory <- as.numeric(memory)
 
-  # convert the input to a numeric value
-  aws_lambda_timeout <- as.numeric(aws_lambda_timeout)
-  
-  
   # Check if the input is numeric and between 256 and 10240
-  if(aws_lambda_memory != "" && !is.na(memory_numeric_input) && memory_numeric_input >= 256 && memory_numeric_input <= 10240){
-    break
-  } else {
+  if(memory_numeric_input >= 10240 && memory_numeric_input <= 256){
     cli_aler_danger("Invalid memory size. Please provide a numeric value between 256 and 10240")
     stop()
   }
-  # convert the input to a numeric value
-  aws_lambda_memory <- as.numeric(aws_lambda_memory)
   
   aws_account_id <- lambda_server_info[[1]]$aws_account_id
   #build lambda role arn
