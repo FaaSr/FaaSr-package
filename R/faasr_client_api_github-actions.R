@@ -1,3 +1,8 @@
+workflow_basic_path <- "https://raw.githubusercontent.com/FaaSr/FaaSr-package/main/schema/workflow_template.yml"
+workflow_timer_path <- "https://raw.githubusercontent.com/FaaSr/FaaSr-package/main/schema/workflow_with_cron_template.yml"
+#TBD. workflow_runner_path <- ""
+#TBD. workflow_runner_w_timer_path <- ""
+
 #' @name faasr_register_workflow_github_actions
 #' @title faasr_register_workflow_github_actions
 #' @description 
@@ -11,11 +16,6 @@
 #' @import httr
 #' @import cli
 #' @export
-
-workflow_basic_path <- "https://raw.githubusercontent.com/FaaSr/FaaSr-package/main/schema/workflow_template.yml"
-workflow_timer_path <- "https://raw.githubusercontent.com/FaaSr/FaaSr-package/main/schema/workflow_with_cron_template.yml"
-#TBD. workflow_runner_path <- ""
-#TBD. workflow_runner_w_timer_path <- ""
 
 faasr_register_workflow_github_actions <- function(faasr, cred, cron=NULL, runner=FALSE) {
 
