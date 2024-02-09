@@ -96,9 +96,9 @@ faasr_register_workflow_aws_lambda <- function(faasr, cred, memory=1024, timeout
       "{col_yellow(symbol$checkbox_on)} Successfully registered actions for server ",
       "in {pb_elapsed}."
     ),
-    total = 4
+    total = 5
   )
-
+  cli_progress_update()
   # get aws lambda function list
   lambda_function_info <- faasr_register_workflow_lambda_function_lists(faasr, cred, lambda_server_info)
   if (length(lambda_function_info)==0){
@@ -364,7 +364,7 @@ faasr_register_workflow_aws_lambda_function_build <- function(faasr, lambda_func
     )
 
     if(lambda_function_info[[function_name]]$action == "update"){
-      lambda_instance$update_function_configuration(FunctionName = function_name, Role = lambda_role_arn, Timeout = aws_lambda_timeout, MemorySize = aws_lambda_memory)
+      current_lambda_instance$update_function_configuration(FunctionName = function_name, Role = lambda_role_arn, Timeout = aws_lambda_timeout, MemorySize = aws_lambda_memory)
       execute_command_with_retry(function_name, function_image_url, cred, current_lambda_instance)
       cli_alert_success(paste0("Successfully Update the function: ", function_name))
       
