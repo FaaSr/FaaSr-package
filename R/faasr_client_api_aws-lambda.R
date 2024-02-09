@@ -151,7 +151,7 @@ faasr_register_workflow_lambda_function_lists <- function(faasr,cred, lambda_ser
 
     if(check_lambda_exists(action_name, cred, current_lambda_server_info)){
       cli_alert_info(paste0("lambda function - {.strong ", action_name, "} already exists."))
-      cli_alert_info("Do you want to update?")
+      cli_alert_info("Do you want to update?[y/n]")
       while(TRUE) {
         check <- readline()
         if(check == "y"){
