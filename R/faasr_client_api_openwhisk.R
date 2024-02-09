@@ -247,7 +247,7 @@ faasr_set_workflow_timer_ow <- function(faasr, cred, target, cron, unset=FALSE, 
   namespace <- faasr$ComputeServers[[server]]$Namespace
 
   # json should get out two layers, so escaping letter should be twice
-  faasr <- FaaSr::faasr_replace_values(faasr, cred)
+  faasr <- faasr_replace_values(faasr, cred)
    
   # if unset==TRUE, delete the rule and trigger
   if (unset==TRUE){
