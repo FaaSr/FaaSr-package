@@ -13,9 +13,6 @@
 #' @import cli
 #' @export
 
-library("cli")
-library("httr")
-
 faasr_register_workflow_openwhisk <- function(faasr, cred, ssl=TRUE, memory=1024, timeout=600000) {
   
   options(cli.progress_clear = FALSE)
