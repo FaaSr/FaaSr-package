@@ -220,7 +220,7 @@ check_user_image_exist <- function(faasr, action_name, server_name, user_image_u
   # Split by '/' and then by ':'
   splited_img <- unlist(strsplit(user_image_url, "/"))
   splited_image_part <- splited_img[2]
-  
+  aws_account_id <- current_lambda_server_info$aws_account_id
   repo_tag_part <- unlist(strsplit(splited_image_part, ":"))
   repo_name <- repo_tag_part[1]
   image_tag <- repo_tag_part[2]
@@ -240,33 +240,22 @@ check_user_image_exist <- function(faasr, action_name, server_name, user_image_u
   
   # check if the image exists
   check_result <- tryCatch({
-    #result <- ecr_instance$batch_get_image(repositoryName = repo_name, imageIds = list(imageTag = image_tag))
+    result <- ecr_instance$batch_get_image(registryId = aws_account_id, repositoryName = repo_name, imageIds=list(list(imageTag=image_tag)))
   }, error = function(e) {
     # Check if the error is a RepositoryNotFoundException
     if(grepl("HTTP 400", e$message)) {
-      return(400)
-    } else {
-      cli_aler_danger(paste0("user image exists error: ", e$message))
-      stop()  # Re-throw other errors
+      cli_aler_danger(paste0("Check repository error: ", e$message))
+      stop()  
     }
   })
 
-
   # check if the repo exists
-  if (length(check_result) == 1 && check_result == 400) {
-    # repo does not exist
-    err_msg <- paste0("repo name ", repo_name, " not exist, please check")
+  if (length(check_result$failure) == 0) {
+    return(TRUE)
+  }else{
+    err_msg <- paste0("image tag ", image_tag, " not exist, please check")
     cli_alert_warning(msg)
     return(FALSE)
-  } else {
-    # repo exists then check if tag exists
-    if(image_tag %in% check_result$imageDetails[[1]]$imageTags){
-      return(TRUE)
-    }else{
-      err_msg <- paste0("image tag ", image_tag, " not exist, please check")
-      cli_alert_warning(msg)
-      return(FALSE)
-    }
   }
 }
 
