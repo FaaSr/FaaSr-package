@@ -108,7 +108,6 @@ faasr_register_workflow_github_actions <- function(faasr, cred, cron=NULL, runne
 
 # help sending httr requests
 faasr_httr_request <- function(token, url, body=list(), type){
-  library("httr")
   # get functions depending on "type"
   func <- get(type)
   # write headers
