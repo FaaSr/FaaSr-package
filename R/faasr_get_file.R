@@ -33,17 +33,11 @@ faasr_get_file <- function(server_name=.faasr$DefaultDataStore, remote_folder=""
   remote_file <- sub("^/+", "", sub("/+$", "", remote_file))
   get_file_s3 <- paste0(remote_folder, "/", remote_file)
 
-  # Check the situation that local_path is not defined and local_folder is defined as an absoulte path.
-  if (local_folder=="." && local_file == normalizePath(local_file)){
-    local_folder <- dirname(local_file)
-    get_file <- local_file
-  # If not, takes same way with remote folder & file
-  } else{
-    local_folder <- sub("^/+", "", sub("/+$", "", local_folder))
-    local_file <- sub("^/+", "", sub("/+$", "", local_file))
-    get_file <- paste0(local_folder,"/",local_file)
-  }  
-  
+  # takes same way with remote folder & file
+  local_folder <- sub("^/+", "", sub("/+$", "", local_folder))
+  local_file <- sub("^/+", "", sub("/+$", "", local_file))
+  get_file <- paste0(local_folder,"/",local_file)
+   
   if (!dir.exists(local_folder)) {
     dir.create(local_folder, recursive=TRUE)
   }
