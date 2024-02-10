@@ -456,7 +456,7 @@ check_lambda_exists <- function(function_name, cred, lambda_server_info) {
 #' @param current_lambda_instance a list form of current Lambda server information: id, keys, region
 #' @param max_retries a integer for the number of maximum tries
 #' @param sleep_seconds a integer for the time for sleep between retries
-#' @return a logicla value
+#' @return a logical value
 #' @import cli
 #' @import paws
 #' @export

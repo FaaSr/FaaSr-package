@@ -60,13 +60,13 @@ Without FaaS, deploying and managing such kinds of workflows is time-consuming, 
 
 With FaaS, it is possible to enable individual researchers and small teams to deploy such workflows without managing servers, bringing cloud capabilities closer to a wider range of researchers and applications. However, there are still challenges:
 
-* There is a significant learning curve in using the APIs (Application Programming Interfces) of FaaS platforms
+* There is a significant learning curve in using the APIs (Application Programming Interfaces) of FaaS platforms
 
 * Different FaaS platforms use different, incompatible APIs; developing for one platform can lead to vendor lock-in over time
 
 * Typically, FaaS platforms have native support for languages such as Python and Javascript, whereas many applications in the scientific community are written in R
 
-* FaaS execution is "stateless" whereby all the data that a function uses/creates in runtimemust be downloaded/uploaded to cloud data storage external to the FaaS platform
+* FaaS execution is "stateless" whereby all the data that a function uses/creates in runtime must be downloaded/uploaded to cloud data storage external to the FaaS platform
 
 FaaSr supports the science use cases by addressing these challenges:
 
