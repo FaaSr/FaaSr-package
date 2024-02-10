@@ -1,51 +1,14 @@
-#' @title Client tool for registering aws-lambda functions.
-#' @description faasr_register_workflow_aws_lambda: 
+#' @name faasr_register_workflow_aws_lambda
+#' @title faasr_register_workflow_aws_lambda
+#' @description 
 #' starts to register functions in the JSON file for AWS-Lambda
-#' @description faasr_register_workflow_lambda_function_lists: 
-#' Get aws lambda function list              
-#' @description faasr_register_workflow_lambda_function_image: 
-#' Get aws lambda function image list              
-#' @description faasr_register_workflow_aws_ecr_build: 
-#' Build aws ecr repository with the given json              
-#' @description faasr_register_workflow_aws_lambda_role_create: 
-#' create lambda role             
-#' @description faasr_register_workflow_aws_ecr_image_build: 
-#' Builds docker image for the aws-ecr
-#' @description faasr_register_workflow_aws_lambda_function_build:
-#' Create aws lambda functions
-#' @description check_lambda_exists:
-#' create or update lambda function
-#' @description execute_command_with_retry:
-#' check if a Lambda function exists
-#' 
-#' @param faasr_register_workflow_aws_lambda: "faasr" for list of the json
-#' @param faasr_register_workflow_lambda_function_lists: "faasr" for list of the json
-#' @param faasr_register_workflow_lambda_function_image: "faasr" for list of the json
-#' @param faasr_register_workflow_aws_ecr_build: "faasr" for list of the json
-#' @param faasr_register_workflow_aws_lambda_role_create: "faasr" for list of the json
-#' @param faasr_register_workflow_aws_ecr_image_build: "function_image_list" for  the list of imagename:image url pairs,
-#' aws_ecr_repo_name for the string
-#' @param faasr_register_workflow_aws_lambda_function_build: "lambda_function_info" for the list of image and actionname pairs,
-#' "function_image_list" for the list of imagename:image url pairs, "aws_lambda_role_name" for the string
-#' @param check_lambda_exists: function_name for the string
-#' @param execute_command_with_retry: "command" for the string
-#' 
-#' @return faasr_register_workflow_aws_lambda: "faasr" for list of the json
-#' @return faasr_register_workflow_lambda_function_lists: "lambda_function_info" for the list of 
-#' actionname and "create" or "update" pairs.
-#' @return faasr_register_workflow_lambda_function_image: "function_image_list" for the list of
-#' actionname:image pairs
-#' @return faasr_register_workflow_aws_ecr_build: "aws_ecr_repo_name" for the string
-#' @return faasr_register_workflow_aws_lambda_role_create: "aws_lambda_role_name" for the string
-#' @return faasr_register_workflow_aws_ecr_image_build: "function_image_list" for the list of 
-#' imagename:image url pairs
-#' @return check_lambda_exists: boolean value
-#' @return execute_command_with_retry: boolean value
+#' @param faasr a list form of the JSON file
+#' @param cred a list form of the credentials
+#' @param memory an integer for the max size of memory
+#' @param timeout an integer for the max length of timeout
 #' @import cli
 #' @import paws
-
-
-
+#' @export
 
 faasr_register_workflow_aws_lambda <- function(faasr, cred, memory=1024, timeout=600){
   # collect lambda server information
@@ -121,6 +84,17 @@ faasr_register_workflow_aws_lambda <- function(faasr, cred, memory=1024, timeout
   cli_text(col_cyan("{symbol$menu} {.strong Successfully registered all lambda actions}"))
 }
 
+
+#' @title faasr_register_workflow_lambda_function_lists
+#' @description 
+#' Get aws lambda function list
+#' @param faasr a list form of the JSON file
+#' @param cred a list form of the credentials
+#' @param lambda_server_info a list form of Lambda server information: id, keys, region
+#' @return lambda_function_info a list form of lambda function information: name, actions
+#' @import cli
+#' @export
+
 # Get aws lambda function list
 faasr_register_workflow_lambda_function_lists <- function(faasr,cred, lambda_server_info){
   
@@ -173,6 +147,16 @@ faasr_register_workflow_lambda_function_lists <- function(faasr,cred, lambda_ser
   return (lambda_function_info)
 }
 
+
+#' @title faasr_register_workflow_lambda_function_image
+#' @description 
+#' Get aws lambda function image list
+#' @param faasr a list form of the JSON file
+#' @param lambda_server_info a list form of Lambda server information: id, keys, region
+#' @return function_image_list a list form of lambda function information: name, images
+#' @import cli
+#' @export
+
 # Get aws lambda function image list
 faasr_register_workflow_lambda_function_image <- function(faasr, lambda_server_info){
   
@@ -215,6 +199,20 @@ faasr_register_workflow_lambda_function_image <- function(faasr, lambda_server_i
   cli_alert_success("Get the ECR image information")
   return (function_image_list)
 }
+
+
+#' @title check_user_image_exist
+#' @description 
+#' check if user provided image exists, if not, return false then stop processing
+#' @param faasr a list form of the JSON file
+#' @param action_name a string for the target action name 
+#' @param server_name a string for the target server
+#' @param user_image_url a string for FaaSr container image uri
+#' @param current_lambda_server_info a list form of current Lambda server information: id, keys, region
+#' @return function_image_list a list form of lambda function information: name, images
+#' @import cli
+#' @import paws
+#' @export
 
 # check if user provided image exists, if not, return false then stop processing
 check_user_image_exist <- function(faasr, action_name, server_name, user_image_url, current_lambda_server_info){
@@ -260,6 +258,17 @@ check_user_image_exist <- function(faasr, action_name, server_name, user_image_u
   }
 }
 
+
+#' @title faasr_register_workflow_aws_lambda_role_create
+#' @description 
+#' create the aws-lamda role named "faasr-lambda-role"
+#' @param faasr a list form of the JSON file
+#' @param cred a list form of the credentials
+#' @param lambda_server_info a list form of Lambda server information: id, keys, region
+#' @return lambda-role-name a string for the lambda role name
+#' @import cli
+#' @import paws
+#' @export
 
 # create lambda role
 faasr_register_workflow_aws_lambda_role_create <- function(faasr, cred, lambda_server_info){
@@ -311,6 +320,20 @@ faasr_register_workflow_aws_lambda_role_create <- function(faasr, cred, lambda_s
 }
 
 
+#' @title faasr_register_workflow_aws_lambda_function_build
+#' @description 
+#' Create aws lambda functions
+#' @param faasr a list form of the JSON file
+#' @param cred a list form of the credentials
+#' @param lambda_function_info a list form of lambda function information: name, actions
+#' @param function_image_list a list form of lambda function information: name, images
+#' @param aws_lambda_role_name a string for the lambda role name
+#' @param lambda_server_info a list form of Lambda server information: id, keys, region
+#' @param memory an integer for the max size of memory
+#' @param timeout an integer for the max length of timeout
+#' @import paws
+#' @import cli
+#' @export
 
 # Create aws lambda functions
 faasr_register_workflow_aws_lambda_function_build <- function(faasr, lambda_function_info, function_image_list, aws_lambda_role_name, cred, lambda_server_info, memory=1024, timeout=600){
@@ -377,6 +400,16 @@ faasr_register_workflow_aws_lambda_function_build <- function(faasr, lambda_func
 }
 
 
+#' @title check_lambda_exists
+#' @description 
+#' check if a Lambda function exists
+#' @param function_name a string for the function name
+#' @param cred a list form of the credentials
+#' @param lambda_server_info a list form of Lambda server information: id, keys, region
+#' @import cli
+#' @import paws
+#' @export
+
 # check if a Lambda function exists
 check_lambda_exists <- function(function_name, cred, lambda_server_info) {
   # aws command check if a function exist
@@ -413,8 +446,22 @@ check_lambda_exists <- function(function_name, cred, lambda_server_info) {
   }
 }
 
-# check if aws command run successfully, and retry
 
+#' @title execute_command_with_retry
+#' @description 
+#' check if aws command run successfully, and retry
+#' @param function_name a string for the function name
+#' @param function_image_url a string for FaaSr container image uri
+#' @param cred a list form of the credentials
+#' @param current_lambda_instance a list form of current Lambda server information: id, keys, region
+#' @param max_retries a integer for the number of maximum tries
+#' @param sleep_seconds a integer for the time for sleep between retries
+#' @return a logicla value
+#' @import cli
+#' @import paws
+#' @export
+
+# check if aws command run successfully, and retry
 execute_command_with_retry <- function(function_name, function_image_url, cred, current_lambda_instance, max_retries = 3, sleep_seconds = 5) {
 
   for (i in 1:max_retries) {
@@ -443,6 +490,19 @@ execute_command_with_retry <- function(function_name, function_image_url, cred, 
   cli_alert_danger("Max retries reached. Exiting.")
   stop()
 }
+
+
+#' @title faasr_set_workflow_timer_ld
+#' @description 
+#' # set/unset workflow cron timer for lambda
+#' @param faasr a list form of the JSON file
+#' @param cred a list form of the credentials
+#' @param target a string for the target action
+#' @param cron a string for cron data e.g., */5 * * * *
+#' @param unset a logical value; set timer(FALSE) or unset timer(TRUE)
+#' @import cli
+#' @import paws
+#' @export
 
 # set workflow timer for lambda
 faasr_set_workflow_timer_ld <- function(faasr, cred, target, cron, unset=FALSE){
@@ -565,6 +625,19 @@ faasr_set_workflow_timer_ld <- function(faasr, cred, target, cron, unset=FALSE){
   
 }
 
+
+#' @title faasr_workflow_invoke_lambda
+#' @description 
+#' Invoke a workflow for the lambda
+#' this function is invoked by faasr_workflow_invoke
+#' @param faasr a list form of the JSON file
+#' @param cred a list form of the credentials
+#' @param faas_name a string for the target server
+#' @param actionname a string for the target action name
+#' @import cli
+#' @import paws
+#' @export
+
 faasr_workflow_invoke_lambda <- function(faasr, cred, faas_name, actionname){
     aws_region <- faasr$ComputeServers[[faas_name]]$Region
     # get access key and secret key from cred
@@ -599,6 +672,5 @@ faasr_workflow_invoke_lambda <- function(faasr, cred, faas_name, actionname){
     cli_alert_danger(err_msg)
     
   }
-
 }
                            

@@ -1,4 +1,5 @@
-#' @title Parses and validates JSON Payload for a FaaSr invocation
+#' @name faasr_parse
+#' @title faasr_parse
 #' @description
 #' This function uses JSON parsing and validation to ensure the Payload is compliant
 #' Two checks are made here: 1) is it a valid JSON format? and 2) does it conform to the FaaSr JSON schema?
@@ -6,6 +7,9 @@
 #' Otherwise, abort
 #' @param faasr_payload JSON Payload provided upon Action invocation by the FaaS platform
 #' @return faasr list with parsed and validated Payload
+#' @import jsonlite
+#' @import jsonvalidate
+#' @export
 
 library("jsonlite")
 library("jsonvalidate")

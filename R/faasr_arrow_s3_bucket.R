@@ -1,9 +1,14 @@
-#' @title Provide user functions for "arrow" library
-#' @description Uses "arrow" library to set up the configurations with given json file and 
-#'              provide the object to the users
+#' @name faasr_arrow_s3_bucket
+#' @title faasr_arrow_s3_bucket
+#' @description 
+#' `test` Uses "arrow" library to set up the configurations with given json file and 
+#' provide the object to the users
 #' @param server_name for string, default value is faasr$DefaultDataStore
 #' @return s3 representing object for "arrow"
+#' @import arrow
+#' @export
 
+globalVariables(".faasr")
 library("arrow")
 
 

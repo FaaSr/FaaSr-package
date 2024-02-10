@@ -1,12 +1,17 @@
-#' @title Puts a file into S3 bucket
-#' @description Helper function to upload a file from a local Action folder to an S3 bucket
+#' @name faasr_put_file
+#' @title faasr_put_file
+#' @description 
+#' Helper function to upload a file from a local Action folder to an S3 bucket
 #' @param faasr list with parsed and validated Payload
 #' @param server_name string with name of the S3 bucket to use; must match a name declared in the faasr list
 #' @param local_folder string with the name of the local folder where the file to be uploaded resides
 #' @param local_file string with the name of the local file to be uploaded
 #' @param remote_folder string with the name of the remote folder where the file is to be uploaded to
 #' @param remote_file string with the name for the file once uploaded to the S3 bucket
+#' @import paws
+#' @export
 
+globalVariables(".faasr")
 library("paws")
 
 # Default server_name is Logging Server, default remote folder name is empty ("") and 

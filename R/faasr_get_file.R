@@ -1,12 +1,17 @@
-#' @title Gets a file from an S3 bucket
-#' @description Helper function to download a file from an S3 bucket to local Action folder
+#' @name faasr_get_file
+#' @title faasr_get_file
+#' @description 
+#' Helper function to download a file from an S3 bucket to local Action folder
 #' @param faasr list with parsed and validated Payload
 #' @param server_name string with name of the S3 bucket to use; must match a name declared in the faasr list
 #' @param remote_folder string with the name of the remote folder where the file is to be downloaded from
 #' @param remote_file string with the name for the file to be downloaded from the S3 bucket
 #' @param local_folder string with the name of the local folder where the file to be downloaded is stored
 #' @param local_file string with the name of the local file once downloaded
+#' @import paws
+#' @export
 
+globalVariables(".faasr")
 library("paws")
 
 # Default server_name is DefaultDataStore, default remote folder name is empty ("") and 

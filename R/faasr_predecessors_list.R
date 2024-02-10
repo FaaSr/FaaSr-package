@@ -1,7 +1,11 @@
-#' @title Check if the User Function has any predecessors in the Workflow
-#' @description TBD
+#' @name faasr_predecessors_list
+#' @title faasr_predecessors_list
+#' @description 
+#' Get the predecessors list, by using the graph from faasr_check_workflow
 #' @param faasr list with parsed and validated Payload
 #' @param graph graph constructed by the depth first search in faasr_check_workflow_cycle
+#' @return a list of "function:predecessors" pairs.
+#' @export
 
 faasr_predecessors_list <- function(faasr, graph){
   # find the predecessors and add them to the list "pre"

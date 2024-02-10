@@ -1,10 +1,14 @@
-#' @title Deletes a file from an S3 bucket
+#' @name faasr_delete_file
+#' @title faasr_delete_file
 #' @description Helper function to delete a file in an S3 bucket
 #' @param faasr list with parsed and validated Payload
 #' @param server_name string with name of the S3 bucket to use; must match a name declared in the faasr list
 #' @param remote_folder string with the name of the remote folder where the file is to be deleted from
 #' @param remote_file string with the name for the file to be deleted 
+#' @import paws
+#' @export
 
+globalVariables(".faasr")
 library("paws")
 
 # Default server_name is DefaultDataStore, default remote folder name is empty ("") and 

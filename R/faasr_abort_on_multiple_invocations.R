@@ -1,10 +1,17 @@
-#' @title Abort this Action if it's not the last one being triggered
-#' @description Ensures that only one Action proceeds to execute a User Function if there are multiple triggers
-#'              This is necessary because if in the Workflow a function receives multiple triggers, multiple Actions
-#'              are invoked; however, we don't want to execute the same function multiple times.
-#'              This function aborts all but the last Action triggered
+#' @name faasr_abort_on_multiple_invocations
+#' @title faasr_abort_on_multiple_invocations
+#' @description 
+#' Ensures that only one Action proceeds to execute a User Function if there are multiple triggers
+#' This is necessary because if in the Workflow a function receives multiple triggers, 
+#' multiple Actions are invoked; however, we don't want to execute the same function multiple times.
+#' This function aborts all but the last Action triggered
 #' @param faasr list with parsed and validated Payload
+#' @param pre list with names of functions and corresponding predecessors
+#' @import uuid
+#' @import paws
+#' @export
 
+globalVariables(".faasr")
 library("uuid")
 library("paws")
 

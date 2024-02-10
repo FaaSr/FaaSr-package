@@ -1,38 +1,21 @@
-#' @title Client tool for registering github-actions.
-#' @description faasr_register_workflow_github_actions:
-#' starts to register functions in the JSON file for GithubActions
-#' @description faasr_register_workflow_github_repo_lists:
-#' creates a list of Server and Action name pairs
-#' @description faasr_register_workflow_github_create_env:
-#' creates a "env" file for the credentials for github actions
-#' @description faasr_register_workflow_github_create_yml_file:
-#' creates a "yml" file, name with the given actionname and a folder ".github/workflows/"
-#' @description faasr_register_workflow_github_set_payload:
-#' creates a "payload" file for json
-#' @description faasr_register_workflow_github_gh_setup:
-#' create a local repo, push the local to remote, and setup payload and credentials
-#' @description faasr_register_workflow_github_repo_exists:
-#' check the given repo in the JSON exists
-#'
-#' @param faasr_register_workflow_github_actions: "faasr" for list of the json, "cred" for the list of credentials
-#' @param faasr_register_workflow_github_repo_lists: "faasr" for list of the json
-#' @param faasr_register_workflow_github_create_env: "server_name" for the string of server name,
-#' "repo_name" for the string of repo name, "cred" for the list of credentials
-#' @param faasr_register_workflow_github_create_yml_file: "faasr" for list of the json
-#' @param faasr_register_workflow_github_set_payload: "faasr" for list of the json
-#' @param faasr_register_workflow_github_gh_setup: "check" for the boolean, "repo" for the string, "ref" for the string
-#' @param faasr_register_workflow_github_repo_exists: "repo" for the string
-#'
-#' @return faasr_register_workflow_github_actions: "faasr" for list of the json
-#' @return faasr_register_workflow_github_repo_lists: "repo_list" for the list of servername:actionname pairs
-#' @return faasr_register_workflow_github_repo_exists: "exit_code" for the int
-
-
-
 workflow_basic_path <- "https://raw.githubusercontent.com/FaaSr/FaaSr-package/main/schema/workflow_template.yml"
 workflow_timer_path <- "https://raw.githubusercontent.com/FaaSr/FaaSr-package/main/schema/workflow_with_cron_template.yml"
 #TBD. workflow_runner_path <- ""
 #TBD. workflow_runner_w_timer_path <- ""
+
+#' @name faasr_register_workflow_github_actions
+#' @title faasr_register_workflow_github_actions
+#' @description 
+#' register the workflow for github actions.
+#' parse faasr to get the repository list and actions.
+#' create a local/remote repository for the FaaSr actions.
+#' @param faasr a list form of the JSON file
+#' @param cred a list form of the credentials
+#' @param cron a string for cron data e.g., */5 * * * *
+#' @param runner a logical value; enable runner
+#' @import httr
+#' @import cli
+#' @export
 
 faasr_register_workflow_github_actions <- function(faasr, cred, cron=NULL, runner=FALSE) {
 
@@ -69,10 +52,10 @@ faasr_register_workflow_github_actions <- function(faasr, cred, cron=NULL, runne
     # check user's request
     private <- faasr_register_workflow_github_repo_question(response)
     # create directories
-    faasr_register_workflow_github_create_dir(server,repo,cred)
+    faasr_register_workflow_github_create_dir(server,repo)
     cli_alert_success("Create github local directories")
     # create .gitignore files
-    faasr_register_workflow_github_create_env(server,repo,cred)
+    faasr_register_workflow_github_create_env(server,repo)
     cli_alert_success("Create github env files")
     # create the payload file
     faasr_register_workflow_github_create_payload(faasr,repo)
@@ -88,7 +71,7 @@ faasr_register_workflow_github_actions <- function(faasr, cred, cron=NULL, runne
     cli_progress_update()
     
     # build local repositories
-    faasr_register_workflow_git_local_repo(response,repo,ref)
+    faasr_register_workflow_git_local_repo(repo,ref)
     cli_alert_success("Create github local repository")
     cli_progress_update()
     
@@ -110,10 +93,21 @@ faasr_register_workflow_github_actions <- function(faasr, cred, cron=NULL, runne
   cli_text(col_cyan("{symbol$menu} {.strong Successfully registered all github actions}"))
 }
 
+#' @title faasr_httr_request
+#' @description 
+#' the help function to send the curl request to the github
+#' by using the "httr" library. 
+#' @param token a string for the github token
+#' @param url a string of url
+#' @param body a list of body
+#' @param type REST API values; GET/PUT/DELETE/PATCH/POST
+#' @return response: response status; 200/202/204/400/etc
+#' @import httr
+#' @import cli
+#' @export
 
 # help sending httr requests
 faasr_httr_request <- function(token, url, body=list(), type){
-  library("httr")
   # get functions depending on "type"
   func <- get(type)
   # write headers
@@ -137,6 +131,17 @@ faasr_httr_request <- function(token, url, body=list(), type){
 }
 
 
+#' @title faasr_register_workflow_github_repo_lists
+#' @description 
+#' Parse the faasr and get the list of function:repository
+#' Find actions which is using "Github Actions"
+#' return value's key is action and value is server name.
+#' @param faasr a list form of the JSON file
+#' @return a list of "action:server name" pairs.
+#' @import httr
+#' @import cli
+#' @export
+
 # make a repo list. like a key-value set, key is a server_name and value is a repository name
 faasr_register_workflow_github_repo_lists <- function(faasr) {
   # empty list
@@ -159,6 +164,19 @@ faasr_register_workflow_github_repo_lists <- function(faasr) {
 }
 
 
+#' @title faasr_register_workflow_github_repo_exists
+#' @description 
+#' Check the remote repository is existing on the github
+#' by sending the GET request.
+#' If it exists, return TRUE, doesn't exist, return FALSE
+#' @param faasr_token a string for the github token
+#' @param repo a string for the target repository name
+#' @return a logical value; if exists, return TRUE, 
+#' doesn't exist, return FALSE
+#' @import httr
+#' @import cli
+#' @export
+
 # check github remote repository existence
 faasr_register_workflow_github_repo_exists <- function(faasr_token, repo) {
   # get env
@@ -175,6 +193,14 @@ faasr_register_workflow_github_repo_exists <- function(faasr_token, repo) {
   }
 }
 
+
+#' @title faasr_register_workflow_github_repo_question
+#' @description 
+#' Ask users to update the repository
+#' @param check a logical value 
+#' @param repo a string for the target repository name
+#' @return a logical value to make repository private or not
+#' @export
 
 faasr_register_workflow_github_repo_question <- function(check, repo){
   # get env
@@ -216,7 +242,14 @@ faasr_register_workflow_github_repo_question <- function(check, repo){
 }
 
 
-faasr_register_workflow_github_create_dir <- function(server,repo,cred){
+#' @title faasr_register_workflow_github_create_dir
+#' @description 
+#' Create the directory for the workflows
+#' @param server a string for the server name
+#' @param repo a string for the target repository name
+#' @export
+
+faasr_register_workflow_github_create_dir <- function(server,repo){
   cwd <- getwd()
   setwd(faasr_gh_local_repo)
   # create directories
@@ -231,13 +264,27 @@ faasr_register_workflow_github_create_dir <- function(server,repo,cred){
 }
 
 
-faasr_register_workflow_github_create_env <- function(server,repo,cred){
+#' @title faasr_register_workflow_github_create_env
+#' @description 
+#' Create the environment file .gitignore
+#' @param server a string for the server name
+#' @param repo a string for the target repository name
+#' @export
+
+faasr_register_workflow_github_create_env <- function(server,repo){
   # create a file ".gitignore"
   writeLines(paste0(".env\n*~\n*.swp\n*.swo\n.Rproj.user\n.Rhistory\n.RData\n.Ruserdata\n",
                     ".DS_Store\ncache\n*.o\n*.so\n",faasr_data,"\n",faasr_gh_local_repo),
              paste0(faasr_gh_local_repo,"/",repo,"/.gitignore"))
 }
 
+
+#' @title faasr_register_workflow_github_create_payload
+#' @description 
+#' Create the payload JSON file named "payload.json"
+#' @param faasr a list form of the JSON file
+#' @param repo a string for the target repository name
+#' @export
 
 faasr_register_workflow_github_create_payload <- function(faasr, repo){
   # create a file named "payload.json"
@@ -246,6 +293,12 @@ faasr_register_workflow_github_create_payload <- function(faasr, repo){
   write(faasr_gh_pt, paste0(faasr_gh_local_repo,"/",repo,"/payload.json"))
 }
 
+
+#' @title faasr_register_workflow_github_create_readme
+#' @description 
+#' create README.md file for repository description
+#' @param repo a string for the target repository name
+#' @export
 
 # create README.md file for repository description
 faasr_register_workflow_github_create_readme <- function(repo){
@@ -259,6 +312,18 @@ It is safe to delete this repository if you no longer need this workflow. It can
   writeLines(contents, path)
 }
 
+
+#' @title faasr_register_workflow_github_create_yml_file
+#' @description 
+#' Create a yaml workflow file with the container name
+#' @param faasr a list form of the JSON file
+#' @param actionname a string for the action name
+#' @param repo a string for the target repository name
+#' @param cron a string for cron data e.g., */5 * * * *
+#' @param runner a logical value; enable runner
+#' @import httr
+#' @import cli
+#' @export
 
 # Create a yaml workflow file with the container name
 # TBD implement a native workflow pattern
@@ -303,8 +368,15 @@ faasr_register_workflow_github_create_yml_file <- function(faasr, actionname, re
 }
 
 
+#' @title faasr_register_workflow_git_local_repo
+#' @description 
+#' Create a local git repository
+#' @param repo a string for the target repository name
+#' @param ref a string for the branch of target repository
+#' @export
+
 # create git local repository
-faasr_register_workflow_git_local_repo <- function(check,repo,ref){
+faasr_register_workflow_git_local_repo <- function(repo,ref){
   cwd <- getwd()
   setwd(paste0(faasr_gh_local_repo,"/",repo))
   
@@ -317,6 +389,19 @@ faasr_register_workflow_git_local_repo <- function(check,repo,ref){
   setwd(cwd)
 }
 
+
+#' @title faasr_register_workflow_git_remote_repo
+#' @description 
+#' create / push git remote repository
+#' @param token a string for the github token
+#' @param check a logical value whether the remote repository exists
+#' @param private a logical value to make repository private or not
+#' @param repo a string for the target repository name
+#' @param ref a string for the branch of target repository
+#' @return a integer value for the result
+#' @import httr
+#' @import cli
+#' @export
 
 # create / push git remote repository
 faasr_register_workflow_git_remote_repo <- function(token,check,private,repo,ref){
@@ -347,6 +432,16 @@ faasr_register_workflow_git_remote_repo <- function(token,check,private,repo,ref
   return(check2)
 }
 
+
+#' @title faasr_register_workflow_git_remote_env
+#' @description 
+#' set env(secrets and variables) to the remote repository
+#' @param repo a string for the target repository name
+#' @param cred a list form of the credentials
+#' @param token a string for the github token
+#' @import httr
+#' @import cli
+#' @export
 
 # set env(secrets and variables)
 faasr_register_workflow_git_remote_env <- function(repo, cred, token){
@@ -408,6 +503,19 @@ faasr_register_workflow_git_remote_env <- function(repo, cred, token){
 }
 
 
+#' @title faasr_workflow_invoke_github
+#' @description 
+#' invoke the github actions workflow on the github repository.
+#' Async version; does not wait for the result
+#' This will be invoked by faasr_workflow_invoke function
+#' @param faasr a list form of the JSON file
+#' @param cred a list form of the credentials
+#' @param faas_name a string for the target server name
+#' @param actionname a string for the target action name
+#' @import httr
+#' @import cli
+#' @export
+
 # inovke workflow run
 faasr_workflow_invoke_github <- function(faasr, cred, faas_name, actionname){
 
@@ -454,6 +562,18 @@ faasr_workflow_invoke_github <- function(faasr, cred, faas_name, actionname){
   }
 }
 
+
+#' @title faasr_set_workflow_timer_gh
+#' @description 
+#' set/unset cron timer for the github actions.
+#' @param faasr a list form of the JSON file
+#' @param cred a list form of the credentials
+#' @param actionname a string for the target action name
+#' @param cron a string for cron data e.g., */5 * * * *
+#' @param unset a logical value; set timer(FALSE) or unset timer(TRUE)
+#' @import httr
+#' @import cli
+#' @export
 
 # set workflow timer
 faasr_set_workflow_timer_gh <- function(faasr,cred,actionname,cron=NULL,unset=FALSE){
@@ -513,7 +633,7 @@ faasr_set_workflow_timer_gh <- function(faasr,cred,actionname,cron=NULL,unset=FA
   }
 
   # build local repositories
-  faasr_register_workflow_git_local_repo(response,repo,ref)
+  faasr_register_workflow_git_local_repo(repo,ref)
   cli_alert_success("Update local git repository workflow")
   cli_progress_update()
 
