@@ -128,7 +128,7 @@ faasr_register_workflow_lambda_function_lists <- function(faasr,cred, lambda_ser
       cli_alert_info("Do you want to update?[y/n]")
       while(TRUE) {
         check <- readline()
-        if(check == "y"){
+        if(check == "y" || check == ""){
           lambda_function_info[[action_name]]$action <- "update"
           break
         } else if(check == 'n'){

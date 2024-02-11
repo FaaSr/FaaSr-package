@@ -211,7 +211,7 @@ faasr_register_workflow_github_repo_question <- function(check, repo){
     cli_text("{symbol$fancy_question_mark}Enter repository visibility[private/public]")
     while(TRUE) {
       check <- invisible(readline())
-      if (check == "private") {
+      if (check == "private" || check == "") {
         private <- TRUE
         break
       } else if(check == "public") {
@@ -228,7 +228,7 @@ faasr_register_workflow_github_repo_question <- function(check, repo){
     cli_text("{symbol$fancy_question_mark} Update the repository?[y/n]")
     while(TRUE) {
       check1 <- readline()
-      if (check1=="y") {
+      if (check1=="y" || check1=="") {
         break
       } else if(check1 == "n") {
         cli_alert_danger("Stop the function")

@@ -199,7 +199,7 @@ faasr_register_workflow_openwhisk_check_user_input <- function(check, actionname
 
     while(TRUE) {
       check <- readline()
-      if (check=="y") {
+      if (check=="y" || check=="") {
         overwrite <- "true"
         break
       } else if(check=="n") {
