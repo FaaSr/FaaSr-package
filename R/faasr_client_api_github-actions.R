@@ -211,10 +211,10 @@ faasr_register_workflow_github_repo_question <- function(check, repo){
     cli_text("{symbol$fancy_question_mark}Enter repository visibility[private/public]")
     while(TRUE) {
       check <- invisible(readline())
-      if (check == "private" || check == "") {
+      if (check == "private") {
         private <- TRUE
         break
-      } else if(check == "public") {
+      } else if(check == "public" || check == "") {
         private <- FALSE
         break
       } else {
