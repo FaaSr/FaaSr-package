@@ -426,7 +426,7 @@ faasr_register_workflow_git_remote_repo <- function(token,check,private,repo,ref
     }
   }
   # push files to the repository
-  check2 <- system(paste0("git push -f https://github.com/", repo, " ", ref),
+  check2 <- system(paste0("git push -f https://github.com/", repo, " ", ref)
                    ,ignore.stderr=TRUE, ignore.stdout=TRUE)
   setwd(cwd)
   return(check2)
