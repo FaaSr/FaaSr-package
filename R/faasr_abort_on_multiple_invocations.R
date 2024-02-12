@@ -11,7 +11,6 @@
 #' @import paws
 #' @export
 
-globalVariables(".faasr")
 library("uuid")
 library("paws")
 
@@ -24,7 +23,7 @@ faasr_abort_on_multiple_invocations <- function(faasr, pre) {
     log_server_name = faasr$LoggingDataStore
   }
   
-  if (log_server_name %in% names(.faasr$DataStores)) {
+  if (log_server_name %in% names(faasr$DataStores)) {
     NULL
   } else {
     err_msg <- paste0('{\"faasr_abort_on_multiple_invocation\":\"Invalid data server name: ',log_server_name,'\"}', "\n")
