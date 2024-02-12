@@ -11,6 +11,143 @@
 #' @export
 
 faasr_register_workflow_aws_lambda <- function(faasr, cred, memory=1024, timeout=600){
+
+  # check function information
+  lambda_function_info <- faasr_register_workflow_lambda_function_lists(faasr)
+  
+  if (length(lambda_function_info)==0){
+    return("")
+  }
+    
+  cli::cli_h1(paste0("Registering workflow for lambda"))
+  cli::cli_progress_bar(
+    format = paste0(
+      "FaaSr {pb_spin} Registering workflow lambda ",
+      "{cli::pb_bar} {cli::pb_percent} [{pb_current}/{pb_total}]   ETA:{pb_eta}"
+    ),
+    format_done = paste0(
+      "{col_yellow(symbol$checkbox_on)} Successfully registered actions for lambda server ",
+      "in {pb_elapsed}."
+    ),
+    total = 5
+  )
+
+  lambda_server_info <- faasr_register_workflow_lambda_server_info(faasr, cred)
+  cli_progress_update()
+
+  # get aws lambda function list
+  lambda_function_info <- faasr_register_workflow_lambda_function_info(faasr, cred, lambda_server_info, lambda_function_info)
+  cli_progress_update()
+
+  # get aws lambda function image list
+  function_image_list <- faasr_register_workflow_lambda_function_image(faasr, lambda_server_info)
+  cli_progress_update()
+
+  #create aws lambda function role
+  aws_lambda_role_name <- faasr_register_workflow_aws_lambda_role_create(faasr, cred, lambda_server_info)
+  cli_progress_update()
+
+  # create aws lambda functions
+  faasr_register_workflow_aws_lambda_function_build(faasr, lambda_function_info, function_image_list, aws_lambda_role_name, cred, lambda_server_info, memory, timeout)
+  cli_progress_update()
+
+  cli_text(col_cyan("{symbol$menu} {.strong Successfully registered all lambda actions}"))
+}
+
+
+#' @title faasr_register_workflow_lambda_function_lists
+#' @description 
+#' Get aws lambda function list
+#' @param faasr a list form of the JSON file
+#' @return lambda_function_info a list form of lambda function information: name, actions
+#' @import cli
+#' @export
+
+faasr_register_workflow_lambda_function_lists <- function(faasr){
+  
+  function_list <- faasr$FunctionList
+  compute_servers <- faasr$ComputeServers 
+
+  # initialize the list
+  lambda_function_info <- list()
+  
+  # iterate over the functions
+  for (func_name in names(function_list)) {
+    
+    func <- function_list[[func_name]]
+    server_name <- func$FaaSServer
+    server_type <- compute_servers[[server_name]]$FaaSType
+    action_name <- func_name
+    
+    # check if the function server type is Lambda
+    if (server_type == "Lambda") {
+      if(!action_name %in% names(lambda_function_info)){
+        lambda_function_info[[action_name]]$image <- action_name
+      }
+    }
+  }
+  return(lambda_function_info)
+}
+
+
+#' @title faasr_register_workflow_lambda_function_info
+#' @description 
+#' Get aws lambda function information
+#' @param faasr a list form of the JSON file
+#' @param cred a list form of the credentials
+#' @param lambda_server_info a list form of Lambda server information: id, keys, region
+#' @param lambda_function_info a list form of lambda function information: name, actions
+#' @return lambda_function_info a list form of lambda function information: name, actions, create/update
+#' @import cli
+#' @export
+
+# Get aws lambda function info
+faasr_register_workflow_lambda_function_info <- function(faasr,cred, lambda_server_info, lambda_function_info){
+  
+  function_list <- faasr$FunctionList
+  compute_servers <- faasr$ComputeServers
+  
+  for(action_name in names(lambda_function_info)){
+    server_name <- function_list[[action_name]]$FaaSServer
+    current_lambda_server_info <- lambda_server_info[[server_name]]
+
+    if(check_lambda_exists(action_name, cred, current_lambda_server_info)){
+      cli_alert_info(paste0("lambda function - {.strong ", action_name, "} already exists."))
+      cli_alert_info("Do you want to update?[y/n]")
+      while(TRUE) {
+        check <- readline()
+        if(check == "y" || check == ""){
+          lambda_function_info[[action_name]]$action <- "update"
+          break
+        } else if(check == 'n'){
+          cli_alert_danger("stop the script")
+          stop()
+        }else {
+          cli_alert_warning("Enter \"y\" or \"n\": ")
+        }
+      }
+    } else {
+      lambda_function_info[[action_name]]$action <- "create"
+    }
+  }
+  cli_alert_success("Get the lambda function information")
+
+  return (lambda_function_info)
+}
+
+
+#' @title faasr_register_workflow_lambda_server_info
+#' @description 
+#' Get aws lambda server information
+#' @param faasr a list form of the JSON file
+#' @param cred a list form of the credentials
+#' @return lambda_server_info a list form of Lambda server information: id, keys, region
+#' @import cli
+#' @import paws
+#' @export
+
+faasr_register_workflow_lambda_server_info <- function(faasr, cred){
+  
   # collect lambda server information
   lambda_server_info <- list()
   aws_account_checked <- FALSE
@@ -43,108 +180,10 @@ faasr_register_workflow_aws_lambda <- function(faasr, cred, memory=1024, timeout
         aws_account_id <- sts_instance$get_caller_identity()$Account
         aws_account_checked <- TRUE
       }
-
       lambda_server_info[[faas]]$aws_account_id <- aws_account_id
-
     }
   }
-  
-  cli::cli_h1(paste0("Registering workflow for lambda"))
-  cli::cli_progress_bar(
-    format = paste0(
-      "FaaSr {pb_spin} Registering workflow lambda ",
-      "{cli::pb_bar} {cli::pb_percent} [{pb_current}/{pb_total}]   ETA:{pb_eta}"
-    ),
-    format_done = paste0(
-      "{col_yellow(symbol$checkbox_on)} Successfully registered actions for server ",
-      "in {pb_elapsed}."
-    ),
-    total = 5
-  )
-  cli_progress_update()
-  # get aws lambda function list
-  lambda_function_info <- faasr_register_workflow_lambda_function_lists(faasr, cred, lambda_server_info)
-  if (length(lambda_function_info)==0){
-    return("")
-  }
-  cli_progress_update()
-
-  # get aws lambda function image list
-  function_image_list <- faasr_register_workflow_lambda_function_image(faasr, lambda_server_info)
-  cli_progress_update()
-
-  #create aws lambda function role
-  aws_lambda_role_name <- faasr_register_workflow_aws_lambda_role_create(faasr, cred, lambda_server_info)
-  cli_progress_update()
-
-  # create aws lambda functions
-  faasr_register_workflow_aws_lambda_function_build(faasr, lambda_function_info, function_image_list, aws_lambda_role_name, cred, lambda_server_info, memory, timeout)
-  cli_progress_update()
-
-  cli_text(col_cyan("{symbol$menu} {.strong Successfully registered all lambda actions}"))
-}
-
-
-#' @title faasr_register_workflow_lambda_function_lists
-#' @description 
-#' Get aws lambda function list
-#' @param faasr a list form of the JSON file
-#' @param cred a list form of the credentials
-#' @param lambda_server_info a list form of Lambda server information: id, keys, region
-#' @return lambda_function_info a list form of lambda function information: name, actions
-#' @import cli
-#' @export
-
-# Get aws lambda function list
-faasr_register_workflow_lambda_function_lists <- function(faasr,cred, lambda_server_info){
-  
-  function_list <- faasr$FunctionList
-  compute_servers <- faasr$ComputeServers
-  
-  # initialize the list
-  lambda_function_info <- list()
-  
-  # iterate over the functions
-  for (func_name in names(function_list)) {
-    
-    func <- function_list[[func_name]]
-    server_name <- func$FaaSServer
-    server_type <- compute_servers[[server_name]]$FaaSType
-    action_name <- func_name
-    
-    # check if the function server type is Lambda
-    if (server_type == "Lambda") {
-      if(!action_name %in% names(lambda_function_info)){
-        lambda_function_info[[action_name]]$image <- action_name
-      }
-    }
-  }
-  for(action_name in names(lambda_function_info)){
-    server_name <- function_list[[action_name]]$FaaSServer
-    current_lambda_server_info <- lambda_server_info[[server_name]]
-
-    if(check_lambda_exists(action_name, cred, current_lambda_server_info)){
-      cli_alert_info(paste0("lambda function - {.strong ", action_name, "} already exists."))
-      cli_alert_info("Do you want to update?[y/n]")
-      while(TRUE) {
-        check <- readline()
-        if(check == "y" || check == ""){
-          lambda_function_info[[action_name]]$action <- "update"
-          break
-        } else if(check == 'n'){
-          cli_alert_danger("stop the script")
-          stop()
-        }else {
-          cli_alert_warning("Enter \"y\" or \"n\": ")
-        }
-      }
-    } else {
-      lambda_function_info[[action_name]]$action <- "create"
-    }
-  }
-  cli_alert_success("Get the lambda function information")
-
-  return (lambda_function_info)
+  return(lambda_server_info)
 }
 
 
