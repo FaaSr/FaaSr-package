@@ -261,7 +261,7 @@ check_user_image_exist <- function(faasr, action_name, server_name, user_image_u
 
 #' @title faasr_register_workflow_aws_lambda_role_create
 #' @description 
-#' create the aws-lamda role named "faasr-lambda-role"
+#' create the aws-lambda role named "faasr-lambda-role"
 #' @param faasr a list form of the JSON file
 #' @param cred a list form of the credentials
 #' @param lambda_server_info a list form of Lambda server information: id, keys, region

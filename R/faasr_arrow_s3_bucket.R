@@ -9,8 +9,6 @@
 #' @export
 
 globalVariables(".faasr")
-library("arrow")
-
 
 faasr_arrow_s3_bucket <- function(server_name=.faasr$DefaultDataStore) {
   # Check that an S3 server_name has been defined

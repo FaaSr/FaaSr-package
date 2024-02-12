@@ -5,8 +5,6 @@
 #' @import paws
 #' @param faasr list with parsed and validated Payload
 
-library("paws")
-
 # Read-Set Memory implementation
 faasr_rsm <- function(faasr) {
   # Set env for flag and lock

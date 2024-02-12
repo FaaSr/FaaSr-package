@@ -12,7 +12,6 @@
 #' 
 
 globalVariables(".faasr")
-library("paws")
 
 faasr_s3_check <- function(faasr){
 

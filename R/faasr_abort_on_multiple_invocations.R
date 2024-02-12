@@ -11,9 +11,6 @@
 #' @import paws
 #' @export
 
-library("uuid")
-library("paws")
-
 faasr_abort_on_multiple_invocations <- function(faasr, pre) {
 
   # Set env for checking

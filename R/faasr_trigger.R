@@ -12,11 +12,6 @@
 #' @import paws
 #' @export
 
-library("jsonlite")
-library("httr")
-library("paws")
-
-
 faasr_trigger <- function(faasr) {
 
   # First extract the name of the user function

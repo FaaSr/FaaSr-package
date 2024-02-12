@@ -9,7 +9,6 @@
 #' @export
 
 globalVariables(".faasr")
-library("paws")
 
 # Default server_name is DefaultDataStore, default remote folder name is empty ("") and 
 # local folder name is current directory(".")
