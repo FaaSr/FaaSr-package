@@ -1,11 +1,12 @@
 {   "FunctionInvoke": "first_action",
     "InvocationID": "uuid_format_id",
     "FaaSrLog": "logfolder_name/default:FaaSrLog",
-    "LoggingServer": "Servername for logging/should be one of DataStores Server name",
+    "DefaultDataStore": "Servername for logging/should be one of DataStores Server name",
+    "LoggingDataStore": "Logging server name",
     "FunctionList": {
         "F1": {
             "FaaSServer": "target_faas_server/should be one of ComputeServers Server name",
-            "Actionname": "actionname for function",
+            "FunctionName": "F1_function_name",
             "Arguments": {
                 "input1": "input1.csv",
                 "input2": "input2.csv"
@@ -17,14 +18,14 @@
         },
         "F2": {
             "FaaSServer": "My_Github_Account",
-            "Actionname": "workflow.yml",
+            "FunctionName": "F2_function_name",
             "Arguments": {
                 "input": "input3.csv"
             }
         },
         "F3": {
             "FaaSServer": "My_AWS_Account",
-            "Actionname": "f3_action",
+            "FunctionName": "F3_function_name",
             "Arguments": {
                 "input": "input123.csv"
             }
@@ -68,7 +69,7 @@
             "FaaSType": "GitHubActions",
             "UserName": "user_name",
             "ActionRepoName": "repo_name",
-            "Ref": "branch1",
+            "Branch": "branch1",
             "Token": "git_token" 
         },
         "My_AWS_Account": {
@@ -81,8 +82,7 @@
             "FaaSType": "OpenWhisk",
             "Endpoint": "http://00.00.00.00",
             "Namespace": "my_namespace",
-            "API.key": "ow_api_key",
-            "Region": "test"
+            "API.key": "ow_api_key"
         }
     },
     "DataStores": {

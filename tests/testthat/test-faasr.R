@@ -22,14 +22,16 @@ test_that("faasr_function", {
   ## 3. Check json_path is not NULL
   ## json_path isn't NULL, so first wrap it up with "expect_null" function
   ## Then, use "expect_failure" to say that "expect_null" function will be failed.
-  expect_failure(expect_null(faasr_test$json_path))
+  expect_failure(expect_null(faasr_test$path$json))
   
-  ## 4. Check json_file and directory is created.
+  ## 4. Check directory is created.
   ## file would have been created on the path: faasr_test$json_path
-  expect_true(file.exists(faasr_test$json_path))
+  expect_true(file.exists("faasr_gh_local_repo"))
+  expect_true(file.exists("faasr_data"))
   
   ## Change the json files and test it.
 
   ## After all the test, clean up the directory
-  unlink(".faasr_json", recursive=TRUE, force=TRUE)
+  unlink("faasr_gh_local_repo", recursive=TRUE, force=TRUE)
+  unlink("faasr_data", recursive=TRUE, force=TRUE)
 })

@@ -1,4 +1,5 @@
 test_json <- readLines("test.json")
+writeLines(readLines("https://raw.githubusercontent.com/FaaSr/FaaSr-package/main/schema/FaaSr.schema.json"), "FaaSr.schema.json")
   
 
 test_that("parse", {
@@ -34,4 +35,6 @@ test_that("parse", {
   #################################################################################
   ## You should modify test_json as many times as you can to find errors.
   
+  ## After all the test, clean up the file
+  unlink("FaaSr.schema.json", recursive=TRUE, force=TRUE)
 })
