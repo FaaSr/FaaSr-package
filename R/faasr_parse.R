@@ -11,9 +11,6 @@
 #' @import jsonvalidate
 #' @export
 
-library("jsonlite")
-library("jsonvalidate")
-
 faasr_parse <- function(faasr_payload) {
   faasr_schema <- readLines("FaaSr.schema.json")
 

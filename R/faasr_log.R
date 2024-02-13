@@ -11,7 +11,6 @@
 #' @export
 
 globalVariables(".faasr")
-library("paws")
 
 faasr_log <- function(log_message) {
 

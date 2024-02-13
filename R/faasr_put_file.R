@@ -12,7 +12,6 @@
 #' @export
 
 globalVariables(".faasr")
-library("paws")
 
 # Default server_name is Logging Server, default remote folder name is empty ("") and 
 # local folder name is current directory(".")

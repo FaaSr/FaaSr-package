@@ -11,9 +11,6 @@
 #' @import paws
 #' @export
 
-library("uuid")
-library("paws")
-
 faasr_init_log_folder <- function(faasr) {
   # if InvocationID doesn't have valid form, generate a UUID
   if (length(faasr$InvocationID) == 0) {

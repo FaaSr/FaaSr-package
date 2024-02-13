@@ -214,7 +214,7 @@ faasr_register_workflow_github_repo_question <- function(check, repo){
       if (check == "private") {
         private <- TRUE
         break
-      } else if(check == "public") {
+      } else if(check == "public" || check == "") {
         private <- FALSE
         break
       } else {
@@ -228,7 +228,7 @@ faasr_register_workflow_github_repo_question <- function(check, repo){
     cli_text("{symbol$fancy_question_mark} Update the repository?[y/n]")
     while(TRUE) {
       check1 <- readline()
-      if (check1=="y") {
+      if (check1=="y" || check1=="") {
         break
       } else if(check1 == "n") {
         cli_alert_danger("Stop the function")
@@ -425,9 +425,16 @@ faasr_register_workflow_git_remote_repo <- function(token,check,private,repo,ref
       stop()
     }
   }
+  # set the config
+  system("git config --global user.name 'github-actions[bot]'", ignore.stderr=TRUE, ignore.stdout=TRUE)
+  system("git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'"
+        , ignore.stderr=TRUE, ignore.stdout=TRUE)
   # push files to the repository
-  check2 <- system(paste0("git push -f https://github.com/", repo, " ", ref),
-                   ,ignore.stderr=TRUE, ignore.stdout=TRUE)
+  system(paste0("git commit -m 'update'"), ignore.stderr=TRUE, ignore.stdout=TRUE)
+  system(paste0("git branch -M ",ref), ignore.stderr=TRUE, ignore.stdout=TRUE)
+  system(paste0("git remote add origin https://",token,"@github.com/",repo,".git")
+        , ignore.stderr=TRUE, ignore.stdout=TRUE)
+  check2 <- system(paste0("git push -f -u origin ",ref), ignore.stderr=TRUE, ignore.stdout=TRUE)
   setwd(cwd)
   return(check2)
 }
