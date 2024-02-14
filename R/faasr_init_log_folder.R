@@ -8,7 +8,7 @@
 #' @param faasr list with parsed and validated Payload
 #' @return faasr a list of json file, UUID updated.
 #' @import uuid
-#' @import paws
+#' @importFrom paws.storage s3
 #' @export
 
 faasr_init_log_folder <- function(faasr) {

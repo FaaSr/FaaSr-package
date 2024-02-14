@@ -7,7 +7,7 @@
 #' 3. Check that the bucket name exists.
 #' @param faasr list with parsed and validated Payload
 #' @return faasr list with parsed and validated payload
-#' @import paws
+#' @importFrom paws.storage s3
 #' @export
 #' 
 

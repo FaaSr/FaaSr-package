@@ -8,7 +8,7 @@
 #' @param faasr list with parsed and validated Payload
 #' @param pre list with names of functions and corresponding predecessors
 #' @import uuid
-#' @import paws
+#' @importFrom paws.storage s3
 #' @export
 
 faasr_abort_on_multiple_invocations <- function(faasr, pre) {

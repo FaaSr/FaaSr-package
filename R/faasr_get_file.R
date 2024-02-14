@@ -8,7 +8,7 @@
 #' @param remote_file string with the name for the file to be downloaded from the S3 bucket
 #' @param local_folder string with the name of the local folder where the file to be downloaded is stored
 #' @param local_file string with the name of the local file once downloaded
-#' @import paws
+#' @importFrom paws.storage s3
 #' @export
 
 globalVariables(".faasr")

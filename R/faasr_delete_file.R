@@ -5,7 +5,7 @@
 #' @param server_name string with name of the S3 bucket to use; must match a name declared in the faasr list
 #' @param remote_folder string with the name of the remote folder where the file is to be deleted from
 #' @param remote_file string with the name for the file to be deleted 
-#' @import paws
+#' @importFrom paws.storage s3
 #' @export
 
 globalVariables(".faasr")

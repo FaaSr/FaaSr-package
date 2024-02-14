@@ -8,7 +8,7 @@
 #' @param local_file string with the name of the local file to be uploaded
 #' @param remote_folder string with the name of the remote folder where the file is to be uploaded to
 #' @param remote_file string with the name for the file once uploaded to the S3 bucket
-#' @import paws
+#' @importFrom paws.storage s3
 #' @export
 
 globalVariables(".faasr")

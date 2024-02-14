@@ -9,7 +9,7 @@
 #' @param faasr list with parsed and validated Payload
 #' @import jsonlite
 #' @import httr
-#' @import paws
+#' @importFrom paws.compute lambda
 #' @export
 
 faasr_trigger <- function(faasr) {
