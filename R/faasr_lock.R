@@ -2,7 +2,7 @@
 #' @title faasr_rsm
 #' @description 
 #' Uses locking algorithm with S3 to enforce single User Function execution when there are multiple predecessors
-#' @importFrom paws.storage s3
+#' @importFrom "paws.storage" "s3"
 #' @param faasr list with parsed and validated Payload
 
 # Read-Set Memory implementation
@@ -20,7 +20,7 @@ faasr_rsm <- function(faasr) {
     target_s3 <- faasr$LoggingDataStore
   }
   target_s3 <- faasr$DataStores[[target_s3]]
-  s3<-paws::s3(
+  s3<-paws.storage::s3(
     config=list(
 	  credentials=list(
 	    creds=list(
@@ -104,7 +104,7 @@ faasr_release<-function(faasr) {
         }
 
 	target_s3 <- faasr$DataStores[[target_s3]]
-	s3<-paws::s3(
+	s3<-paws.storage::s3(
 	  config=list(
 		credentials=list(
 			creds=list(
@@ -124,7 +124,7 @@ faasr_release<-function(faasr) {
 # Anyone_else_interested implementation
 faasr_anyone_else_interested <- function(faasr, target_s3, flag_path, flag_name){
 
-    s3<-paws::s3(
+    s3<-paws.storage::s3(
       config=list(
 	    credentials=list(
 	      creds=list(

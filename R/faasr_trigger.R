@@ -9,7 +9,7 @@
 #' @param faasr list with parsed and validated Payload
 #' @import jsonlite
 #' @import httr
-#' @importFrom paws.compute lambda
+#' @importFrom "paws.compute" "lambda"
 #' @export
 
 faasr_trigger <- function(faasr) {
@@ -112,7 +112,7 @@ faasr_trigger <- function(faasr) {
           payload_json <- toJSON(faasr, auto_unbox = TRUE)
 
           # Create a Lambda client using paws
-          lambda <- paws::lambda(
+          lambda <- paws.compute::lambda(
             config=list(
               credentials=list(
                 creds=list(

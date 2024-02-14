@@ -5,7 +5,7 @@
 #' provide the object to the users
 #' @param server_name for string, default value is faasr$DefaultDataStore
 #' @return s3 representing object for "arrow"
-#' @importFrom arrow s3_bucket
+#' @importFrom "arrow" "s3_bucket"
 #' @export
 
 globalVariables(".faasr")

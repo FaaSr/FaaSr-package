@@ -8,7 +8,7 @@
 #' @param remote_file string with the name for the file to be downloaded from the S3 bucket
 #' @param local_folder string with the name of the local folder where the file to be downloaded is stored
 #' @param local_file string with the name of the local file once downloaded
-#' @importFrom paws.storage s3
+#' @importFrom "paws.storage" "s3"
 #' @export
 
 globalVariables(".faasr")
@@ -46,7 +46,7 @@ faasr_get_file <- function(server_name=.faasr$DefaultDataStore, remote_folder=""
     dir.create(local_folder, recursive=TRUE)
   }
 
-  s3 <- paws::s3(
+  s3 <- paws.storage::s3(
     config=list(
 	  credentials=list(
 	    creds=list(

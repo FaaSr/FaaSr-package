@@ -39,7 +39,6 @@ Imports:
     jsonlite,
     httr,
     uuid,
-    paws.common,
     paws.application.integration,
     paws.compute,
     paws.storage,
@@ -47,13 +46,10 @@ Imports:
     cli,
     jsonvalidate,
     base64enc,
-    sodium,
-    devtools
+    sodium
 Suggests:
     glue,
-    utils,
-    methods,
-    withr,
+    paws.common,
     testthat,
     knitr
 Encoding: UTF-8

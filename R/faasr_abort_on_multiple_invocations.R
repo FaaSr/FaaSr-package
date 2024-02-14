@@ -8,7 +8,7 @@
 #' @param faasr list with parsed and validated Payload
 #' @param pre list with names of functions and corresponding predecessors
 #' @import uuid
-#' @importFrom paws.storage s3
+#' @importFrom "paws.storage" "s3"
 #' @export
 
 faasr_abort_on_multiple_invocations <- function(faasr, pre) {
@@ -29,7 +29,7 @@ faasr_abort_on_multiple_invocations <- function(faasr, pre) {
   }
 
   log_server <- faasr$DataStores[[log_server_name]]
-  s3<-paws::s3(
+  s3<-paws.storage::s3(
     config=list(
       credentials=list(
         creds=list(

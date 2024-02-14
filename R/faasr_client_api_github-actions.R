@@ -448,6 +448,8 @@ faasr_register_workflow_git_remote_repo <- function(token,check,private,repo,ref
 #' @param token a string for the github token
 #' @import httr
 #' @import cli
+#' @importFrom "sodium" "simple_encrypt"
+#' @importFrom "base64enc" "base64decode" "base64encode"
 #' @export
 
 # set env(secrets and variables)

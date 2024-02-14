@@ -8,7 +8,7 @@
 #' @param local_file string with the name of the local file to be uploaded
 #' @param remote_folder string with the name of the remote folder where the file is to be uploaded to
 #' @param remote_file string with the name for the file once uploaded to the S3 bucket
-#' @importFrom paws.storage s3
+#' @importFrom "paws.storage" "s3"
 #' @export
 
 globalVariables(".faasr")
@@ -48,7 +48,7 @@ faasr_put_file <- function(server_name=.faasr$DefaultDataStore, local_folder="."
     put_file <- paste0(local_folder,"/",local_file)
   }  
  
-  s3 <- paws::s3(
+  s3 <- paws.storage::s3(
 	  config=list(
 		  credentials=list(
 			  creds=list(
