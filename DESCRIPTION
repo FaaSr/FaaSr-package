@@ -49,6 +49,7 @@ Imports:
     sodium
 Suggests:
     glue,
+    rmarkdown,
     paws.common,
     testthat,
     knitr
