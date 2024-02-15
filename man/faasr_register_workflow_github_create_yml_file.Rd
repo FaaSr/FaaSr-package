@@ -26,3 +26,4 @@ faasr_register_workflow_github_create_yml_file(
 \description{
 Create a yaml workflow file with the container name
 }
+\keyword{internal}

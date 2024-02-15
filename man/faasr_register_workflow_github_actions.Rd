@@ -25,3 +25,4 @@ register the workflow for github actions.
 parse faasr to get the repository list and actions.
 create a local/remote repository for the FaaSr actions.
 }
+\keyword{internal}

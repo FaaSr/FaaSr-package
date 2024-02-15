@@ -15,7 +15,7 @@ workflow_timer_path <- "https://raw.githubusercontent.com/FaaSr/FaaSr-package/ma
 #' @param runner a logical value; enable runner
 #' @import httr
 #' @import cli
-#' @export
+#' @keywords internal
 
 faasr_register_workflow_github_actions <- function(faasr, cred, cron=NULL, runner=FALSE) {
 
@@ -104,7 +104,14 @@ faasr_register_workflow_github_actions <- function(faasr, cred, cron=NULL, runne
 #' @return response: response status; 200/202/204/400/etc
 #' @import httr
 #' @import cli
-#' @export
+#' @keywords internal
+#' @examples
+#' if (interactive()){
+#' url <- "https://github.com"
+#' body <- list(a="a",b="b")
+#' type <- "GET"
+#' check <- faasr_httr_request(token, url, body=list(), type)
+#' }
 
 # help sending httr requests
 faasr_httr_request <- function(token, url, body=list(), type){
@@ -140,7 +147,13 @@ faasr_httr_request <- function(token, url, body=list(), type){
 #' @return a list of "action:server name" pairs.
 #' @import httr
 #' @import cli
-#' @export
+#' @keywords internal
+#' @examples
+#' if (interactive()){
+#' faasr <- list()
+#' faasr$FunctionList$F1$FaaSServer <- "GitHubActions" 
+#' repo_list <- faasr_register_workflow_github_repo_lists(faasr)
+#' }
 
 # make a repo list. like a key-value set, key is a server_name and value is a repository name
 faasr_register_workflow_github_repo_lists <- function(faasr) {
@@ -175,7 +188,11 @@ faasr_register_workflow_github_repo_lists <- function(faasr) {
 #' doesn't exist, return FALSE
 #' @import httr
 #' @import cli
-#' @export
+#' @keywords internal
+#' @examples
+#' if (interactive()){
+#' check <- faasr_register_workflow_github_repo_exists(faasr_token, repo)
+#' }
 
 # check github remote repository existence
 faasr_register_workflow_github_repo_exists <- function(faasr_token, repo) {
@@ -200,7 +217,13 @@ faasr_register_workflow_github_repo_exists <- function(faasr_token, repo) {
 #' @param check a logical value 
 #' @param repo a string for the target repository name
 #' @return a logical value to make repository private or not
-#' @export
+#' @keywords internal
+#' @examples
+#' if (interactive()){
+#' check <- FALSE
+#' repo <- "test/test"
+#' check <- faasr_register_workflow_github_repo_question(check, repo)
+#' }
 
 faasr_register_workflow_github_repo_question <- function(check, repo){
   # get env
@@ -224,7 +247,7 @@ faasr_register_workflow_github_repo_question <- function(check, repo){
     # if yes, update the repository
   } else {
     # Ask user for the repository to be updated
-    cli_alert_info("Repository already exists")
+    cli_alert_info(paste0("Repository: ",repo," already exists"))
     cli_text("{symbol$fancy_question_mark} Update the repository?[y/n]")
     while(TRUE) {
       check1 <- readline()
@@ -247,7 +270,7 @@ faasr_register_workflow_github_repo_question <- function(check, repo){
 #' Create the directory for the workflows
 #' @param server a string for the server name
 #' @param repo a string for the target repository name
-#' @export
+#' @keywords internal
 
 faasr_register_workflow_github_create_dir <- function(server,repo){
   cwd <- getwd()
@@ -269,7 +292,7 @@ faasr_register_workflow_github_create_dir <- function(server,repo){
 #' Create the environment file .gitignore
 #' @param server a string for the server name
 #' @param repo a string for the target repository name
-#' @export
+#' @keywords internal
 
 faasr_register_workflow_github_create_env <- function(server,repo){
   # create a file ".gitignore"
@@ -284,7 +307,7 @@ faasr_register_workflow_github_create_env <- function(server,repo){
 #' Create the payload JSON file named "payload.json"
 #' @param faasr a list form of the JSON file
 #' @param repo a string for the target repository name
-#' @export
+#' @keywords internal
 
 faasr_register_workflow_github_create_payload <- function(faasr, repo){
   # create a file named "payload.json"
@@ -298,7 +321,7 @@ faasr_register_workflow_github_create_payload <- function(faasr, repo){
 #' @description 
 #' create README.md file for repository description
 #' @param repo a string for the target repository name
-#' @export
+#' @keywords internal
 
 # create README.md file for repository description
 faasr_register_workflow_github_create_readme <- function(repo){
@@ -323,7 +346,7 @@ It is safe to delete this repository if you no longer need this workflow. It can
 #' @param runner a logical value; enable runner
 #' @import httr
 #' @import cli
-#' @export
+#' @keywords internal
 
 # Create a yaml workflow file with the container name
 # TBD implement a native workflow pattern
@@ -373,7 +396,7 @@ faasr_register_workflow_github_create_yml_file <- function(faasr, actionname, re
 #' Create a local git repository
 #' @param repo a string for the target repository name
 #' @param ref a string for the branch of target repository
-#' @export
+#' @keywords internal
 
 # create git local repository
 faasr_register_workflow_git_local_repo <- function(repo,ref){
@@ -401,7 +424,11 @@ faasr_register_workflow_git_local_repo <- function(repo,ref){
 #' @return a integer value for the result
 #' @import httr
 #' @import cli
-#' @export
+#' @keywords internal
+#' @examples
+#' if (interactive()){
+#' check <- faasr_register_workflow_git_remote_repo(token,check,private,repo,ref)
+#' }
 
 # create / push git remote repository
 faasr_register_workflow_git_remote_repo <- function(token,check,private,repo,ref){
@@ -450,7 +477,7 @@ faasr_register_workflow_git_remote_repo <- function(token,check,private,repo,ref
 #' @import cli
 #' @importFrom "sodium" "simple_encrypt"
 #' @importFrom "base64enc" "base64decode" "base64encode"
-#' @export
+#' @keywords internal
 
 # set env(secrets and variables)
 faasr_register_workflow_git_remote_env <- function(repo, cred, token){
@@ -523,7 +550,7 @@ faasr_register_workflow_git_remote_env <- function(repo, cred, token){
 #' @param actionname a string for the target action name
 #' @import httr
 #' @import cli
-#' @export
+#' @keywords internal
 
 # inovke workflow run
 faasr_workflow_invoke_github <- function(faasr, cred, faas_name, actionname){
@@ -582,7 +609,7 @@ faasr_workflow_invoke_github <- function(faasr, cred, faas_name, actionname){
 #' @param unset a logical value; set timer(FALSE) or unset timer(TRUE)
 #' @import httr
 #' @import cli
-#' @export
+#' @keywords internal
 
 # set workflow timer
 faasr_set_workflow_timer_gh <- function(faasr,cred,actionname,cron=NULL,unset=FALSE){

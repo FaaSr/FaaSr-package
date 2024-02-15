@@ -4,7 +4,12 @@
 #' Uses graph depth-first search algorithm to detect cycles
 #' @param faasr list with parsed and validated Payload
 #' @return graph a graph representation of the Workflow
-#' @export
+#' @keywords internal
+#' @examples 
+#' # this function can be run only inside the container
+#' if (interactive()){
+#' predecessors <- faasr_check_workflow_cycle(faasr)
+#' }
 
 # workflow implementation - check loop iteratively, predecessors.
 faasr_check_workflow_cycle <- function(faasr){

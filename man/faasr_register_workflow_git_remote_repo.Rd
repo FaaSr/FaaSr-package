@@ -23,3 +23,9 @@ a integer value for the result
 \description{
 create / push git remote repository
 }
+\examples{
+if (interactive()){
+check <- faasr_register_workflow_git_remote_repo(token,check,private,repo,ref)
+}
+}
+\keyword{internal}

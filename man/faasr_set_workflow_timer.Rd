@@ -13,9 +13,18 @@ faasr_set_workflow_timer(cron, target = NULL, ...)
 
 \item{...}{a string for underlying functions}
 }
+\value{
+return nothing / set the workflow timer
+}
 \description{
 set cron timer for workflow 
 This function aggregates the set cron timer function for
 openwhisk, github actions and lambda
 This can be used as a cross-platform function
+}
+\examples{
+if (interactive()){
+test <- faasr("test.json", "env")
+test$set_workflow_timer
+}
 }

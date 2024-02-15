@@ -7,9 +7,9 @@
 #' This function aborts all but the last Action triggered.
 #' @param faasr list with parsed and validated Payload
 #' @param pre list with names of functions and corresponding predecessors
+#' @keywords internal
 #' @import uuid
 #' @importFrom "paws.storage" "s3"
-#' @export
 
 faasr_abort_on_multiple_invocations <- function(faasr, pre) {
 

@@ -24,8 +24,20 @@ check_user_image_exist(
 \item{current_lambda_server_info}{a list form of current Lambda server information: id, keys, region}
 }
 \value{
-function_image_list a list form of lambda function information: name, images
+logical value TRUE/FALSE for the existence of user images.
 }
 \description{
 check if user provided image exists, if not, return false then stop processing
 }
+\examples{
+if (interactive()){
+faasr <- jsonlite::fromJSON("path/to/json")
+action <- "action_name"
+server <- "server_name"
+url <- "user_image_url"
+info <- list(info="current_lambda_server_info")
+check <- check_user_image_exist(faasr, action, server, url, info)
+is.logical(check)
+}
+}
+\keyword{internal}

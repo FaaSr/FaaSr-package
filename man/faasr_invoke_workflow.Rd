@@ -11,9 +11,18 @@ faasr_invoke_workflow(FunctionInvoke = NULL, ...)
 
 \item{...}{a string for underlying functions}
 }
+\value{
+return nothing / invokes the FaaS platform.
+}
 \description{
 invoke workflow 
 This function aggregates the invoke workflow function for
 openwhisk, github actions and lambda
 This can be used as a cross-platform function
+}
+\examples{
+if (interactive()){
+test <- faasr("test.json", "env")
+test$invoke_workflow
+}
 }

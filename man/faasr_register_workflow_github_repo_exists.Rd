@@ -20,3 +20,9 @@ Check the remote repository is existing on the github
 by sending the GET request.
 If it exists, return TRUE, doesn't exist, return FALSE
 }
+\examples{
+if (interactive()){
+check <- faasr_register_workflow_github_repo_exists(faasr_token, repo)
+}
+}
+\keyword{internal}

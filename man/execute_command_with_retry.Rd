@@ -32,3 +32,16 @@ a logical value
 \description{
 check if aws command run successfully, and retry
 }
+\examples{
+if (interactive()){
+func_name <- "function_name"
+url <- "function_image_url"
+cred <- list(keys="credentials")
+instance <- paws.compute::lambda()
+max_re <- 5
+sleep_sec <- 3
+check <- execute_command_with_retry(func_name, url, cred, instance, max_re, sleep_sec)
+is.logical(check)
+}
+}
+\keyword{internal}

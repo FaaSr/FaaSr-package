@@ -15,5 +15,6 @@ faasr_abort_on_multiple_invocations(faasr, pre)
 Ensures that only one Action proceeds to execute a User Function if there are multiple triggers
 This is necessary because if in the Workflow a function receives multiple triggers, 
 multiple Actions are invoked; however, we don't want to execute the same function multiple times.
-This function aborts all but the last Action triggered
+This function aborts all but the last Action triggered.
 }
+\keyword{internal}

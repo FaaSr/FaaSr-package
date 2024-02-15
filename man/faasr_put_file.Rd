@@ -16,6 +16,15 @@
 
 \item{remote_file}{string with the name for the file once uploaded to the S3 bucket}
 }
+\value{
+return nothing / put the file into the bucket
+}
 \description{
 Helper function to upload a file from a local Action folder to an S3 bucket
+}
+\examples{
+# This function can be run only in the container
+if (interactive()){
+faasr_put_file("local_folder", "local_file", "remote_folder", "remote_file")
+}
 }

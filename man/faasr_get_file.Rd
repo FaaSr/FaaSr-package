@@ -16,6 +16,15 @@
 
 \item{local_file}{string with the name of the local file once downloaded}
 }
+\value{
+return nothing / delete the file in the bucket
+}
 \description{
 Helper function to download a file from an S3 bucket to local Action folder
+}
+\examples{
+# This function can be run only in the container
+if (interactive()){
+faasr_get_file("remote_folder", "remote_file", "local_folder", "local_file")
+}
 }

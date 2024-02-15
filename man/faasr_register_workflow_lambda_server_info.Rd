@@ -17,3 +17,9 @@ lambda_server_info a list form of Lambda server information: id, keys, region
 \description{
 Get aws lambda server information
 }
+\examples{
+if (interactive()){
+lambda_server_info <- faasr_register_workflow_lambda_server_info(faasr, cred)
+}
+}
+\keyword{internal}

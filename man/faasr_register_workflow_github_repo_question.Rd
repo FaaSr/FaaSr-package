@@ -17,3 +17,11 @@ a logical value to make repository private or not
 \description{
 Ask users to update the repository
 }
+\examples{
+if (interactive()){
+check <- FALSE
+repo <- "test/test"
+check <- faasr_register_workflow_github_repo_question(check, repo)
+}
+}
+\keyword{internal}

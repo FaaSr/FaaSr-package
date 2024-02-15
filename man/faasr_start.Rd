@@ -31,3 +31,9 @@ faasr_start calls other FaaSr Functions to go through the following steps:
 * Update the logs folder to assert that this User Function has completed
 * Generate triggers to start Actions that will run the next User Functions, if there are any in the User Workflow
 }
+\examples{
+# This function can be run only in the container
+if (interactive()){
+faasr <- faasr_start(faasr_payload)
+}
+}

@@ -9,8 +9,17 @@ faasr_register_workflow(...)
 \arguments{
 \item{...}{inputs for timeout, cron, and memory}
 }
+\value{
+return nothing / executes the FaaS
+}
 \description{
 Client tools for registering actions
 This aggregates openwhisk, github actions and lambda's
 register functions
+}
+\examples{
+if (interactive()){
+test <- faasr("test.json", "env")
+test$register_workflow
+}
 }

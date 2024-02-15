@@ -15,3 +15,10 @@ graph a graph representation of the Workflow
 \description{
 Uses graph depth-first search algorithm to detect cycles
 }
+\examples{
+# this function can be run only inside the container
+if (interactive()){
+predecessors <- faasr_check_workflow_cycle(faasr)
+}
+}
+\keyword{internal}

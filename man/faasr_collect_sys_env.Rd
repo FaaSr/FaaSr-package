@@ -20,3 +20,9 @@ If the credential name is property set (Servername + Key name),
 this function will use Sys.getenv to collect credentials.
 If there's already credentials in the list, it skips the procedure.
 }
+\examples{
+if (interactive()){
+cred_from_env <- faasr_collect_sys_env(faasr, cred)
+}
+}
+\keyword{internal}

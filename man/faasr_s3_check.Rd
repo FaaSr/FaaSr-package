@@ -15,3 +15,10 @@ Check
 2. send a req for the list of buckets to check the status of s3 servers.
 3. Check that the bucket name exists.
 }
+\examples{
+# This function can be run only in the container
+if (interactive()){
+faasr <- faasr_s3_check(faasr)
+}
+}
+\keyword{internal}

@@ -19,3 +19,8 @@ replace dummy keys with real keys
 Dummy key format: Servername + "_" + Key Name with CAPITAL LETTER
 e.g., My_OW_Account + API.key = My_OW_Account_API_KEY
 }
+\examples{
+if (interactive()){
+faasr_with_cred <- faasr_replace_values(faasr, cred)
+}
+}

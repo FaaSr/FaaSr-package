@@ -13,3 +13,10 @@ s3 representing object for "arrow"
 `test` Uses "arrow" library to set up the configurations with given json file and 
 provide the object to the users
 }
+\examples{
+# this function can be run only inside the container
+if (interactive()){
+arrow_s3 <- faasr_arrow_s3_bucket()
+arrow_s3$ls
+}
+}

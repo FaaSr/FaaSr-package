@@ -9,6 +9,15 @@ faasr_run_user_function(.faasr)
 \arguments{
 \item{.faasr}{list with parsed and validated Payload}
 }
+\value{
+return nothing / executes the given user function
+}
 \description{
 Run user functions and leave the state information
+}
+\examples{
+# This function can be run only in the container
+if (interactive()){
+faasr_run_user_function(.faasr)
+}
 }

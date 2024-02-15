@@ -7,10 +7,16 @@
 #' * AWS Lambda
 #' * GitHub Actions
 #' @param faasr list with parsed and validated Payload
+#' @return return nothing / send requests to the FaaS servers.
 #' @import jsonlite
 #' @import httr
 #' @importFrom "paws.compute" "lambda"
 #' @export
+#' @examples
+#' # This function can be run only in the container
+#' if (interactive()){
+#' faasr_trigger(faasr)
+#' }
 
 faasr_trigger <- function(faasr) {
 

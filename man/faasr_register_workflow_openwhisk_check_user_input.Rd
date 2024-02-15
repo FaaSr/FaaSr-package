@@ -19,3 +19,9 @@ a logical value for the overwrite
 \description{
 Ask user input for the openwhisk
 }
+\examples{
+if (interactive()){
+check <- faasr_register_workflow_openwhisk_check_user_input(check, actionname, type)
+}
+}
+\keyword{internal}

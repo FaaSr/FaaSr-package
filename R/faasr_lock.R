@@ -4,6 +4,7 @@
 #' Uses locking algorithm with S3 to enforce single User Function execution when there are multiple predecessors
 #' @importFrom "paws.storage" "s3"
 #' @param faasr list with parsed and validated Payload
+#' @keywords internal
 
 # Read-Set Memory implementation
 faasr_rsm <- function(faasr) {
@@ -67,6 +68,13 @@ faasr_rsm <- function(faasr) {
   }
 }
 
+#' @title faasr_acquire
+#' @description 
+#' Uses locking algorithm with S3 to enforce single User Function execution when there are multiple predecessors
+#' Acquire the lock leaving the file into the s3 bucket
+#' @param faasr list with parsed and validated Payload
+#' @keywords internal
+
 # lock implementation - acquire
 faasr_acquire<-function(faasr) {
 	# Call faasr_rsm to get a lock, faasr_rsm returns either TRUE or FALSE
@@ -92,6 +100,13 @@ faasr_acquire<-function(faasr) {
 	}
 }
 
+#' @title faasr_release
+#' @description 
+#' Uses locking algorithm with S3 to enforce single User Function execution when there are multiple predecessors
+#' Release the lock by deleting the lock file in the bucket
+#' @importFrom "paws.storage" "s3"
+#' @param faasr list with parsed and validated Payload
+#' @keywords internal
 
 # lock implementation - release
 faasr_release<-function(faasr) {
@@ -120,6 +135,22 @@ faasr_release<-function(faasr) {
 	s3$delete_object(Key=lock_name, Bucket=target_s3$Bucket)
 }
 
+#' @title faasr_release
+#' @description 
+#' Uses locking algorithm with S3 to enforce single User Function execution when there are multiple predecessors
+#' Checking the flag to find any other nodes are seeking for the lock.
+#' @importFrom "paws.storage" "s3"
+#' @param faasr list with parsed and validated Payload
+#' @param target_s3 the name of target server
+#' @param flag_path the string value of the path for the flag
+#' @param flag_name the string value of the name of the flag
+#' @return a logical value if there are other nodes
+#' @keywords internal
+#' @examples
+#' # This function can be run only in the container
+#' if (interactive()){
+#' check <- faasr_anyone_else_interested(faasr, target_s3, flag_path, flag_name)
+#' }
 
 # Anyone_else_interested implementation
 faasr_anyone_else_interested <- function(faasr, target_s3, flag_path, flag_name){

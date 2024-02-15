@@ -14,3 +14,4 @@ faasr_register_workflow_github_create_dir(server, repo)
 \description{
 Create the directory for the workflows
 }
+\keyword{internal}

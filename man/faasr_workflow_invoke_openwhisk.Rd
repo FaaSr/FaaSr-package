@@ -21,3 +21,4 @@ faasr_workflow_invoke_openwhisk(faasr, cred, faas_name, actionname, ssl = TRUE)
 Invoke a workflow for the openwhisk
 this function is invoked by faasr_workflow_invoke
 }
+\keyword{internal}

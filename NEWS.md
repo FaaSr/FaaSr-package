@@ -1,6 +1,6 @@
 # FaaSr (1.0.9.0)
 
-* Add support for user-client functions to register AWS Lambda functions without "aws" cli.
+* Add support for user-client functions to register AWS Lambda functions without "aws" CLI.
 * Edit R Scripts meta-data.
 
 # FaaSr (1.0.8.0)
@@ -50,8 +50,8 @@
 
 * Backoff for the locking: faasr_lock.R / faasr_acquire
   + After try to get a lock, if it fails, system will sleep exponentially.
-  + cnt is for counting the number, and max_cnt is maximum count.
-* README file: faasr_client_api_github-actions.R / faasr_register_workflow_github_readme
+  + 'cnt' is for counting the number, and 'max_cnt' is maximum count.
+* README file: `faasr_client_api_github-actions.R` / `faasr_register_workflow_github_readme`
   + README file is added to describe the repository.
 * Bug fix: Bucket name for arrow function 
 
@@ -63,8 +63,8 @@
 * Ref -> Branch
   + In the json file, "Ref" is now "Branch"
 * Changing some messages
-  + In the user-side api, messages are editted.
-  + message are starting with "[faasr_msg]"
+  + In the user-side API, messages are changed.
+  + message are starting with "['faasr_msg']"
 
 # FaaSr (1.0.0.0)
 

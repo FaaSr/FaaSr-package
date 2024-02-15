@@ -26,3 +26,4 @@ faasr_set_workflow_timer_gh(
 \description{
 set/unset cron timer for the github actions.
 }
+\keyword{internal}
