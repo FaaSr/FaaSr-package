@@ -25,6 +25,11 @@
 #' @return faasr a list form of JSON payload 
 #' @importFrom "utils" "write.table"
 #' @export
+#' @examples
+#' # This function can be run only in the container
+#' if (interactive()){
+#' faasr <- faasr_start(faasr_payload)
+#' }
 
 globalVariables(".faasr")
 

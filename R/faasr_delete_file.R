@@ -5,8 +5,14 @@
 #' @param server_name string with name of the S3 bucket to use; must match a name declared in the faasr list
 #' @param remote_folder string with the name of the remote folder where the file is to be deleted from
 #' @param remote_file string with the name for the file to be deleted 
+#' @return return nothing / delete the file in the bucket
 #' @importFrom "paws.storage" "s3"
 #' @export
+#' @examples
+#' # This function can be run only in the container
+#' if (interactive()){
+#' faasr_delete_file(remote_file="test.txt")
+#' }
 
 globalVariables(".faasr")
 

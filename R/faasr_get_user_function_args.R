@@ -6,7 +6,13 @@
 #' @return 
 #' args list of User Function arguments
 #' if no args provided, return empty list
-#' @export
+#' @keywords internal
+#' @examples 
+#' faasr <- list()
+#' faasr$FunctionInvoke <- "F1"
+#' faasr$FunctionList$F1$Arguments$test <- "test"
+#' args <- faasr_get_user_function_args(faasr)
+#' }
 
 faasr_get_user_function_args <- function(faasr) {
   # First extract the name of the User Function to invoke

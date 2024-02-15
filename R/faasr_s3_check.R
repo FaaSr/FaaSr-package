@@ -8,8 +8,12 @@
 #' @param faasr list with parsed and validated Payload
 #' @return faasr list with parsed and validated payload
 #' @importFrom "paws.storage" "s3"
-#' @export
-#' 
+#' @keywords internal
+#' @examples
+#' # This function can be run only in the container
+#' if (interactive()){
+#' faasr <- faasr_s3_check(faasr)
+#' }
 
 globalVariables(".faasr")
 

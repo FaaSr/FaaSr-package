@@ -6,9 +6,16 @@
 #' the log file is a concatenation of folder "logs" and file name "faasr_log_" + InvocationID + ".txt"
 #' @param faasr list with parsed and validated Payload
 #' @param log_message string message to be appended to the log
+#' @return return nothing / leave the log to the bucket
 #' @importFrom "paws.storage" "s3"
 #' @importFrom "utils" "write.table"
 #' @export
+#' @examples
+#' # This function can be run only in the container
+#' if (interactive()){
+#' log_message <- "test message"
+#' faasr_log(log_message)
+#' }
 
 globalVariables(".faasr")
 

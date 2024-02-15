@@ -3,7 +3,13 @@
 #' @description 
 #' Run user functions and leave the state information
 #' @param .faasr list with parsed and validated Payload
+#' @return return nothing / executes the given user function
 #' @export
+#' @examples
+#' # This function can be run only in the container
+#' if (interactive()){
+#' faasr_run_user_function(.faasr)
+#' }
 
 faasr_run_user_function <- function(.faasr){ 
   

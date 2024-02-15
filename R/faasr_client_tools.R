@@ -18,7 +18,13 @@ basic_ld_image_tag <- ".amazonaws.com/aws-lambda-tidyverse:latest"
 #' @param ... inputs for timeout, cron, and memory
 #' @import cli
 #' @import httr
+#' @return return nothing / executes the FaaS
 #' @export 
+#' @examples
+#' if (interactive()){
+#' test <- faasr("test.json", "env")
+#' test$register_workflow
+#' }
 
 # faasr_register_workflow function
 faasr_register_workflow <- function(...){
@@ -53,7 +59,11 @@ faasr_register_workflow <- function(...){
 #' @param cred a list form of the credentials
 #' @return credential list
 #' @import cli
-#' @export 
+#' @keywords internal
+#' @examples
+#' if (interactive()){
+#' cred_from_env <- faasr_collect_sys_env(faasr, cred)
+#' }
 
 # collect system envrionment
 faasr_collect_sys_env <- function(faasr, cred){
@@ -169,6 +179,17 @@ faasr_collect_sys_env <- function(faasr, cred){
   return(cred)
 }
 
+#' @title .faasr_get_svc 
+#' @description 
+#' Helper function to get the saved data for 
+#' json, cred, and operations.
+#' @return object containing all the information
+#' @keywords internal
+#' @examples
+#' if (interactive()){
+#' svc <- .faasr_get_svc()
+#' }
+
 # get the list "svc"
 .faasr_get_svc <- function(){
   # get the caller's envrionments.
@@ -195,6 +216,10 @@ faasr_collect_sys_env <- function(faasr, cred){
 #' @return svc; a set of data consisting of functions and data
 #' @import cli
 #' @export 
+#' @examples
+#' if (interactive()){
+#' test <- faasr(json_path="json_path.json", env_path="env_path")
+#' }
 
 # faasr main function
 faasr <- function(json_path=NULL, env_path=NULL){
@@ -331,7 +356,11 @@ faasr <- function(json_path=NULL, env_path=NULL){
 #' @param cred a list form of the credentials
 #' @return faasr a list form of the JSON file with real keys
 #' @import cli
-#' @export 
+#' @export
+#' @examples
+#' if (interactive()){
+#' faasr_with_cred <- faasr_replace_values(faasr, cred)
+#' }
 
 # replace fake values into real values
 faasr_replace_values <- function(faasr, cred){
@@ -362,8 +391,14 @@ faasr_replace_values <- function(faasr, cred){
 #' This can be used as a cross-platform function
 #' @param FunctionInvoke a string for invoke function
 #' @param ... a string for underlying functions
+#' @return return nothing / invokes the FaaS platform.
 #' @import cli
 #' @export 
+#' @examples
+#' if (interactive()){
+#' test <- faasr("test.json", "env")
+#' test$invoke_workflow
+#' }
 
 # invoke first action
 faasr_invoke_workflow <- function(FunctionInvoke=NULL, ...){
@@ -415,8 +450,15 @@ faasr_invoke_workflow <- function(FunctionInvoke=NULL, ...){
 #' @param cron a string for cron data e.g., */5 * * * *
 #' @param target a string for specific function
 #' @param ... a string for underlying functions
+#' @return return nothing / set the workflow timer
 #' @import cli
 #' @export 
+#' @examples
+#' if (interactive()){
+#' test <- faasr("test.json", "env")
+#' test$set_workflow_timer
+#' }
+
 
 # set the cron timer
 faasr_set_workflow_timer <- function(cron, target=NULL, ...){
@@ -461,8 +503,14 @@ faasr_set_workflow_timer <- function(cron, target=NULL, ...){
 #' This can be used as a cross-platform function
 #' @param target a string for specific function
 #' @param ... a string for underlying functions
+#' @return return nothing / unset the workflow timer
 #' @import cli
 #' @export 
+#' @examples
+#' if (interactive()){
+#' test <- faasr("test.json", "env")
+#' test$unset_workflow_timer
+#' }
 
 # unset the timer
 faasr_unset_workflow_timer <- function(target=NULL,...){

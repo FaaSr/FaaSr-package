@@ -11,7 +11,7 @@
 #' @param timeout an integer for the max length of timeout
 #' @import httr
 #' @import cli
-#' @export
+#' @keywords internal
 
 faasr_register_workflow_openwhisk <- function(faasr, cred, ssl=TRUE, memory=1024, timeout=600000) {
   
@@ -69,7 +69,11 @@ faasr_register_workflow_openwhisk <- function(faasr, cred, ssl=TRUE, memory=1024
 #' @return an integer value for the response
 #' @import httr
 #' @import cli
-#' @export
+#' @keywords internal
+#' @examples
+#' if (interactive()){
+#' check <- faasr_ow_httr_request(faasr, server, action, type, body=list(), ssl=TRUE, namespace=NULL)
+#' }
 
 # help sending httr requests
 faasr_ow_httr_request <- function(faasr, server, action, type, body=list(), ssl=TRUE, namespace=NULL){
@@ -122,7 +126,11 @@ faasr_ow_httr_request <- function(faasr, server, action, type, body=list(), ssl=
 #' @return an list of "action name: server name" pairs
 #' @import httr
 #' @import cli
-#' @export
+#' @keywords internal
+#' @examples
+#' if (interactive()){
+#' action_list <- faasr_ow_httr_requesfaasr_register_workflow_openwhisk_action_listst(faasr)
+#' }
 
 faasr_register_workflow_openwhisk_action_lists <- function(faasr) {
   # empty list
@@ -158,7 +166,11 @@ faasr_register_workflow_openwhisk_action_lists <- function(faasr) {
 #' doesn't exist, return FALSE
 #' @import httr
 #' @import cli
-#' @export
+#' @keywords internal
+#' @examples
+#' if (interactive()){
+#' check <- faasr_register_workflow_openwhisk_check_exists(ssl, action, server, faasr)
+#' }
 
 faasr_register_workflow_openwhisk_check_exists <- function(ssl, action, server, faasr){
   
@@ -190,7 +202,12 @@ faasr_register_workflow_openwhisk_check_exists <- function(ssl, action, server, 
 #' @return a logical value for the overwrite
 #' @import httr
 #' @import cli
-#' @export
+#' @keywords internal
+#' @examples
+#' if (interactive()){
+#' check <- faasr_register_workflow_openwhisk_check_user_input(check, actionname, type)
+#' }
+
 
 faasr_register_workflow_openwhisk_check_user_input <- function(check, actionname, type){
   # if given values already exists, ask the user to update the action
@@ -228,7 +245,7 @@ faasr_register_workflow_openwhisk_check_user_input <- function(check, actionname
 #' @param check a logical value for target existence
 #' @import httr
 #' @import cli
-#' @export
+#' @keywords internal
 
 # create an action
 faasr_register_workflow_openwhisk_create_action <- function(ssl, actionname, server, faasr, memory, timeout, check) {
@@ -284,7 +301,7 @@ faasr_register_workflow_openwhisk_create_action <- function(ssl, actionname, ser
 #' @param ssl SSL CA check; for the SSL certificate: FALSE
 #' @import httr
 #' @import cli
-#' @export
+#' @keywords internal
 
 faasr_workflow_invoke_openwhisk <- function(faasr, cred, faas_name, actionname, ssl=TRUE){
 
@@ -315,7 +332,7 @@ faasr_workflow_invoke_openwhisk <- function(faasr, cred, faas_name, actionname, 
 #' @param ssl SSL CA check; for the SSL certificate: FALSE
 #' @import httr
 #' @import cli
-#' @export
+#' @keywords internal
 
 # set workflow timer for openwhisk
 faasr_set_workflow_timer_ow <- function(faasr, cred, target, cron, unset=FALSE, ssl=TRUE){

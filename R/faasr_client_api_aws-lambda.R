@@ -7,7 +7,7 @@
 #' @param memory an integer for the max size of memory
 #' @param timeout an integer for the max length of timeout
 #' @import cli
-#' @export
+#' @keywords internal
 
 faasr_register_workflow_aws_lambda <- function(faasr, cred, memory=1024, timeout=600){
 
@@ -60,7 +60,11 @@ faasr_register_workflow_aws_lambda <- function(faasr, cred, memory=1024, timeout
 #' @param faasr a list form of the JSON file
 #' @return lambda_function_info a list form of lambda function information: name, actions
 #' @import cli
-#' @export
+#' @keywords internal
+#' @examples
+#' #' if (interactive()){
+#' lambda_function_info <- faasr_register_workflow_lambda_function_lists(faasr)
+#' }
 
 faasr_register_workflow_lambda_function_lists <- function(faasr){
   
@@ -98,7 +102,11 @@ faasr_register_workflow_lambda_function_lists <- function(faasr){
 #' @param lambda_function_info a list form of lambda function information: name, actions
 #' @return lambda_function_info a list form of lambda function information: name, actions, create/update
 #' @import cli
-#' @export
+#' @keywords internal
+#' @examples
+#' #' if (interactive()){
+#' lambda_function_info <- faasr_register_workflow_lambda_function_info(faasr, cred, lambda_server_info, lambda_function_info)
+#' }
 
 # Get aws lambda function info
 faasr_register_workflow_lambda_function_info <- function(faasr,cred, lambda_server_info, lambda_function_info){
@@ -143,7 +151,11 @@ faasr_register_workflow_lambda_function_info <- function(faasr,cred, lambda_serv
 #' @return lambda_server_info a list form of Lambda server information: id, keys, region
 #' @import cli
 #' @importFrom "paws.security.identity" "sts"
-#' @export
+#' @keywords internal
+#' @examples
+#' #' if (interactive()){
+#' lambda_server_info <- faasr_register_workflow_lambda_server_info(faasr, cred)
+#' }
 
 faasr_register_workflow_lambda_server_info <- function(faasr, cred){
   
@@ -193,7 +205,11 @@ faasr_register_workflow_lambda_server_info <- function(faasr, cred){
 #' @param lambda_server_info a list form of Lambda server information: id, keys, region
 #' @return function_image_list a list form of lambda function information: name, images
 #' @import cli
-#' @export
+#' @keywords internal
+#' @examples
+#' #' if (interactive()){
+#' function_image_list <- faasr_register_workflow_lambda_function_image(faasr, lambda_server_info)
+#' }
 
 # Get aws lambda function image list
 faasr_register_workflow_lambda_function_image <- function(faasr, lambda_server_info){
@@ -247,10 +263,15 @@ faasr_register_workflow_lambda_function_image <- function(faasr, lambda_server_i
 #' @param server_name a string for the target server
 #' @param user_image_url a string for FaaSr container image uri
 #' @param current_lambda_server_info a list form of current Lambda server information: id, keys, region
-#' @return function_image_list a list form of lambda function information: name, images
+#' @return logical value TRUE/FALSE for the existence of user images.
 #' @import cli
 #' @importFrom "paws.compute" "ecr"
-#' @export
+#' @keywords internal
+#' @examples
+#' #' if (interactive()){
+#' check <- check_user_image_exist(faasr, action_name, server_name, user_image_url, current_lambda_server_info)
+#' is.logical(check)
+#' }
 
 # check if user provided image exists, if not, return false then stop processing
 check_user_image_exist <- function(faasr, action_name, server_name, user_image_url, current_lambda_server_info){
@@ -306,7 +327,11 @@ check_user_image_exist <- function(faasr, action_name, server_name, user_image_u
 #' @return lambda-role-name a string for the lambda role name
 #' @import cli
 #' @importFrom "paws.security.identity" "iam"
-#' @export
+#' @keywords internal
+#' @examples
+#' #' if (interactive()){
+#' lambda-role-name <- faasr_register_workflow_aws_lambda_role_create(faasr, cred, lambda_server_info)
+#' }
 
 # create lambda role
 faasr_register_workflow_aws_lambda_role_create <- function(faasr, cred, lambda_server_info){
@@ -371,7 +396,7 @@ faasr_register_workflow_aws_lambda_role_create <- function(faasr, cred, lambda_s
 #' @param timeout an integer for the max length of timeout
 #' @importFrom "paws.compute" "lambda"
 #' @import cli
-#' @export
+#' @keywords internal
 
 # Create aws lambda functions
 faasr_register_workflow_aws_lambda_function_build <- function(faasr, lambda_function_info, function_image_list, aws_lambda_role_name, cred, lambda_server_info, memory=1024, timeout=600){
@@ -446,7 +471,7 @@ faasr_register_workflow_aws_lambda_function_build <- function(faasr, lambda_func
 #' @param lambda_server_info a list form of Lambda server information: id, keys, region
 #' @import cli
 #' @importFrom "paws.compute" "lambda"
-#' @export
+#' @keywords internal
 
 # check if a Lambda function exists
 check_lambda_exists <- function(function_name, cred, lambda_server_info) {
@@ -496,7 +521,12 @@ check_lambda_exists <- function(function_name, cred, lambda_server_info) {
 #' @param sleep_seconds a integer for the time for sleep between retries
 #' @return a logical value
 #' @import cli
-#' @export
+#' @keywords internal
+#' @examples
+#' #' if (interactive()){
+#' check <- execute_command_with_retry(function_name, function_image_url, cred, current_lambda_instance, max_retries = 5, sleep_seconds = 3)
+#' is.logical(check)
+#' }
 
 # check if aws command run successfully, and retry
 execute_command_with_retry <- function(function_name, function_image_url, cred, current_lambda_instance, max_retries = 3, sleep_seconds = 5) {
@@ -541,7 +571,7 @@ execute_command_with_retry <- function(function_name, function_image_url, cred, 
 #' @importFrom "paws.compute" "lambda"
 #' @importFrom "paws.security.identity" "sts"
 #' @importFrom "paws.application.integration" "eventbridge"
-#' @export
+#' @keywords internal
 
 # set workflow timer for lambda
 faasr_set_workflow_timer_ld <- function(faasr, cred, target, cron, unset=FALSE){
@@ -675,7 +705,7 @@ faasr_set_workflow_timer_ld <- function(faasr, cred, target, cron, unset=FALSE){
 #' @param actionname a string for the target action name
 #' @import cli
 #' @importFrom "paws.compute" "lambda"
-#' @export
+#' @keywords internal
 
 faasr_workflow_invoke_lambda <- function(faasr, cred, faas_name, actionname){
     aws_region <- faasr$ComputeServers[[faas_name]]$Region

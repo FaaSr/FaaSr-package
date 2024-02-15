@@ -10,6 +10,12 @@
 #' @import jsonlite
 #' @import jsonvalidate
 #' @export
+#' @examples
+#' # This function can be run only in the container
+#' if (interactive()){
+#' faasr <- faasr_parse(faasr_payload)
+#' }
+
 
 faasr_parse <- function(faasr_payload) {
   faasr_schema <- readLines("FaaSr.schema.json")

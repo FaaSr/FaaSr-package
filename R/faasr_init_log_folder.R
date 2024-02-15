@@ -9,7 +9,12 @@
 #' @return faasr a list of json file, UUID updated.
 #' @import uuid
 #' @importFrom "paws.storage" "s3"
-#' @export
+#' @keywords internal
+#' @examples
+#' # This function can be run only in the container
+#' if (interactive()){
+#' faasr <- faasr_init_log_folder(faasr)
+#' }
 
 faasr_init_log_folder <- function(faasr) {
   # if InvocationID doesn't have valid form, generate a UUID
