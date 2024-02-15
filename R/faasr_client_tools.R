@@ -7,6 +7,7 @@ faasr_data <- "faasr_data"
 basic_gh_image <- "ghcr.io/faasr/github-actions-tidyverse:latest"
 basic_ow_image <- "faasr/openwhisk-tidyverse:latest"
 basic_ld_image_account <- "145342739029.dkr.ecr."
+basic_ld_image_account_id <- "145342739029"
 basic_ld_image_tag <- ".amazonaws.com/aws-lambda-tidyverse:latest"
 
 #' @name faasr_register_workflow

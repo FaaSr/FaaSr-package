@@ -287,7 +287,11 @@ check_user_image_exist <- function(faasr, action_name, server_name, user_image_u
   # Split by '/' and then by ':'
   splited_img <- unlist(strsplit(user_image_url, "/"))
   splited_image_part <- splited_img[2]
-  aws_account_id <- current_lambda_server_info$aws_account_id
+  if (startsWith(splited_img[1], basic_ld_image_account)){
+    aws_account_id <- basic_ld_image_account_id
+  } else {
+    aws_account_id <- current_lambda_server_info$aws_account_id
+  }
   repo_tag_part <- unlist(strsplit(splited_image_part, ":"))
   repo_name <- repo_tag_part[1]
   image_tag <- repo_tag_part[2]
