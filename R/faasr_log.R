@@ -6,7 +6,7 @@
 #' the log file is a concatenation of folder "logs" and file name "faasr_log_" + InvocationID + ".txt"
 #' @param faasr list with parsed and validated Payload
 #' @param log_message string message to be appended to the log
-#' @import paws
+#' @importFrom "paws.storage" "s3"
 #' @importFrom "utils" "write.table"
 #' @export
 
@@ -31,7 +31,7 @@ faasr_log <- function(log_message) {
 
   log_server <- .faasr$DataStores[[log_server_name]]
 
-  s3<-paws::s3(
+  s3<-paws.storage::s3(
     config=list(
 	  credentials=list(
 	    creds=list(

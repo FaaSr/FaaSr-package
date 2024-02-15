@@ -2,3 +2,6 @@
 ^\.Rproj\.user$
 ^schema$
 ^docs$
+^LICENSE\.md$
+^\.github$
+^README\.Rmd$

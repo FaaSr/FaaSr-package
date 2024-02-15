@@ -7,7 +7,7 @@
 #' 3. Check that the bucket name exists.
 #' @param faasr list with parsed and validated Payload
 #' @return faasr list with parsed and validated payload
-#' @import paws
+#' @importFrom "paws.storage" "s3"
 #' @export
 #' 
 
@@ -30,7 +30,7 @@ faasr_s3_check <- function(faasr){
     if (length(region_check)==0 || region_check==""){
       faasr$DataStores[[server]]$Region <- "us-east-1"
     }
-    s3<-paws::s3(
+    s3<-paws.storage::s3(
       config=list(
 	      credentials=list(
 	        creds=list(

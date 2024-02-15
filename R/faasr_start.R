@@ -23,7 +23,6 @@
 #' * Generate triggers to start Actions that will run the next User Functions, if there are any in the User Workflow
 #' @param faasr_payload JSON Payload provided upon Action invocation by the FaaS platform
 #' @return faasr a list form of JSON payload 
-#' @import paws
 #' @importFrom "utils" "write.table"
 #' @export
 

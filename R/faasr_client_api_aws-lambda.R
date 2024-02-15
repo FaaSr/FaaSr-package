@@ -7,7 +7,6 @@
 #' @param memory an integer for the max size of memory
 #' @param timeout an integer for the max length of timeout
 #' @import cli
-#' @import paws
 #' @export
 
 faasr_register_workflow_aws_lambda <- function(faasr, cred, memory=1024, timeout=600){
@@ -143,7 +142,7 @@ faasr_register_workflow_lambda_function_info <- function(faasr,cred, lambda_serv
 #' @param cred a list form of the credentials
 #' @return lambda_server_info a list form of Lambda server information: id, keys, region
 #' @import cli
-#' @import paws
+#' @importFrom "paws.security.identity" "sts"
 #' @export
 
 faasr_register_workflow_lambda_server_info <- function(faasr, cred){
@@ -165,7 +164,7 @@ faasr_register_workflow_lambda_server_info <- function(faasr, cred){
       
       if(!aws_account_checked){
         # get aws account id
-        sts_instance <- paws::sts(
+        sts_instance <- paws.security.identity::sts(
           config=list(
             credentials=list(
               creds=list(
@@ -250,7 +249,7 @@ faasr_register_workflow_lambda_function_image <- function(faasr, lambda_server_i
 #' @param current_lambda_server_info a list form of current Lambda server information: id, keys, region
 #' @return function_image_list a list form of lambda function information: name, images
 #' @import cli
-#' @import paws
+#' @importFrom "paws.compute" "ecr"
 #' @export
 
 # check if user provided image exists, if not, return false then stop processing
@@ -263,7 +262,7 @@ check_user_image_exist <- function(faasr, action_name, server_name, user_image_u
   repo_name <- repo_tag_part[1]
   image_tag <- repo_tag_part[2]
 
-  ecr_instance <- paws::ecr(
+  ecr_instance <- paws.compute::ecr(
     config=list(
       credentials=list(
         creds=list(
@@ -306,7 +305,7 @@ check_user_image_exist <- function(faasr, action_name, server_name, user_image_u
 #' @param lambda_server_info a list form of Lambda server information: id, keys, region
 #' @return lambda-role-name a string for the lambda role name
 #' @import cli
-#' @import paws
+#' @importFrom "paws.security.identity" "iam"
 #' @export
 
 # create lambda role
@@ -320,7 +319,7 @@ faasr_register_workflow_aws_lambda_role_create <- function(faasr, cred, lambda_s
 
   current_lambda_server_info <- lambda_server_info[[1]]
   # aws command to list all roles
-  iam_instance <- paws::iam(
+  iam_instance <- paws.security.identity::iam(
     config=list(
       credentials=list(
         creds=list(
@@ -370,7 +369,7 @@ faasr_register_workflow_aws_lambda_role_create <- function(faasr, cred, lambda_s
 #' @param lambda_server_info a list form of Lambda server information: id, keys, region
 #' @param memory an integer for the max size of memory
 #' @param timeout an integer for the max length of timeout
-#' @import paws
+#' @importFrom "paws.compute" "lambda"
 #' @import cli
 #' @export
 
@@ -413,7 +412,7 @@ faasr_register_workflow_aws_lambda_function_build <- function(faasr, lambda_func
     current_lambda_server_info <- lambda_server_info[[current_lambda_server_name]]
 
     # build paws lambda instance for the current function
-    current_lambda_instance <- paws::lambda(
+    current_lambda_instance <- paws.compute::lambda(
       config=list(
         credentials=list(
           creds=list(
@@ -446,14 +445,14 @@ faasr_register_workflow_aws_lambda_function_build <- function(faasr, lambda_func
 #' @param cred a list form of the credentials
 #' @param lambda_server_info a list form of Lambda server information: id, keys, region
 #' @import cli
-#' @import paws
+#' @importFrom "paws.compute" "lambda"
 #' @export
 
 # check if a Lambda function exists
 check_lambda_exists <- function(function_name, cred, lambda_server_info) {
   # aws command check if a function exist
   
-  lambda_instance <- paws::lambda(
+  lambda_instance <- paws.compute::lambda(
     config=list(
       credentials=list(
         creds=list(
@@ -497,7 +496,6 @@ check_lambda_exists <- function(function_name, cred, lambda_server_info) {
 #' @param sleep_seconds a integer for the time for sleep between retries
 #' @return a logical value
 #' @import cli
-#' @import paws
 #' @export
 
 # check if aws command run successfully, and retry
@@ -540,7 +538,9 @@ execute_command_with_retry <- function(function_name, function_image_url, cred, 
 #' @param cron a string for cron data e.g., */5 * * * *
 #' @param unset a logical value; set timer(FALSE) or unset timer(TRUE)
 #' @import cli
-#' @import paws
+#' @importFrom "paws.compute" "lambda"
+#' @importFrom "paws.security.identity" "sts"
+#' @importFrom "paws.application.integration" "eventbridge"
 #' @export
 
 # set workflow timer for lambda
@@ -556,7 +556,7 @@ faasr_set_workflow_timer_ld <- function(faasr, cred, target, cron, unset=FALSE){
   aws_secret_key <- cred[[secret_key_name]]
 
   # get aws account id
-  sts_instance <- paws::sts(
+  sts_instance <- paws.security.identity::sts(
     config=list(
       credentials=list(
         creds=list(
@@ -579,7 +579,7 @@ faasr_set_workflow_timer_ld <- function(faasr, cred, target, cron, unset=FALSE){
   # get the lambda function name
   lambda_function_name <- faasr$FunctionInvoke
 
-  lambda_instance <- paws::lambda(
+  lambda_instance <- paws.compute::lambda(
     config=list(
       credentials=list(
         creds=list(
@@ -593,7 +593,7 @@ faasr_set_workflow_timer_ld <- function(faasr, cred, target, cron, unset=FALSE){
   )
 
 
-  eventbridge_instance <- paws::eventbridge(
+  eventbridge_instance <- paws.application.integration::eventbridge(
     config=list(
       credentials=list(
         creds=list(
@@ -674,7 +674,7 @@ faasr_set_workflow_timer_ld <- function(faasr, cred, target, cron, unset=FALSE){
 #' @param faas_name a string for the target server
 #' @param actionname a string for the target action name
 #' @import cli
-#' @import paws
+#' @importFrom "paws.compute" "lambda"
 #' @export
 
 faasr_workflow_invoke_lambda <- function(faasr, cred, faas_name, actionname){
@@ -684,7 +684,7 @@ faasr_workflow_invoke_lambda <- function(faasr, cred, faas_name, actionname){
     secret_key_name <- paste0(faas_name, "_SECRET_KEY")
     aws_access_key <- cred[[access_key_name]]
     aws_secret_key <- cred[[secret_key_name]]
-    aws_instance <- paws::lambda(
+    aws_instance <- paws.compute::lambda(
       config=list(
       credentials=list(
         creds=list(

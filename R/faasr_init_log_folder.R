@@ -8,7 +8,7 @@
 #' @param faasr list with parsed and validated Payload
 #' @return faasr a list of json file, UUID updated.
 #' @import uuid
-#' @import paws
+#' @importFrom "paws.storage" "s3"
 #' @export
 
 faasr_init_log_folder <- function(faasr) {
@@ -26,7 +26,7 @@ faasr_init_log_folder <- function(faasr) {
   }
       
   target_s3 <- faasr$DataStores[[target_s3]]
-  s3<-paws::s3(
+  s3<-paws.storage::s3(
     config=list(
 	  credentials=list(
 	    creds=list(

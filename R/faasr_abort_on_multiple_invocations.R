@@ -4,11 +4,11 @@
 #' Ensures that only one Action proceeds to execute a User Function if there are multiple triggers
 #' This is necessary because if in the Workflow a function receives multiple triggers, 
 #' multiple Actions are invoked; however, we don't want to execute the same function multiple times.
-#' This function aborts all but the last Action triggered
+#' This function aborts all but the last Action triggered.
 #' @param faasr list with parsed and validated Payload
 #' @param pre list with names of functions and corresponding predecessors
 #' @import uuid
-#' @import paws
+#' @importFrom "paws.storage" "s3"
 #' @export
 
 faasr_abort_on_multiple_invocations <- function(faasr, pre) {
@@ -29,7 +29,7 @@ faasr_abort_on_multiple_invocations <- function(faasr, pre) {
   }
 
   log_server <- faasr$DataStores[[log_server_name]]
-  s3<-paws::s3(
+  s3<-paws.storage::s3(
     config=list(
       credentials=list(
         creds=list(
