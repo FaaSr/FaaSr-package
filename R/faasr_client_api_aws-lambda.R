@@ -62,7 +62,7 @@ faasr_register_workflow_aws_lambda <- function(faasr, cred, memory=1024, timeout
 #' @import cli
 #' @keywords internal
 #' @examples
-#' #' if (interactive()){
+#' if (interactive()){
 #' lambda_function_info <- faasr_register_workflow_lambda_function_lists(faasr)
 #' }
 
@@ -104,8 +104,12 @@ faasr_register_workflow_lambda_function_lists <- function(faasr){
 #' @import cli
 #' @keywords internal
 #' @examples
-#' #' if (interactive()){
-#' lambda_function_info <- faasr_register_workflow_lambda_function_info(faasr, cred, lambda_server_info, lambda_function_info)
+#' if (interactive()){
+#' faasr <- jsonlite::fromJSON("path/to/json") #from JSON file
+#' cred <- list(keys="creds") #from env file or system environment
+#' server <- list(info="server_info") #from faasr_register_workflow_lambda_server_info()
+#' func_info <- list(info="function_info") #from faasr_register_workflow_lambda_function_lists()
+#' func_info <- faasr_register_workflow_lambda_function_info(faasr, cred, server, func_info)
 #' }
 
 # Get aws lambda function info
@@ -153,7 +157,7 @@ faasr_register_workflow_lambda_function_info <- function(faasr,cred, lambda_serv
 #' @importFrom "paws.security.identity" "sts"
 #' @keywords internal
 #' @examples
-#' #' if (interactive()){
+#' if (interactive()){
 #' lambda_server_info <- faasr_register_workflow_lambda_server_info(faasr, cred)
 #' }
 
@@ -207,7 +211,7 @@ faasr_register_workflow_lambda_server_info <- function(faasr, cred){
 #' @import cli
 #' @keywords internal
 #' @examples
-#' #' if (interactive()){
+#' if (interactive()){
 #' function_image_list <- faasr_register_workflow_lambda_function_image(faasr, lambda_server_info)
 #' }
 
@@ -268,8 +272,13 @@ faasr_register_workflow_lambda_function_image <- function(faasr, lambda_server_i
 #' @importFrom "paws.compute" "ecr"
 #' @keywords internal
 #' @examples
-#' #' if (interactive()){
-#' check <- check_user_image_exist(faasr, action_name, server_name, user_image_url, current_lambda_server_info)
+#' if (interactive()){
+#' faasr <- jsonlite::fromJSON("path/to/json")
+#' action <- "action_name"
+#' server <- "server_name"
+#' url <- "user_image_url"
+#' info <- list(info="current_lambda_server_info")
+#' check <- check_user_image_exist(faasr, action, server, url, info)
 #' is.logical(check)
 #' }
 
@@ -329,7 +338,7 @@ check_user_image_exist <- function(faasr, action_name, server_name, user_image_u
 #' @importFrom "paws.security.identity" "iam"
 #' @keywords internal
 #' @examples
-#' #' if (interactive()){
+#' if (interactive()){
 #' lambda-role-name <- faasr_register_workflow_aws_lambda_role_create(faasr, cred, lambda_server_info)
 #' }
 
@@ -523,8 +532,14 @@ check_lambda_exists <- function(function_name, cred, lambda_server_info) {
 #' @import cli
 #' @keywords internal
 #' @examples
-#' #' if (interactive()){
-#' check <- execute_command_with_retry(function_name, function_image_url, cred, current_lambda_instance, max_retries = 5, sleep_seconds = 3)
+#' if (interactive()){
+#' func_name <- "function_name"
+#' url <- "function_image_url"
+#' cred <- list(keys="credentials")
+#' instance <- paws.compute::lambda()
+#' max_re <- 5
+#' sleep_sec <- 3
+#' check <- execute_command_with_retry(func_name, url, cred, instance, max_re, sleep_sec)
 #' is.logical(check)
 #' }
 

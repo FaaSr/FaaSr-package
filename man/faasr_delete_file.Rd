@@ -12,6 +12,15 @@
 
 \item{remote_file}{string with the name for the file to be deleted}
 }
+\value{
+return nothing / delete the file in the bucket
+}
 \description{
 Helper function to delete a file in an S3 bucket
+}
+\examples{
+# This function can be run only in the container
+if (interactive()){
+faasr_delete_file(remote_file="test.txt")
+}
 }

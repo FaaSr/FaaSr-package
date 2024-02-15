@@ -8,6 +8,7 @@
 #' if no args provided, return empty list
 #' @keywords internal
 #' @examples 
+#' if (interactive()){
 #' faasr <- list()
 #' faasr$FunctionInvoke <- "F1"
 #' faasr$FunctionList$F1$Arguments$test <- "test"
@@ -16,10 +17,10 @@
 
 faasr_get_user_function_args <- function(faasr) {
   # First extract the name of the User Function to invoke
-  user_action = faasr$FunctionInvoke
+  user_action <- faasr$FunctionInvoke
 
   # Now extract and return the arguments specific to this User Function
-  args = faasr$FunctionList[[user_action]]$Arguments
+  args <- faasr$FunctionList[[user_action]]$Arguments
   if (is.null(args)){
     return(list())
   }

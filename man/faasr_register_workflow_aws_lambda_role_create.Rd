@@ -19,3 +19,9 @@ lambda-role-name a string for the lambda role name
 \description{
 create the aws-lambda role named "faasr-lambda-role"
 }
+\examples{
+if (interactive()){
+lambda-role-name <- faasr_register_workflow_aws_lambda_role_create(faasr, cred, lambda_server_info)
+}
+}
+\keyword{internal}

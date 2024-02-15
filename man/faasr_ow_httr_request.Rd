@@ -36,3 +36,9 @@ an integer value for the response
 the help function to send the curl request to the openwhisk
 by using the "httr" library.
 }
+\examples{
+if (interactive()){
+check <- faasr_ow_httr_request(faasr, server, action, type, body=list(), ssl=TRUE, namespace=NULL)
+}
+}
+\keyword{internal}

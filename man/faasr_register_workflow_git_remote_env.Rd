@@ -16,3 +16,4 @@ faasr_register_workflow_git_remote_env(repo, cred, token)
 \description{
 set env(secrets and variables) to the remote repository
 }
+\keyword{internal}

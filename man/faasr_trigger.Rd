@@ -9,10 +9,19 @@ faasr_trigger(faasr)
 \arguments{
 \item{faasr}{list with parsed and validated Payload}
 }
+\value{
+return nothing / send requests to the FaaS servers.
+}
 \description{
 Uses FaaS-specific APIs to generate triggers to execute downstream User Function
 Currently supports:
 * Apache OpenWhisk
 * AWS Lambda
 * GitHub Actions
+}
+\examples{
+# This function can be run only in the container
+if (interactive()){
+faasr_trigger(faasr)
+}
 }

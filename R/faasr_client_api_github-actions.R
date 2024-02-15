@@ -107,7 +107,7 @@ faasr_register_workflow_github_actions <- function(faasr, cred, cron=NULL, runne
 #' @keywords internal
 #' @examples
 #' if (interactive()){
-#' url <- https://github.com
+#' url <- "https://github.com"
 #' body <- list(a="a",b="b")
 #' type <- "GET"
 #' check <- faasr_httr_request(token, url, body=list(), type)
@@ -149,9 +149,11 @@ faasr_httr_request <- function(token, url, body=list(), type){
 #' @import cli
 #' @keywords internal
 #' @examples
+#' if (interactive()){
 #' faasr <- list()
 #' faasr$FunctionList$F1$FaaSServer <- "GitHubActions" 
 #' repo_list <- faasr_register_workflow_github_repo_lists(faasr)
+#' }
 
 # make a repo list. like a key-value set, key is a server_name and value is a repository name
 faasr_register_workflow_github_repo_lists <- function(faasr) {

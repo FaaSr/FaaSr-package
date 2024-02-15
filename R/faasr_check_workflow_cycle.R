@@ -6,7 +6,7 @@
 #' @return graph a graph representation of the Workflow
 #' @keywords internal
 #' @examples 
-#' this function can be run only inside the container
+#' # this function can be run only inside the container
 #' if (interactive()){
 #' predecessors <- faasr_check_workflow_cycle(faasr)
 #' }

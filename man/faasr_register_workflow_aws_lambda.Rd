@@ -18,3 +18,4 @@ faasr_register_workflow_aws_lambda(faasr, cred, memory = 1024, timeout = 600)
 \description{
 starts to register functions in the JSON file for AWS-Lambda
 }
+\keyword{internal}

@@ -20,3 +20,4 @@ invoke the github actions workflow on the github repository.
 Async version; does not wait for the result
 This will be invoked by faasr_workflow_invoke function
 }
+\keyword{internal}

@@ -16,3 +16,4 @@ check_lambda_exists(function_name, cred, lambda_server_info)
 \description{
 check if a Lambda function exists
 }
+\keyword{internal}

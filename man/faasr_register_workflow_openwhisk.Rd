@@ -28,3 +28,4 @@ register the workflow for openwhisk.
 parse faasr to get the server list and actions.
 create a actions for the FaaSr actions.
 }
+\keyword{internal}

@@ -14,7 +14,7 @@
 #' @examples
 #' # This function can be run only in the container
 #' if (interactive()){
-#' faasr_put_file(local_folder="test", local_file="test.txt", remote_folder="test", remote_file="test.txt")
+#' faasr_put_file("local_folder", "local_file", "remote_folder", "remote_file")
 #' }
 
 globalVariables(".faasr")

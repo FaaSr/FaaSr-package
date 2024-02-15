@@ -17,3 +17,9 @@ function_image_list a list form of lambda function information: name, images
 \description{
 Get aws lambda function image list
 }
+\examples{
+if (interactive()){
+function_image_list <- faasr_register_workflow_lambda_function_image(faasr, lambda_server_info)
+}
+}
+\keyword{internal}

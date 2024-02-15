@@ -8,8 +8,18 @@
 
 \item{log_message}{string message to be appended to the log}
 }
+\value{
+return nothing / leave the log to the bucket
+}
 \description{
 Helper function to append to the log file residing in an S3 bucket
 the name of the S3 server is implicit from the validated JSON payload, key LoggingServer
 the log file is a concatenation of folder "logs" and file name "faasr_log_" + InvocationID + ".txt"
+}
+\examples{
+# This function can be run only in the container
+if (interactive()){
+log_message <- "test message"
+faasr_log(log_message)
+}
 }

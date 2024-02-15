@@ -16,3 +16,12 @@ if no args provided, return empty list
 \description{
 Helper function to extract arguments of a User Function from the faasr parsed Payload list
 }
+\examples{
+if (interactive()){
+faasr <- list()
+faasr$FunctionInvoke <- "F1"
+faasr$FunctionList$F1$Arguments$test <- "test"
+args <- faasr_get_user_function_args(faasr)
+}
+}
+\keyword{internal}

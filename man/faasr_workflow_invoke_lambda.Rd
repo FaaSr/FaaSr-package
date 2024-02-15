@@ -19,3 +19,4 @@ faasr_workflow_invoke_lambda(faasr, cred, faas_name, actionname)
 Invoke a workflow for the lambda
 this function is invoked by faasr_workflow_invoke
 }
+\keyword{internal}

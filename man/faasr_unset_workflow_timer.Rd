@@ -11,9 +11,18 @@ faasr_unset_workflow_timer(target = NULL, ...)
 
 \item{...}{a string for underlying functions}
 }
+\value{
+return nothing / unset the workflow timer
+}
 \description{
 unset cron timer for workflow 
 This function aggregates the unset cron timer function for
 openwhisk, github actions and lambda
 This can be used as a cross-platform function
+}
+\examples{
+if (interactive()){
+test <- faasr("test.json", "env")
+test$unset_workflow_timer
+}
 }

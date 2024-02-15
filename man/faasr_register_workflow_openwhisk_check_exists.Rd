@@ -24,3 +24,9 @@ Check the remote repository is existing on the openwhisk
 by sending the GET request.
 If it exists, return TRUE, doesn't exist, return FALSE
 }
+\examples{
+if (interactive()){
+check <- faasr_register_workflow_openwhisk_check_exists(ssl, action, server, faasr)
+}
+}
+\keyword{internal}

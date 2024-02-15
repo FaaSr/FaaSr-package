@@ -18,3 +18,9 @@ Two checks are made here: 1) is it a valid JSON format? and 2) does it conform t
 If both checks pass, return a list with all the parsed key/value pairs
 Otherwise, abort
 }
+\examples{
+# This function can be run only in the container
+if (interactive()){
+faasr <- faasr_parse(faasr_payload)
+}
+}

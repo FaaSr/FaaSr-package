@@ -17,3 +17,9 @@ Parse the faasr and get the list of function:server
 Find actions which is using "OpenWhisk"
 return value's key is action and value is server name.
 }
+\examples{
+if (interactive()){
+action_list <- faasr_ow_httr_requesfaasr_register_workflow_openwhisk_action_listst(faasr)
+}
+}
+\keyword{internal}
