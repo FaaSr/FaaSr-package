@@ -1,0 +1,86 @@
+---
+title: "Accessing S3 data in FaaSr"
+output: rmarkdown::html_vignette
+description: >
+  This vignette walks you through examples of reading/writing inputs/outputs from your FaaSr workflow using S3 and Arrow.
+vignette: >
+  %\VignetteIndexEntry{Accessing S3 data in FaaSr}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r, echo = FALSE, message = FALSE}
+knitr::opts_chunk$set(collapse = T, comment = "#>")
+options(tibble.print_min = 4L, tibble.print_max = 4L)
+library(FaaSr)
+set.seed(1014)
+```
+
+## Overview
+
+When FaaSr functions execute in the cloud, they start from a blank slate - they don't have file inputs available. 
+Furthermore, when they finish execution, outputs are not automatically saved - it's your responsibility to save any output that should persist.
+This is because FaaS platforms are *stateless* - i.e., no persistent *state* (e.g. files) is available/saved unless you explicitly do so.
+Hence, typically FaaSr functions follow this pattern:
+
+- Files are stored persistently in an S3 *bucket*
+- The *names* of folder(s), file input(s) and output(s) in that bucket are passed as arguments to the function
+- At beginning of execution, the function *gets* all the inputs from the S3 to a local folder
+- During the execution, the function creates in a local folder all of its outputs
+- At the end of execution, the function *puts* all the outputs it needs to save from the local folder to the S3 bucket
+
+## Getting/putting files from/to S3
+
+The simplest way to get/put files from/to S3 is to use the `faasr_get_file()` and `faasr_put_file()` functions. 
+These examples come from the [companion vignette for single function](singlefunction.html) and [companion vignette for simple workflow](twofunctionworkflow.html):
+
+- `faasr_get_file(remote_folder=folder, remote_file=input1, local_file="input1.csv")`
+  - gets from S3 a remote file whose name is passed as function argument `input1` and which is stored in `folder` (also passed as an argument)
+  - saves this file locally with name `input1.csv`
+- `faasr_put_file(local_file="df1.csv", remote_folder=folder, remote_file=output1)`
+  - puts to S3 a local file whose name is `df1.csv`, storing with the name gives from function argument `output1` stored in `folder` (also passed as an argument)
+
+## Using Arrow and S3
+
+[Apache Arrow](https://arrow.apache.org/) allows efficient columnar data access for large datasets.
+FaaSr provides a function `faasr_arrow_s3_bucket()` that returns an Arrow object that can then be used in your code.
+For example, the `compute_sum` function described in the [companion vignette for simple workflow](twofunctionworkflow.html) can be re-written to use Arrow as follows:
+
+```{}
+library(arrow)
+
+compute_sum_arrow <- function(folder, input1, input2, output) {
+
+  # Download two input files from bucket, generate a sum of their contents, and write back to bucket
+
+  # The function uses the default S3 bucket name, configured in the FaaSr JSON 
+  # folder: name of the folder where the inputs and outputs reside
+  # input1, input2: names of the input files
+  # output: name of the output file
+  
+  # The bucket is configured in the JSON payload as My_S3_Bucket
+  # In this demo code, all inputs/outputs are in the same S3 folder, which is also configured by the user
+
+  # Set up s3 bucket using arrow
+  s3 <- faasr_arrow_s3_bucket()
+
+  # Get file from s3 bucket using arrow
+  frame_input1 <- arrow::read_csv_arrow(s3$path(file.path(folder, input1)))
+  frame_input2 <- arrow::read_csv_arrow(s3$path(file.path(folder, input2)))
+  
+  # This demo function computes output <- input1 + input2 and stores the output back into S3
+  # First, read the local inputs, compute the sum
+  #
+  frame_output <- frame_input1 + frame_input2
+
+  # Upload the output file to S3 bucket using arrow
+  arrow::write_csv_arrow(frame_output, s3$path(file.path(folder, output)))
+
+  # Print a log message
+  # 
+  log_msg <- paste0('Function compute_sum finished; output written to ', folder, '/', output, ' in default S3 bucket')
+  faasr_log(log_msg)
+}	
+```
+
+

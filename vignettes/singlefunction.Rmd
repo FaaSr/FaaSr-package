@@ -26,6 +26,7 @@ With the knowledge gained from this tutorial, you will be able to also run FaaSr
 
 The main requirements to follow this vignette are: 
 * FaaSr installed in RStudio in your desktop
+* Git installed in your computer
 * minioclient installed in your desktop (optional, but recommended - you can also use other S3 clients)
 * A GitHub account 
 
@@ -43,6 +44,10 @@ Replace YOUR_GITHUB_USERNAME and YOUR_GITHUB_EMAIL with your account information
 This function will prompt you for your GitHub PAT token; copy and paste it to the pop-up window:
 
 `credentials::set_github_pat()`
+
+*note: make sure your git installation is set to use `main` as the default branch.* 
+This is typically the default in most modern systems, but if your git version uses `master` as the default, you can change with this terminal command:
+`git config --global init.defaultBranch main`
 
 ### Add your credentials to faasr_env file
 
@@ -117,6 +122,7 @@ You will use the [FaaSr-JSON-Builder Shiny app](https://faasr.shinyapps.io/faasr
 3. For the `Select Type` drop-down, select `GitHubActions`.
 4. For `GitHubActions user name`, enter your GitHub `username`. This will ensure FaaSr runs under your account.
 5. For `GitHubActions Action Repository name`, enter `FaaSr_single_function_action` - this is where GitHub Actions will be configured by FaaSr.
+6. For `GitHubActions Branch`, enter `main`
 6. Leave the remaining fields as the default, and click the Apply button. You will see an icon for this FaaS server in the main window to the right.
 
 ![JSON Builder - defining FaaS server after data server has been configured](images/faasr_json_builder_step2.png){width=80%}

@@ -252,9 +252,9 @@ bucket of your choice.</p>
 <div id="requirements" class="section level2">
 <h2>Requirements</h2>
 <p>The main requirements to follow this vignette are: * FaaSr installed
-in RStudio in your desktop * minioclient installed in your desktop
-(optional, but recommended - you can also use other S3 clients) * A
-GitHub account</p>
+in RStudio in your desktop * Git installed in your computer *
+minioclient installed in your desktop (optional, but recommended - you
+can also use other S3 clients) * A GitHub account</p>
 <p>For FaaSr to use your GitHub account, you need a GitHub personal
 access token (PAT), configured to enable at least the “workflow” and
 “read:org” (under admin:org) scopes. With your GitHub PAT in hand, you
@@ -269,6 +269,11 @@ information in the command below:</p>
 <p>This function will prompt you for your GitHub PAT token; copy and
 paste it to the pop-up window:</p>
 <p><code>credentials::set_github_pat()</code></p>
+<p><em>note: make sure your git installation is set to use
+<code>main</code> as the default branch.</em> This is typically the
+default in most modern systems, but if your git version uses
+<code>master</code> as the default, you can change with this terminal
+command: <code>git config --global init.defaultBranch main</code></p>
 </div>
 <div id="add-your-credentials-to-faasr_env-file" class="section level3">
 <h3>Add your credentials to faasr_env file</h3>
@@ -362,6 +367,7 @@ account.</li>
 <li>For <code>GitHubActions Action Repository name</code>, enter
 <code>FaaSr_single_function_action</code> - this is where GitHub Actions
 will be configured by FaaSr.</li>
+<li>For <code>GitHubActions Branch</code>, enter <code>main</code></li>
 <li>Leave the remaining fields as the default, and click the Apply
 button. You will see an icon for this FaaS server in the main window to
 the right.</li>

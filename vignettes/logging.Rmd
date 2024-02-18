@@ -1,0 +1,65 @@
+---
+title: "Logging and debugging in FaaSr"
+output: rmarkdown::html_vignette
+description: >
+  This vignette walks you through examples of reading/writing inputs/outputs from your FaaSr workflow using S3 and Arrow.
+vignette: >
+  %\VignetteIndexEntry{Logging and debugging in FaaSr}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r, echo = FALSE, message = FALSE}
+knitr::opts_chunk$set(collapse = T, comment = "#>")
+options(tibble.print_min = 4L, tibble.print_max = 4L)
+library(FaaSr)
+set.seed(1014)
+```
+
+## Overview
+
+When FaaSr functions execute in the cloud, errors may happen, and it is important that you add logging information so you can debug these errors.
+Because FaaS functions are stateless, FaaSr also use cloud S3 bucket storage to persist logging information.
+
+## Configuring loggging folder in S3
+
+By default, logs are stored in a folder named `FaaSrLog` in your configured S3 bucket.
+You can specify a different folder name in your JSON configuration file using the FaaSr JSON Builder, under the `General configuration` pull-down.
+Within this folder, for every execution of a workflow, a randomly-generated *UUID* (a long name that looks like `2f66208d-63eb-4fd9-b54b-7bebcc970421`) is created to store the logs for that workflow.
+The reason a *UUID* folder is created is to ensure that every FaaSr workflow execution has its own separate logs.
+In this way, you are able to safely run multiple workflows concurrently, and their logs are separate
+
+## Logging from your code
+
+To add a message to the log, use the `faasr_log()` function, with the following pattern as an example:
+
+```{}
+log_msg <- paste0('Function compute_sum finished; output written to ', folder, '/', output, ' in default S3 bucket')
+faasr_log(log_msg)
+```
+
+## Checking the logs
+
+Since logs are stored in S3, you may use any S3-compatible client to browse the logs. For example, using `minioclient`:
+
+`mc_ls("play/faasr/FaaSrLog/")`
+
+We'll assume UUID `2f66208d-63eb-4fd9-b54b-7bebcc970421` in the examples below; please replace appropriately:
+
+`mc_ls("play/faasr/FaaSrLog/2f66208d-63eb-4fd9-b54b-7bebcc970421/")`
+
+Each action's log is written as a file with the action's name and extension `.txt`. For example, the log for `Action1` would be:
+
+`mc_cat("play/faasr/FaaSrLog/2f66208d-63eb-4fd9-b54b-7bebcc970421/Action1.txt")`
+
+## Locating specific UUID
+
+To find out the specific *UUID* for a workflow run, you can check the FaaS-specific platform logs.
+
+### GitHub Actions
+
+You can go to the FaaSr-created Action repo, and click on the `Actions` tab, and expand the `run Rscript` link to see the `Action Invocation ID`, which matches the *UUID* for your logs:
+
+![Locating UUID for logs, in GitHub Actions](images/faasr_log_github_actions.png){width=90%}
+
+
