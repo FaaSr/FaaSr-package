@@ -58,7 +58,7 @@ The S3 credentials below are pre-set to use the Minio Play server.
 
 ## Create GitHub repo and R function
 
-Use the GitHub web site to create a new repository, named `FaaSr_single_function_code`. This is where your R source code will go.
+Use the GitHub web site to create a new repository, named `FaaSr_single_function_code` This is where your R source code will go.
 
 Create a file `create_sample_data.R` file in this repository, copying and pasting the code below. 
 This function creates two synthetic .csv files and uploads to an S3 bucket:
@@ -103,26 +103,26 @@ You will use the [FaaSr-JSON-Builder Shiny app](https://faasr.shinyapps.io/faasr
 ### Define a Data Server
 
 From the drop-down menu on the left, select `Data Server`.
-For `Data Server Name`, enter `My_Minio_Bucket`. This is the name your S3 server will be referred to for any upload/download operations.
-For `Data Server endpoint`, enter `https://play.min.io`. This is the Internet address of the S3 server.
-For `Data Server Bucket`, enter `faasr`.
+For `Data Server Name`, enter `My_Minio_Bucket` - this is the name your S3 server will be referred to for any upload/download operations.
+For `Data Server endpoint`, enter `https://play.min.io` - this is the Internet address of the S3 server.
+For `Data Server Bucket`, enter `faasr`
 Leave the remaining fields as the default, and click the Apply button. You will see an icon for this data server in the main window to the right.
 
 ### Define a FaaS Server
 
 From the drop-down menu on the left, select `FaaS Server`.
-For `FaaS Server Name`, enter `My_GitHub_Account`.  This is the name your FaaS server will be referred to for any functions that are executed.
+For `FaaS Server Name`, enter `My_GitHub_Account` - this is the name your FaaS server will be referred to for any functions that are executed.
 For the `Select Type` drop-down, select `GitHubActions`.
-For `GitHubActions user name`, enter your GitHub account name. This will ensure FaaSr runs under your account.
-For `GitHubActions Action Repository name`, enter `FaaSr_single_function_action`. This is where GitHub Actions will be configured by FaaSr.
+For `GitHubActions user name`, enter your GitHub `username`. This will ensure FaaSr runs under your account.
+For `GitHubActions Action Repository name`, enter `FaaSr_single_function_action` - this is where GitHub Actions will be configured by FaaSr.
 Leave the remaining fields as the default, and click the Apply button. You will see an icon for this FaaS server in the main window to the right.
 
 ### Define a Workflow
 
 From the drop-down menu on the left, select `Functions`.
-Under `Action Name`, enter `Action1`. This is the name that will be used for your GitHub Action.
-Under `Function Name`, enter `create_sample_data`. This is the name of the R function you created in the previous section.
-Under `Function FaaS Server`, leave the default `My_GitHub_Account`. This is the name of the server you configured in the previous step.
+Under `Action Name`, enter `Action1` - this is the name that will be used for your GitHub Action.
+Under `Function Name`, enter `create_sample_data` - this is the name of the R function you created in the previous section.
+Under `Function FaaS Server`, leave the default `My_GitHub_Account` - this is the name of the server you configured in the previous step.
 Under `Function Arguments`, enter the following arguments, which will be passed to the `create_sample_data()` function:
 
 ```{}
@@ -133,7 +133,7 @@ output2="sample2.csv"
 
 Under `Next Actions to Invoke`, leave it blank (the default). This single function  does not invoke any other functions.
 Under `Function's Action Container`, leave it blank (the default). This example will use the default Rocker/Tidyverse FaaSr container.
-Under `Repository/Path, where the function is stored`, enter your GitHub username and repository you created in a previous step, e.g. `username/FaaSr_single_function_code`.
+Under `Repository/Path, where the function is stored`, enter your GitHub username and repository you created in a previous step, e.g. `username/FaaSr_single_function_code`
 Leave the remaining fields as the default, and click the Apply button. You will see an icon for this function in the main window to the right.
 
 ### Configure starting function and log server
