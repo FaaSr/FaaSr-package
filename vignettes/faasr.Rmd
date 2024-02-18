@@ -96,4 +96,4 @@ While FaaSr provides an extensible platform to develop customizable workflows fo
 
 * Uses S3 to upload/download data for inputs/outputs of their workflow
 
-These are covered in other vignettes for this package.
+These steps are covered with concrete examples in other vignettes

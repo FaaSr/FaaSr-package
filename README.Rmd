@@ -47,6 +47,24 @@ The functions exposed by FaaSr can be broadly divided as follows:
 * `workflow$register_workflow()` registers a *workflow* with the configured FaaS provider
 * `workflow$invoke_workflow()` immediately invokes a *workflow* with the configured FaaS provider
 * `workflow$set_workflow_timer(cron_string)` set a timer (using the standard CRON format) to invoke a *workflow* at a given time interval with the configured FaaS provider
+* `workflow$unset_workflow_timer()` unset a timer previously defined with `set_workflow_timer()`
+
+### Workflow configuration
+
+Workflows are configured using the JSON file format and the [FaaSr configuration schema](https://github.com/FaaSr/FaaSr-package/blob/main/schema/FaaSr.schema.json). 
+
+You may use the [FaaSr-JSON-Builder Shiny app](https://faasr.shinyapps.io/faasr-json-builder/) to create and edit workflows using a graphical user interface (GUI) rather than a text editor. This GUI can be used to create FaaSr-compliant JSON files from scratch (or starting from an exiting configuration you can upload using the tool). The generated configuration can be downloaded to your computer.
+
+### Cloud credential configuration
+
+The client-side FaaSr functions expect both a JSON configuration file describing a workflow, and an environment variable file storing the credentials for your FaaS cloud platforms of choice. The example below shows a template for S3 cloud storage, GitHub Actions, OpenWhisk and AWS Lambda credentials:
+
+`"My_GitHub_Account_TOKEN"="REPLACE_WITH_YOUR_GITHUB_TOKEN"`
+`"My_Minio_Bucket_ACCESS_KEY"="REPLACE_WITH_S3_ACCESS_KEY"`
+`"My_Minio_Bucket_SECRET_KEY"="REPLACE_WITH_S3_SECRET_KEY"`
+`"My_OW_Account_API_KEY"="REPLACE_WITH_YOUR_OPENWHISK_ID:SECRET_KEY"`
+`"My_Lambda_Account_ACCESS_KEY"="REPLACE_WITH_YOUR_AWS_LAMBDA_ACCESS_KEY"`
+`"My_Lambda_Account_SECRET_KEY"="REPLACE_WITH_YOUR_AWS_LAMBDA_SECRET_KEY"`
 
 ## Installation
 
@@ -60,4 +78,4 @@ devtools::install_github("FaaSr/FaaSr-package")
 
 ## Example
 
-Please refer to the [FaaSr tutorial](https://github.com/FaaSr/FaaSr-tutorial) for a detailed end-to-end example that uses GitHub Actions and Minio S3 Play server
+Please refer to the [FaaSr tutorial](https://github.com/FaaSr/FaaSr-tutorial) for a detailed step-by-step example that you can run on your own desktop (using Rocker) or on Posit Cloud, using just a GitHub account and the free-for-testing Minio S3 Play server
