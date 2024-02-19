@@ -21,7 +21,7 @@ set.seed(1014)
 When FaaSr functions execute in the cloud, errors may happen, and it is important that you add logging information so you can debug these errors.
 Because FaaS functions are stateless, FaaSr also use cloud S3 bucket storage to persist logging information.
 
-## Configuring loggging folder in S3
+## Configuring logging folder in S3
 
 By default, logs are stored in a folder named `FaaSrLog` in your configured S3 bucket.
 You can specify a different folder name in your JSON configuration file using the FaaSr JSON Builder, under the `General configuration` pull-down.

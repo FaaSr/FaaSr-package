@@ -158,7 +158,7 @@ output2="sample2.csv"
 4. For the `Default Data Server` drop down, also  select `My_Minio_Bucket`. This defines the S3 server where files are stored/retrieved from with the `faasr_put_file()` and `faasr_get_file()` functions in the R code above.
 5. Leave the remaining fields as the default, and click the Apply button.
 
-![JSON Buildr - last step: configuring the workflow](images/faasr_json_builder_step4.png){width=90%}
+![JSON Builder - last step: configuring the workflow](images/faasr_json_builder_step4.png){width=90%}
 
 ### Generate, download and save the configuration file
 
