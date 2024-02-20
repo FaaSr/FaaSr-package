@@ -10,6 +10,7 @@
 * github actions/ ubuntu-latest - R Release
 * github actions/ ubuntu-latest - R Devel
 * github actions/ ubuntu-latest - R Oldrel-1
+* win-builder (devel)
 
 ## R CMD check results
 
