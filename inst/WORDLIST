@@ -1,8 +1,10 @@
 Actionname
+Acyclic
 Async
 Backoff
 CLI
 CMD
+CRON
 DefaultDataStore
 FaaS
 FaaSrLog
@@ -15,13 +17,16 @@ InvocationID
 JSON
 Javascript
 LoggingServer
+Minio
 OpenWhisk
 Openwhisk
 README
 RStudio
+Rstudio
 SSL
 Servername
 Sys
+Tidyverse
 UUID
 VMs
 args
@@ -30,6 +35,7 @@ cli
 cnt
 config
 cron
+csv
 customizable
 dependences
 dir
@@ -46,9 +52,11 @@ init
 json
 ld
 md
+minioclient
 msg
 natively
 openwhisk
+pre
 readme
 repo
 req
