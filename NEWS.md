@@ -1,4 +1,20 @@
-# FaaSr (1.0.9.0)
+# FaaSr (1.1.0.1)
+
+* Bug fix
+  + Add condition for checking the account_id of given image
+  + Add basic_ld_image_account_id
+* CRAN New Submission
+
+# FaaSr (1.1.0.0)
+
+* Edit function's descriptions
+  + Add "@examples" in the function description.
+  + Add "@Keywords internal" in the function that will not be exported.
+  + Delete "@export" in some functions that will not be exported.
+* Update the word list file by `devtools::spell_check()` & `spelling::update_wordlist()`
+* Update Rd files.
+
+#FaaSr (1.0.9.0)
 
 * Add support for user-client functions to register AWS Lambda functions without "aws" CLI.
 * Edit R Scripts meta-data.

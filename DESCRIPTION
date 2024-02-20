@@ -2,7 +2,7 @@ Type: Package
 Package: FaaSr
 Title: 'FaaS' (Function as a Service) Package for R
 Version: 1.1.0.1
-Authors@R: c(person("Figueiredo", "Renato", role = c("aut", "cre", "ths"),
+Authors@R: c(person("Figueiredo", "Renato", role = c("aut", "cre", "ths", "cph"),
                     email = "renatof@ufl.edu",
                     comment = c(ORCID = "0000-0001-9841-6060")),
              person("Park", "Sungjae", role = "aut"),
