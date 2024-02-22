@@ -14,16 +14,21 @@
 
 ## R CMD check results
 
-0 errors ✔ | 0 warnings ✔ | 1 note ✖
+0 errors ✔ | 0 warnings ✔ | 2 note ✖
 
 There were no ERRORs or WARNINGs
 
-One NOTE:
+2 NOTE:
 
 ❯ checking CRAN incoming feasibility ... NOTE
   Maintainer: 'Figueiredo Renato <renatof@ufl.edu>'
   
   New submission
+
+❯ Package suggested but not available for checking: ‘arrow’
+
+  * This is because 'arrow' package currently has an error (CRAN build). - All other packages using arrow as a dependency failed R CMD Checks.
+  * arrow is not required for operation of FaaSr - which can use S3 for data transfers. We will resubmit a package request once arrow building works again.
 
 ## Downstream dependencies
 

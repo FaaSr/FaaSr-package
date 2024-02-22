@@ -35,7 +35,6 @@ BugReports: https://github.com/FaaSr/FaaSr-package/issues
 Depends:
     R (>= 3.5.0)
 Imports:
-    arrow,
     jsonlite,
     httr,
     uuid,
@@ -48,6 +47,7 @@ Imports:
     base64enc,
     sodium
 Suggests:
+    arrow,
     glue,
     rmarkdown,
     paws.common,
