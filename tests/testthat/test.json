@@ -1,4 +1,5 @@
-{   "FunctionInvoke": "first_action",
+{   
+    "FunctionInvoke": "first_action",
     "InvocationID": "uuid_format_id",
     "FaaSrLog": "logfolder_name/default:FaaSrLog",
     "DefaultDataStore": "Servername for logging/should be one of DataStores Server name",

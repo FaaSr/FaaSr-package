@@ -30,9 +30,10 @@ faasr_check_workflow_cycle <- function(faasr){
 	      NULL
 	    # if not, keep checking the DAG.
 	    } else {
-	      dfs(func, target, stack)
+	      stack <- dfs(func, target, stack)
 	    }
 	  }
+    return(stack)
   }
 	
   # build empty lists for the graph and predecessors.
@@ -56,7 +57,7 @@ faasr_check_workflow_cycle <- function(faasr){
   # build an empty list of stacks - this will prevent the infinite loop
   stack <- list()
   # do dfs starting with faasr$FunctionInvoke.
-  dfs(faasr$FunctionInvoke, faasr$FunctionInvoke)
+  dfs(faasr$FunctionInvoke, faasr$FunctionInvoke, stack)
 	
   # call faasr_predecessors_list and get a list of function:predecessor sets.
   pre <- faasr_predecessors_list(faasr, graph)
@@ -69,7 +70,7 @@ faasr_check_workflow_cycle <- function(faasr){
       # build an empty list of stacks - this will prevent the infinite loop
       stack <- list()
       # if it is the initial function, do dfs starting with it to find stacks.
-      dfs(func, func)
+      stack <- dfs(func, func, stack)
 
       # check unreachable states by comparing function list and stack
       for (func in names(faasr$FunctionList)){

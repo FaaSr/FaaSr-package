@@ -59,6 +59,7 @@ test_that("check workflow cycle", {
   result <- pre[[faasr$FunctionInvoke]]
 
   # Now use "expect_equal". 
+  print(result)
   expect_equal(faasr_check_workflow_cycle(faasr), result)
   
   #######################################################

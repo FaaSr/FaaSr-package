@@ -28,7 +28,7 @@ test_that("parse", {
   #################################################################################
   ## Now we should modify test_json for error detecting.
   ## You can make it as a list and edit it, as follows:
-  json_list <- jsonlite::fromJSON("test.json")
+  json_list <- jsonlite::fromJSON(test_json)
   ## intentionally make an error: FaaSType should be Github but set it up as Lambda
   json_list$ComputeServers$My_Github_Account$FaaSType <- "Lambda"
   ## Turn the list back to the JSON forma
