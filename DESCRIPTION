@@ -1,6 +1,6 @@
 Type: Package
 Package: FaaSr
-Title: 'FaaS' (Function as a Service) Package for R
+Title: FaaS (Function as a Service) Package
 Version: 1.1.1
 Authors@R: c(person("Figueiredo", "Renato", role = c("aut", "cre", "ths", "cph"),
                     email = "renatof@ufl.edu",
@@ -13,22 +13,22 @@ Authors@R: c(person("Figueiredo", "Renato", role = c("aut", "cre", "ths", "cph")
              person("Carey", "Cayelan", role = "ctb")
 	     )
 Maintainer: Figueiredo Renato <renatof@ufl.edu>
-Description: Allows users to create and deploy the 'workflow' with multiple R functions
-    in Function-as-a-Service ('FaaS') cloud computing platforms.
-    The 'FaaSr' package makes it simpler for R developers to use 'FaaS' platforms by providing the following functionality:
-    1) Parsing and validating a 'JSON'-based payload compliant to 'FaaSr' schema supporting multiple 'FaaS' platforms
+Description: Allows users to create and deploy the workflow with multiple functions
+    in Function-as-a-Service (FaaS) cloud computing platforms.
+    The 'FaaSr' package makes it simpler for R developers to use FaaS platforms by providing the following functionality:
+    1) Parsing and validating a JSON-based payload compliant to 'FaaSr' schema supporting multiple FaaS platforms
     2) Invoking user functions written in R in a Docker container (derived from rocker), using a list generated from
        the parser as argument
     3) Downloading/uploading of files from/to S3 buckets using simple primitives
     4) Logging to files in S3 buckets
-    5) Triggering downstream actions supporting multiple 'FaaS' platforms
-    6) Generating 'FaaS'-specific API calls to simplify the registering of a user's 'workflow' with a 'FaaS' platform
-    Supported 'FaaS' platforms:
-    Apache 'OpenWhisk' <https://openwhisk.apache.org/>
-    'GitHub' Actions <https://github.com/features/actions>
-    Amazon Web Services ('AWS') Lambda <https://aws.amazon.com/lambda/>
+    5) Triggering downstream actions supporting multiple FaaS platforms
+    6) Generating FaaS-specific API calls to simplify the registering of a user's workflow with a FaaS platform
+    Supported FaaS platforms:
+    Apache OpenWhisk <https://openwhisk.apache.org/>
+    GitHub Actions <https://github.com/features/actions>
+    Amazon Web Services (AWS) Lambda <https://aws.amazon.com/lambda/>
     Supported cloud data storage for persistent storage:
-    Amazon Web Services ('AWS') Simple Storage Service ('S3') <https://aws.amazon.com/s3/>.
+    Amazon Web Services (AWS) Simple Storage Service (S3) <https://aws.amazon.com/s3/>.
 License: MIT + file LICENSE
 URL: https://github.com/FaaSr/FaaSr-package
 BugReports: https://github.com/FaaSr/FaaSr-package/issues

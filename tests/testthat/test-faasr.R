@@ -1,4 +1,9 @@
 test_that("faasr_function", {
+
+  cwd <- getwd()
+  on.exit(setwd(cwd))
+
+  setwd(tempdir())
   ## this function is to set a configuration
   ## input is JSON file path
   ## outputs are various: svc configurations, svc$json, svc$cred, svc$json_path, directory("/.faasr_json/random number file)
@@ -34,4 +39,6 @@ test_that("faasr_function", {
   ## After all the test, clean up the directory
   unlink("faasr_gh_local_repo", recursive=TRUE, force=TRUE)
   unlink("faasr_data", recursive=TRUE, force=TRUE)
+  setwd(cwd)
+
 })

@@ -36,6 +36,7 @@ faasr_register_workflow <- function(...){
   if (!dir.exists(faasr_wd)){
     faasr_wd <- getwd()
   }
+  on.exit(setwd(faasr_wd))
   faasr <- svc$json
   cred <- faasr_collect_sys_env(faasr,svc$cred)
   
@@ -61,10 +62,6 @@ faasr_register_workflow <- function(...){
 #' @return credential list
 #' @import cli
 #' @keywords internal
-#' @examples
-#' if (interactive()){
-#' cred_from_env <- faasr_collect_sys_env(faasr, cred)
-#' }
 
 # collect system envrionment
 faasr_collect_sys_env <- function(faasr, cred){
@@ -186,10 +183,6 @@ faasr_collect_sys_env <- function(faasr, cred){
 #' json, cred, and operations.
 #' @return object containing all the information
 #' @keywords internal
-#' @examples
-#' if (interactive()){
-#' svc <- .faasr_get_svc()
-#' }
 
 # get the list "svc"
 .faasr_get_svc <- function(){
@@ -410,6 +403,7 @@ faasr_invoke_workflow <- function(FunctionInvoke=NULL, ...){
   if (!dir.exists(faasr_wd)){
     faasr_wd <- getwd()
   }
+  on.exit(setwd(faasr_wd))
   faasr <- svc$json
   cred <- faasr_collect_sys_env(faasr,svc$cred)
   
@@ -470,6 +464,7 @@ faasr_set_workflow_timer <- function(cron, target=NULL, ...){
   if (!dir.exists(faasr_wd)){
     faasr_wd <- getwd()
   }
+  on.exit(faasr_wd)
   faasr <- svc$json
   cred <- faasr_collect_sys_env(faasr,svc$cred)
   if (is.null(target)){
@@ -522,6 +517,7 @@ faasr_unset_workflow_timer <- function(target=NULL,...){
   if (!dir.exists(faasr_wd)){
     faasr_wd <- getwd()
   }
+  on.exit(setwd(faasr_wd))
   faasr <- svc$json
   cred <- faasr_collect_sys_env(faasr,svc$cred)
 

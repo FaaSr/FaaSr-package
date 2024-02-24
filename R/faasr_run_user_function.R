@@ -19,7 +19,7 @@ faasr_run_user_function <- function(.faasr){
   func_name <- .faasr$FunctionList[[.faasr$FunctionInvoke]]$FunctionName
   user_function = tryCatch(expr=get(func_name), error=function(e){
     err_msg <- paste0('{\"faasr_user_function\":\"Cannot find Function ',func_name,', check the name and sources\"}', "\n")
-    cat(err_msg)
+    message(err_msg)
     result <- faasr_log(err_msg)
     stop()
     }
@@ -34,7 +34,7 @@ faasr_run_user_function <- function(.faasr){
     nat_err_msg <- paste0('\"faasr_user_function\":Errors in the user function ', as.character(e))
     err_msg <- paste0('{\"faasr_user_function\":\"Errors in the user function: ',.faasr$FunctionInvoke,', check the log for the detail \"}', "\n")
     result_2 <- faasr_log(nat_err_msg)
-    cat(err_msg)
+    message(err_msg)
     stop()
     }
   )

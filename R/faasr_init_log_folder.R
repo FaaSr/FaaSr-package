@@ -10,11 +10,6 @@
 #' @import uuid
 #' @importFrom "paws.storage" "s3"
 #' @keywords internal
-#' @examples
-#' # This function can be run only in the container
-#' if (interactive()){
-#' faasr <- faasr_init_log_folder(faasr)
-#' }
 
 faasr_init_log_folder <- function(faasr) {
   # if InvocationID doesn't have valid form, generate a UUID
@@ -54,7 +49,7 @@ faasr_init_log_folder <- function(faasr) {
   check_UUIDfolder<-s3$list_objects_v2(Prefix=idfolder, Bucket=target_s3$Bucket)
   if (length(check_UUIDfolder$Contents)!=0){
     err_msg <- paste0('{\"faasr_init_log_folder\":\"InvocationID already exists: ', faasr$InvocationID,'\"}', "\n")
-    cat(err_msg)
+    message(err_msg)
     stop()
   }else{
     s3$put_object(Key=idfolder, Bucket=target_s3$Bucket)

@@ -6,11 +6,6 @@
 #' @param graph graph constructed by the depth first search in faasr_check_workflow_cycle
 #' @return a list of "function:predecessors" pairs.
 #' @keywords internal
-#' @examples
-#' # This function can be run only in the container
-#' if (interactive()){
-#' pre <- faasr_predecessors_list(faasr, graph)
-#' }
 
 faasr_predecessors_list <- function(faasr, graph){
   # find the predecessors and add them to the list "pre"

@@ -1,8 +1,12 @@
-test_json <- readLines("test.json")
-writeLines(readLines("https://raw.githubusercontent.com/FaaSr/FaaSr-package/main/schema/FaaSr.schema.json"), "FaaSr.schema.json")
+test_that("parse", {
+  cwd <- getwd()
+  on.exit(setwd(cwd))
+  setwd(tempdir())
+
+  test_json <- readLines("test.json")
+  writeLines(readLines("https://raw.githubusercontent.com/FaaSr/FaaSr-package/main/schema/FaaSr.schema.json"), "FaaSr.schema.json")
   
 
-test_that("parse", {
   ## "parse" validates the given JSON payload and returns the list of JSON.
   ## input should be JSON format (not a list at this time)
   
@@ -37,4 +41,5 @@ test_that("parse", {
   
   ## After all the test, clean up the file
   unlink("FaaSr.schema.json", recursive=TRUE, force=TRUE)
+  setwd(cwd)
 })

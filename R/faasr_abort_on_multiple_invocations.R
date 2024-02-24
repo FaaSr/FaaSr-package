@@ -24,7 +24,7 @@ faasr_abort_on_multiple_invocations <- function(faasr, pre) {
     NULL
   } else {
     err_msg <- paste0('{\"faasr_abort_on_multiple_invocation\":\"Invalid data server name: ',log_server_name,'\"}', "\n")
-    cat(err_msg)
+    message(err_msg)
     stop()	
   }
 
@@ -59,7 +59,7 @@ faasr_abort_on_multiple_invocations <- function(faasr, pre) {
     # if object doesn't exist, leave a log that this function should wait and will be discarded
     if (!func_done %in% check_fn_done_list){
       res_msg <- paste0('{\"faasr_abort_on_multiple_invocations\":\"not the last trigger invoked - no flag\"}', "\n")
-      cat(res_msg)
+      message(res_msg)
       faasr_log(res_msg)
       stop()
     }
@@ -116,7 +116,7 @@ faasr_abort_on_multiple_invocations <- function(faasr, pre) {
     NULL
   } else {
     res_msg <- paste0('{\"faasr_abort_on_multiple_invocations\":\"not the last trigger invoked - random number does not match\"}', "\n")
-    cat(res_msg)
+    message(res_msg)
     faasr_log(res_msg)
     stop()
   }

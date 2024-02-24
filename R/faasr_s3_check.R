@@ -9,11 +9,6 @@
 #' @return faasr list with parsed and validated payload
 #' @importFrom "paws.storage" "s3"
 #' @keywords internal
-#' @examples
-#' # This function can be run only in the container
-#' if (interactive()){
-#' faasr <- faasr_s3_check(faasr)
-#' }
 
 globalVariables(".faasr")
 
@@ -27,7 +22,7 @@ faasr_s3_check <- function(faasr){
     }else{
       if (!(startsWith(endpoint_check, "http"))){
         msg <- paste0('{\"faasr_s3_check\":\"Invalid Data store server endpoint ',server,'\"}', "\n")
-        cat(msg)
+        message(msg)
         stop()
       }
     }
@@ -51,12 +46,12 @@ faasr_s3_check <- function(faasr){
       bucket_names <- lapply(check$Buckets, function(bucket) bucket$Name)
       if(!(faasr$DataStores[[server]]$Bucket %in% bucket_names)){
         msg <- paste0('{\"faasr_s3_check\":\"S3 server ',server,' failed with message: No such bucket\"}', "\n")
-        cat(msg)
+        message(msg)
         stop()
       }
     }else{
       msg <- paste0('{\"faasr_s3_check\":\"S3 server ',server,' failed with message: Data store server unreachable\"}', "\n")
-      cat(msg)
+      message(msg)
       stop()
     }
   }

@@ -146,11 +146,6 @@ faasr_release<-function(faasr) {
 #' @param flag_name the string value of the name of the flag
 #' @return a logical value if there are other nodes
 #' @keywords internal
-#' @examples
-#' # This function can be run only in the container
-#' if (interactive()){
-#' check <- faasr_anyone_else_interested(faasr, target_s3, flag_path, flag_name)
-#' }
 
 # Anyone_else_interested implementation
 faasr_anyone_else_interested <- function(faasr, target_s3, flag_path, flag_name){
