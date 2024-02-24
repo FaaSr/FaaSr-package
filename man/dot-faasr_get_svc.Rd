@@ -13,9 +13,4 @@ object containing all the information
 Helper function to get the saved data for 
 json, cred, and operations.
 }
-\examples{
-if (interactive()){
-svc <- .faasr_get_svc()
-}
-}
 \keyword{internal}

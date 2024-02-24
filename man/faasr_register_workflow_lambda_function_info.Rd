@@ -26,13 +26,4 @@ lambda_function_info a list form of lambda function information: name, actions, 
 \description{
 Get aws lambda function information
 }
-\examples{
-if (interactive()){
-faasr <- jsonlite::fromJSON("path/to/json") #from JSON file
-cred <- list(keys="creds") #from env file or system environment
-server <- list(info="server_info") #from faasr_register_workflow_lambda_server_info()
-func_info <- list(info="function_info") #from faasr_register_workflow_lambda_function_lists()
-func_info <- faasr_register_workflow_lambda_function_info(faasr, cred, server, func_info)
-}
-}
 \keyword{internal}

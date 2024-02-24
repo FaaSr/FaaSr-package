@@ -1,9 +1,10 @@
+test_json <- readLines("test.json")
+
 test_that("parse", {
   cwd <- getwd()
   on.exit(setwd(cwd))
   setwd(tempdir())
 
-  test_json <- readLines("test.json")
   writeLines(readLines("https://raw.githubusercontent.com/FaaSr/FaaSr-package/main/schema/FaaSr.schema.json"), "FaaSr.schema.json")
   
 

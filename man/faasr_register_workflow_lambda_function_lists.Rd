@@ -15,9 +15,4 @@ lambda_function_info a list form of lambda function information: name, actions
 \description{
 Get aws lambda function list
 }
-\examples{
-if (interactive()){
-lambda_function_info <- faasr_register_workflow_lambda_function_lists(faasr)
-}
-}
 \keyword{internal}
