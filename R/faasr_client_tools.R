@@ -289,9 +289,9 @@ faasr <- function(json_path=NULL, env_path=NULL){
     }
     svc$json$DataStores[[data_js]]$AccessKey <- paste0(data_js,"_ACCESS_KEY")
     
-    if (!is.null(svc$json$DataStores[[data_js]]$AccessKey)){
-      if (svc$json$DataStores[[data_js]]$AccessKey != paste0(data_js,"_ACCESS_KEY")){
-        svc$cred[[paste0(data_js,"_ACCESS_KEY")]] <- svc$json$DataStores[[data_js]]$AccessKey
+    if (!is.null(svc$json$DataStores[[data_js]]$SecretKey)){
+      if (svc$json$DataStores[[data_js]]$SecretKey != paste0(data_js,"_SECRET_KEY")){
+        svc$cred[[paste0(data_js,"_SECRET_KEY")]] <- svc$json$DataStores[[data_js]]$SecretKey
       }
     }
     svc$json$DataStores[[data_js]]$SecretKey <- paste0(data_js,"_SECRET_KEY")
