@@ -464,7 +464,7 @@ faasr_set_workflow_timer <- function(cron, target=NULL, ...){
   if (!dir.exists(faasr_wd)){
     faasr_wd <- getwd()
   }
-  on.exit(faasr_wd)
+  on.exit(setwd(faasr_wd))
   faasr <- svc$json
   cred <- faasr_collect_sys_env(faasr,svc$cred)
   if (is.null(target)){
