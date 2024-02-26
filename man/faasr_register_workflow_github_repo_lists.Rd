@@ -17,11 +17,4 @@ Parse the faasr and get the list of function:repository
 Find actions which is using "Github Actions"
 return value's key is action and value is server name.
 }
-\examples{
-if (interactive()){
-faasr <- list()
-faasr$FunctionList$F1$FaaSServer <- "GitHubActions" 
-repo_list <- faasr_register_workflow_github_repo_lists(faasr)
-}
-}
 \keyword{internal}

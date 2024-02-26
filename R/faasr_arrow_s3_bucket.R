@@ -23,7 +23,7 @@ faasr_arrow_s3_bucket <- function(server_name=.faasr$DefaultDataStore) {
     NULL
   } else {
     err_msg <- paste0('{\"faasr_get_arrow\":\"Invalid data server name: ',server_name,'\"}', "\n")
-    cat(err_msg)
+    message(err_msg)
     stop()
   }
 

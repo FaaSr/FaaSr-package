@@ -29,7 +29,7 @@ faasr_parse <- function(faasr_payload) {
   } else {
 	log <- attr(validate(faasr_payload),"err")
 	err_msg <- paste0('{\"faasr_parse\":\"Invalid JSON Payload: ',log,'\"}', "\n")
-	cat(err_msg)
+	message(err_msg)
 	stop()
   }
 
@@ -39,15 +39,15 @@ faasr_parse <- function(faasr_payload) {
     return(faasr)
   } else {
 	#err_msg <- paste0('{\"faasr_parse\":\"JSON Payload not compliant with FaaSr schema\"}', "\n")
-	#cat(err_msg)
+	#message(err_msg)
 	  
 	message_schema <- attr(faasr_schema_valid(faasr_payload, verbose=TRUE, greedy=TRUE),"errors")
         tag <- c("schemaPath", "message")
         log <- message_schema[,tag]
         log_s <- paste(log$schemaPath, log$message, "\n", sep = " ")
-        cat(log_s)
+        message(log_s)
 	err_msg <- paste0('{\"faasr_parse\":\"JSON Payload error - please check the logs for your FaaS provider for more information\"}', "\n")
-	cat(err_msg)
+	message(err_msg)
         stop()
   }
 }

@@ -1,6 +1,14 @@
 ## comments for CRAN submission
 
-* This is a new release.
+Re-submission after fixing issues.
+We are grateful for the review provided by Uwe Ligges!
+* edit DESCRIPTION: remove 'for R' in title.
+* omit single quotes.
+* omit examples from unexported functions.
+* use 'message()' instead of 'cat()'.
+* use 'tempdir()' in tests.
+* use 'on.exit()' function before changing user's current directory.
+* edit function not to modify global envrionment.
 
 ## Test environments
 

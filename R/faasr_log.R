@@ -32,7 +32,7 @@ faasr_log <- function(log_message) {
     NULL
    } else {
      err_msg <- paste0('{\"faasr_log\":\"Invalid logging server name: ',log_server_name,'\"}', "\n")
-     cat(err_msg)
+     message(err_msg)
      stop()
    }
 

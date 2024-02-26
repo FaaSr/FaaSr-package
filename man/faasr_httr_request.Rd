@@ -22,12 +22,4 @@ response: response status; 200/202/204/400/etc
 the help function to send the curl request to the github
 by using the "httr" library.
 }
-\examples{
-if (interactive()){
-url <- "https://github.com"
-body <- list(a="a",b="b")
-type <- "GET"
-check <- faasr_httr_request(token, url, body=list(), type)
-}
-}
 \keyword{internal}

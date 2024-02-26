@@ -1,12 +1,17 @@
 test_that("faasr_function", {
+
+  cwd <- getwd()
+  on.exit(setwd(cwd))
+
+  setwd(tempdir())
   ## this function is to set a configuration
   ## input is JSON file path
   ## outputs are various: svc configurations, svc$json, svc$cred, svc$json_path, directory("/.faasr_json/random number file)
-  faasr_std <- jsonlite::fromJSON("test.json")
+  faasr_std <- jsonlite::fromJSON(paste0(cwd,"/test.json"))
   
   ## We're using our "test.json" file
-  faasr_test <- faasr(json_path="test.json")
-  
+  faasr_test <- faasr(json_path=paste0(cwd,"/test.json"))
+
   ## 1. Check credentials are set as "server name" + "key type in capital letter"
   expect_equal(faasr_test$json$ComputeServers$My_Github_Account$Token, "My_Github_Account_TOKEN")
   expect_equal(faasr_test$json$ComputeServers$My_AWS_Account$AccessKey, "My_AWS_Account_ACCESS_KEY")
@@ -34,4 +39,6 @@ test_that("faasr_function", {
   ## After all the test, clean up the directory
   unlink("faasr_gh_local_repo", recursive=TRUE, force=TRUE)
   unlink("faasr_data", recursive=TRUE, force=TRUE)
+  setwd(cwd)
+
 })

@@ -29,7 +29,7 @@ faasr_trigger <- function(faasr) {
   # Check if the list is empty or not
   if (length(invoke_next) == 0) {
     err_msg <- paste0('{\"faasr_trigger\":\"no triggers for ',user_function,'\"}', "\n")
-    cat(err_msg)
+    message(err_msg)
     faasr_log(err_msg)
   } else {
     # Iterate through invoke_next and use FaaS-specific mechanisms to send trigger
@@ -47,7 +47,7 @@ faasr_trigger <- function(faasr) {
         NULL
       } else {
       	err_msg <- paste0('{\"faasr_trigger\":\"invalid server name: ',next_server,'\"}', "\n")
-        cat(err_msg)
+        message(err_msg)
         faasr_log(err_msg)
         break
       }
@@ -97,11 +97,11 @@ faasr_trigger <- function(faasr) {
 
           if (response$status_code==200 || response$status_code==202){
             succ_msg <- paste0('{\"faasr_trigger\":\"OpenWhisk: Successfully invoked: ', faasr$FunctionInvoke, '\"}\n')
-            cat(succ_msg)
+            message(succ_msg)
             faasr_log(succ_msg)
           } else {
             err_msg <- paste0('{\"faasr_trigger\":\"OpenWhisk: Error invoking: ', faasr$FunctionInvoke, ' - ', content(response)$error,'\"}\n')
-            cat(err_msg)
+            message(err_msg)
             faasr_log(err_msg)
           }
         },
@@ -143,11 +143,11 @@ faasr_trigger <- function(faasr) {
 	  # Check if next function be invoked successfully
           if (response$Status == 202) {
             succ_msg <- paste0("faasr_trigger: Successfully invoked:", faasr$FunctionInvoke, "\n")
-            cat(succ_msg)
+            message(succ_msg)
             faasr_log(succ_msg)
           } else {
             err_msg <- paste0("faasr_trigger: Error invoking: ",faasr$FunctionInvoke," reason:", response$Status, "\n")
-            cat(err_msg)
+            message(err_msg)
             faasr_log(err_msg)
           }
         },
@@ -203,23 +203,23 @@ faasr_trigger <- function(faasr) {
 	  # Check if next action be invoked successfully
           if (status_code(response) == 204) {
             succ_msg <- paste0("faasr_trigger: GitHub Action: Successfully invoked:", faasr$FunctionInvoke, "\n")
-            cat(succ_msg)
+            message(succ_msg)
             faasr_log(succ_msg)
           } else if (status_code(response) == 401) {
 	    err_msg <- paste0("faasr_trigger: GitHub Action: Authentication failed, check the credentials\n")
-            cat(err_msg)
+            message(err_msg)
             faasr_log(err_msg)
 	  } else if (status_code(response) == 404) {
 	    err_msg <- paste0("faasr_trigger: GitHub Action: Cannot find the destination, check the repo name: \"",repo,"\" and workflow name: \"",workflow_file,"\"\n")
-            cat(err_msg)
+            message(err_msg)
             faasr_log(err_msg)
 	  } else if (status_code(response) == 422) {
 	    err_msg <- paste0("faasr_trigger: GitHub Action: Cannot find the destination, check the ref: ", faasr$FunctionInvoke, "\n")
-            cat(err_msg)
+            message(err_msg)
             faasr_log(err_msg)
 	  } else {
 	    err_msg <- paste0("faasr_trigger: GitHub Action: unknown error happens when invoke next function\n")
-            cat(err_msg)
+            message(err_msg)
             faasr_log(err_msg)
           }
     	}

@@ -17,10 +17,4 @@ a list of "function:predecessors" pairs.
 \description{
 Get the predecessors list, by using the graph from faasr_check_workflow
 }
-\examples{
-# This function can be run only in the container
-if (interactive()){
-pre <- faasr_predecessors_list(faasr, graph)
-}
-}
 \keyword{internal}

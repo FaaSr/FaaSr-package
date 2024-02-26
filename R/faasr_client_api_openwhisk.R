@@ -70,10 +70,6 @@ faasr_register_workflow_openwhisk <- function(faasr, cred, ssl=TRUE, memory=1024
 #' @import httr
 #' @import cli
 #' @keywords internal
-#' @examples
-#' if (interactive()){
-#' check <- faasr_ow_httr_request(faasr, server, action, type, body=list(), ssl=TRUE, namespace=NULL)
-#' }
 
 # help sending httr requests
 faasr_ow_httr_request <- function(faasr, server, action, type, body=list(), ssl=TRUE, namespace=NULL){
@@ -127,10 +123,6 @@ faasr_ow_httr_request <- function(faasr, server, action, type, body=list(), ssl=
 #' @import httr
 #' @import cli
 #' @keywords internal
-#' @examples
-#' if (interactive()){
-#' action_list <- faasr_ow_httr_requesfaasr_register_workflow_openwhisk_action_listst(faasr)
-#' }
 
 faasr_register_workflow_openwhisk_action_lists <- function(faasr) {
   # empty list
@@ -167,10 +159,6 @@ faasr_register_workflow_openwhisk_action_lists <- function(faasr) {
 #' @import httr
 #' @import cli
 #' @keywords internal
-#' @examples
-#' if (interactive()){
-#' check <- faasr_register_workflow_openwhisk_check_exists(ssl, action, server, faasr)
-#' }
 
 faasr_register_workflow_openwhisk_check_exists <- function(ssl, action, server, faasr){
   
@@ -203,11 +191,6 @@ faasr_register_workflow_openwhisk_check_exists <- function(ssl, action, server, 
 #' @import httr
 #' @import cli
 #' @keywords internal
-#' @examples
-#' if (interactive()){
-#' check <- faasr_register_workflow_openwhisk_check_user_input(check, actionname, type)
-#' }
-
 
 faasr_register_workflow_openwhisk_check_user_input <- function(check, actionname, type){
   # if given values already exists, ask the user to update the action

@@ -18,10 +18,4 @@ The folder name is a concatenation of FaaSrLog and InvocationID from the Payload
 The folder name needs to be a unique ID. If the user doesn't provide InvocationID, generate a UUID
 If the folder already exists, abort with an error
 }
-\examples{
-# This function can be run only in the container
-if (interactive()){
-faasr <- faasr_init_log_folder(faasr)
-}
-}
 \keyword{internal}

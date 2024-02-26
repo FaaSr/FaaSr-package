@@ -22,10 +22,4 @@ a logical value if there are other nodes
 Uses locking algorithm with S3 to enforce single User Function execution when there are multiple predecessors
 Checking the flag to find any other nodes are seeking for the lock.
 }
-\examples{
-# This function can be run only in the container
-if (interactive()){
-check <- faasr_anyone_else_interested(faasr, target_s3, flag_path, flag_name)
-}
-}
 \keyword{internal}
