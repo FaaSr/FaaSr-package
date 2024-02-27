@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# FaaSr
+# FaaSr <img src='man/figures/FaaSr.png' align="right" height="139" />
 
 <!-- badges: start -->
 
