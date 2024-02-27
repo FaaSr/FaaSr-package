@@ -8,6 +8,8 @@
 [![R-CMD-check](https://github.com/spark0510/FaaSr-package/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/spark0510/FaaSr-package/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
+## Overview
+
 The goal of FaaSr is to make it easy for developers to create R
 functions and workflows that can run in the cloud, on-demand, based on
 triggers - such as timers, or repository commits. It is built for
