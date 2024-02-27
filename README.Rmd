@@ -13,11 +13,14 @@ knitr::opts_chunk$set(
 )
 ```
 
-# FaaSr
+# FaaSr <img src='man/figures/FaaSr.png' align="right" height="139" />
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/spark0510/FaaSr-package/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/spark0510/FaaSr-package/actions/workflows/R-CMD-check.yaml)
+[![CRAN status](https://www.r-pkg.org/badges/version/FaaSr)](https://cran.r-project.org/package=FaaSr)
 <!-- badges: end -->
+
+## Overview
 
 The goal of FaaSr is to make it easy for developers to create R functions and workflows that can run in the cloud, on-demand, based on triggers - such as timers, or repository commits. It is built for Function-as-a-Service (FaaS) cloud computing, and supports both widely-used commercial (GitHub Actions, AWS Lambda, IBM Cloud) and open-source platforms (OpenWhisk). It is also built for cloud storage, and supports the S3 standard also widely used in commercial (AWS S3), open-source (Minio) and research platforms (Open Storage Network). With FaaSr, you can focus on developing the R functions, and leave dealing with the idiosyncrasies of different FaaS platforms and their APIs to the FaaSr package.
 
@@ -68,10 +71,15 @@ The client-side FaaSr functions expect both a JSON configuration file describing
 
 ## Installation
 
+FaaSr can be installed from CRAN with:
+
+``` r
+install.packages("FaaSr")
+```
+
 You can install the development version of FaaSr from [GitHub](https://github.com/) with:
 
 ``` r
-# install.packages("devtools")
 devtools::install_github("FaaSr/FaaSr-package")
 ```
 
