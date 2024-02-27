@@ -101,11 +101,16 @@ Lambda credentials:
 
 ## Installation
 
+FaaSr can be installed from CRAN with:
+
+``` r
+install.packages("FaaSr")
+```
+
 You can install the development version of FaaSr from
 [GitHub](https://github.com/) with:
 
 ``` r
-# install.packages("devtools")
 devtools::install_github("FaaSr/FaaSr-package")
 ```
 
