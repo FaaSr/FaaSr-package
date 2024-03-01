@@ -103,7 +103,7 @@ create_sample_data <- function(folder, output1, output2) {
 
 ## Create JSON configuration file
 
-You will use the [FaaSr-JSON-Builder Shiny app](https://faasr.shinyapps.io/faasr-json-builder/) to create your JSON configuration file.
+You will use the [FaaSr workflow builder](https://faasr.shinyapps.io/faasr-json-builder/) Shiny app to create your JSON configuration file.
 
 ### Define a Data Server
 
@@ -113,7 +113,7 @@ You will use the [FaaSr-JSON-Builder Shiny app](https://faasr.shinyapps.io/faasr
 4. For `Data Server Bucket`, enter `faasr`
 5. Leave the remaining fields as the default, and click the Apply button. You will see an icon for this data server in the main window to the right.
 
-![JSON Builder - defining data server](images/faasr_json_builder_step1.png){width=50%}
+![Workflow builder - defining data server](images/faasr_json_builder_step1.png){width=50%}
 
 ### Define a FaaS Server
 
@@ -125,7 +125,7 @@ You will use the [FaaSr-JSON-Builder Shiny app](https://faasr.shinyapps.io/faasr
 6. For `GitHubActions Branch`, enter `main`
 6. Leave the remaining fields as the default, and click the Apply button. You will see an icon for this FaaS server in the main window to the right.
 
-![JSON Builder - defining FaaS server after data server has been configured](images/faasr_json_builder_step2.png){width=80%}
+![Workflow builder - defining FaaS server after data server has been configured](images/faasr_json_builder_step2.png){width=80%}
 
 ### Define the Workflow
 
@@ -147,7 +147,7 @@ output2="sample2.csv"
 8. Under `Repository/Path, where the function is stored`, enter your GitHub username and repository you created in a previous step, e.g. `username/FaaSr_single_function_code`
 9. Leave the remaining fields as the default, and click the Apply button. You will see an icon for this function in the main window to the right.
 
-![JSON Builder - defining the workflow after both data and FaaS servers have been configured](images/faasr_json_builder_step3.png){width=90%}
+![Workflow builder - defining the workflow after both data and FaaS servers have been configured](images/faasr_json_builder_step3.png){width=90%}
 
 
 ### Configure starting function and log server
@@ -158,7 +158,7 @@ output2="sample2.csv"
 4. For the `Default Data Server` drop down, also  select `My_Minio_Bucket`. This defines the S3 server where files are stored/retrieved from with the `faasr_put_file()` and `faasr_get_file()` functions in the R code above.
 5. Leave the remaining fields as the default, and click the Apply button.
 
-![JSON Builder - last step: configuring the workflow](images/faasr_json_builder_step4.png){width=90%}
+![Workflow builder - last step: configuring the workflow](images/faasr_json_builder_step4.png){width=90%}
 
 ### Generate, download and save the configuration file
 

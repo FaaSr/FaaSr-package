@@ -63,7 +63,7 @@ compute_sum <- function(folder, input1, input2, output) {
 
 ## Add new function to workflow
 
-You will again use the [FaaSr-JSON-Builder Shiny app](https://faasr.shinyapps.io/faasr-json-builder/) to update your workflow and generate a JSON configuration file.
+You will again use the [FaaSr workflow builder Shiny app](https://faasr.shinyapps.io/faasr-json-builder/) to update your workflow and generate a JSON configuration file.
 
 1. Upload the `payload.json` file you downloaded when you completed [companion vignette for single function](singlefunction.html)
 2. From the drop-down menu on the left, select `Functions`
@@ -84,13 +84,13 @@ output="sum.csv"
 9. Under `Repository/Path, where the function is stored`, enter your GitHub username and repository you created in a previous step, e.g. `username/FaaSr_single_function_code`
 10. Leave the remaining fields as the default, and click the Apply button. You will see an icon for this function in the main window to the right.
 
-![JSON Builder - adding compute_sum](images/faasr_json_builder_sum_step1.png){width=50%}
+![Workflow builder - adding compute_sum](images/faasr_json_builder_sum_step1.png){width=50%}
 
 ### Define the Workflow
 
 As of this point, you have two actions defined - `Action1` and `Sum` - but they do not form a workflow graph yet:
 
-![JSON Builder - after compute_sum added](images/faasr_json_builder_sum_step2.png){width=80%}
+![Workflow builder - after compute_sum added](images/faasr_json_builder_sum_step2.png){width=80%}
 
 The workflow we want is one where `Action1` triggers the execution of `Sum` after it completes running. 
 To express this, you need to edit `Action1` by double-clicking its icon on the main window. This allows you to edit its configuration on the left panel.
@@ -99,11 +99,11 @@ The only modification you need to make is:
 1. Under `Next Actions to Invoke`, type `Sum` 
 2. Leave the remaining fields as the default, and click the Apply button. 
 
-![JSON Builder - configuring next function to call](images/faasr_json_builder_sum_step3.png){width=50%}
+![Workflow builder - configuring next function to call](images/faasr_json_builder_sum_step3.png){width=50%}
 
 You will see now an arrow going from `Action1` to `Sum` in the main window to the right, representing the trigger issued by the former:
 
-![JSON Builder - configuring next function to call](images/faasr_json_builder_sum_step4.png){width=50%}
+![Workflow builder - configuring next function to call](images/faasr_json_builder_sum_step4.png){width=50%}
 
 
 ### Generate, download and save the configuration file
