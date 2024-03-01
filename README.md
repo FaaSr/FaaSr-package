@@ -12,7 +12,7 @@ status](https://www.r-pkg.org/badges/version/FaaSr)](https://cran.r-project.org/
 
 ## Overview
 
-The goal of FaaSr is to make it easy for developers to create R
+The goal of [FaaSr](https://faasr.io) is to make it easy for developers to create R
 functions and workflows that can run in the cloud, on-demand, based on
 triggers - such as timers, or repository commits. It is built for
 Function-as-a-Service (FaaS) cloud computing, and supports both
