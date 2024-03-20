@@ -50,7 +50,7 @@ faasr_register_workflow_github_actions <- function(faasr, cred, cron=NULL, runne
     # check the repository
     response <- faasr_register_workflow_github_repo_exists(token,repo)
     # check user's request
-    private <- faasr_register_workflow_github_repo_question(response)
+    private <- faasr_register_workflow_github_repo_question(response, repo)
     # create directories
     faasr_register_workflow_github_create_dir(server,repo)
     cli_alert_success("Create github local directories")
