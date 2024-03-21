@@ -2,7 +2,6 @@
 #' @title faasr_put_file
 #' @description 
 #' Helper function to upload a file from a local Action folder to an S3 bucket
-#' @param faasr list with parsed and validated Payload
 #' @param server_name string with name of the S3 bucket to use; must match a name declared in the faasr list
 #' @param local_folder string with the name of the local folder where the file to be uploaded resides
 #' @param local_file string with the name of the local file to be uploaded
