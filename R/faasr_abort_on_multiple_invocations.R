@@ -25,7 +25,7 @@ faasr_abort_on_multiple_invocations <- function(faasr, pre) {
   } else {
     err_msg <- paste0('{\"faasr_abort_on_multiple_invocation\":\"Invalid data server name: ',log_server_name,'\"}', "\n")
     message(err_msg)
-    stop()	
+    return("err")
   }
 
   log_server <- faasr$DataStores[[log_server_name]]
@@ -60,7 +60,7 @@ faasr_abort_on_multiple_invocations <- function(faasr, pre) {
     if (!func_done %in% check_fn_done_list){
       res_msg <- paste0('{\"faasr_abort_on_multiple_invocations\":\"not the last trigger invoked - no flag\"}', "\n")
       message(res_msg)
-      stop()
+      return("err")
     }
   }
 
@@ -112,10 +112,10 @@ faasr_abort_on_multiple_invocations <- function(faasr, pre) {
   # this action is the only one that won't abort
   # essentially, the first action to append to the candidate file proceeds; all others will abort
   if (as.character(random_number) == readLines(func_candidate,1)) {
-    NULL
+    return("")
   } else {
     res_msg <- paste0('{\"faasr_abort_on_multiple_invocations\":\"not the last trigger invoked - random number does not match\"}', "\n")
     message(res_msg)
-    stop()
+    return("err")
   }
 }
