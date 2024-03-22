@@ -15,7 +15,7 @@
 globalVariables(".faasr")
 
 # Default server_name is DefaultDataStore, default prefix is ""
-faasr_delete_file <- function(server_name=.faasr$DefaultDataStore, faasr_prefix="") { 
+faasr_get_folder_list <- function(server_name=.faasr$DefaultDataStore, faasr_prefix="") { 
   # Check that an S3 server_name has been defined
   # If not, log an error and abort
   
