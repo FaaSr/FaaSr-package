@@ -66,7 +66,7 @@ faasr_start <- function(faasr_payload) {
   # Only the last Action should invoke the User Function; all other Action invocations must abort
   if (length(pre) > 1) {
     result <- faasr_abort_on_multiple_invocations(.faasr, pre)
-    if (result == "err"){
+    if (result[1] == "err"){
       return("err-abort")
     }
   }
