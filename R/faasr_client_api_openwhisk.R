@@ -13,7 +13,7 @@
 #' @import cli
 #' @keywords internal
 
-faasr_register_workflow_openwhisk <- function(faasr, cred, ssl=TRUE, memory=1024, timeout=600) {
+faasr_register_workflow_openwhisk <- function(faasr, cred, ssl=TRUE, memory=1024, timeout=600, storage=NULL) {
   
   options(cli.progress_clear = FALSE)
   options(cli.spinner = "line")
