@@ -13,7 +13,7 @@
 #' @import cli
 #' @keywords internal
 
-faasr_register_workflow_openwhisk <- function(faasr, cred, ssl=TRUE, memory=1024, timeout=600000) {
+faasr_register_workflow_openwhisk <- function(faasr, cred, ssl=TRUE, memory=1024, timeout=600) {
   
   options(cli.progress_clear = FALSE)
   options(cli.spinner = "line")
@@ -254,7 +254,7 @@ faasr_register_workflow_openwhisk_create_action <- function(ssl, actionname, ser
       image = actioncontainer
     ),
     limits = list(
-      timeout = as.numeric(timeout),
+      timeout = as.numeric(timeout)*1000,
       memory = as.numeric(memory)
     )
   )
