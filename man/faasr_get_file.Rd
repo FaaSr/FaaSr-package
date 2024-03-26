@@ -4,8 +4,6 @@
 \alias{faasr_get_file}
 \title{faasr_get_file}
 \arguments{
-\item{faasr}{list with parsed and validated Payload}
-
 \item{server_name}{string with name of the S3 bucket to use; must match a name declared in the faasr list}
 
 \item{remote_folder}{string with the name of the remote folder where the file is to be downloaded from}
