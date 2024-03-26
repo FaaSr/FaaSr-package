@@ -9,7 +9,8 @@ faasr_register_workflow_openwhisk(
   cred,
   ssl = TRUE,
   memory = 1024,
-  timeout = 6e+05
+  timeout = 600,
+  storage = NULL
 )
 }
 \arguments{
