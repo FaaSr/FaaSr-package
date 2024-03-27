@@ -22,7 +22,7 @@ faasr_get_folder_list <- function(server_name=.faasr$DefaultDataStore, faasr_pre
   if (server_name %in% names(.faasr$DataStores)) {
     NULL
    } else {
-     err_msg <- paste0('{\"faasr_delete_file\":\"Invalid data server name: ',server_name,'\"}', "\n")
+     err_msg <- paste0('{\"faasr_get_folder_list\":\"Invalid data server name: ',server_name,'\"}', "\n")
      message(err_msg)
      stop()	
    }
