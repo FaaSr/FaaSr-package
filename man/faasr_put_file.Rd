@@ -4,8 +4,6 @@
 \alias{faasr_put_file}
 \title{faasr_put_file}
 \arguments{
-\item{faasr}{list with parsed and validated Payload}
-
 \item{server_name}{string with name of the S3 bucket to use; must match a name declared in the faasr list}
 
 \item{local_folder}{string with the name of the local folder where the file to be uploaded resides}
