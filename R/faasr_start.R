@@ -65,7 +65,10 @@ faasr_start <- function(faasr_payload) {
   # If a User Function has more than one predecessors, this Action may or may not invoke the User Function
   # Only the last Action should invoke the User Function; all other Action invocations must abort
   if (length(pre) > 1) {
-    faasr_abort_on_multiple_invocations(.faasr, pre)
+    result <- faasr_abort_on_multiple_invocations(.faasr, pre)
+    if (result[1] == "abort-on-multiple-invocation"){
+      return("abort-on-multiple-invocation")
+    }
   }
 
   return(.faasr)
