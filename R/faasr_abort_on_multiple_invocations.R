@@ -25,7 +25,7 @@ faasr_abort_on_multiple_invocations <- function(faasr, pre) {
   } else {
     err_msg <- paste0('{\"faasr_abort_on_multiple_invocation\":\"Invalid data server name: ',log_server_name,'\"}', "\n")
     message(err_msg)
-    return("err")
+    stop()
   }
 
   log_server <- faasr$DataStores[[log_server_name]]
