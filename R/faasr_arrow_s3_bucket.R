@@ -15,7 +15,7 @@
 
 globalVariables(".faasr")
 
-faasr_arrow_s3_bucket <- function(server_name=.faasr$DefaultDataStore) {
+faasr_arrow_s3_bucket <- function(server_name=.faasr$DefaultDataStore, faasr_prefix="") {
   # Check that an S3 server_name has been defined
   # If not, log an error and abort
 
@@ -29,9 +29,14 @@ faasr_arrow_s3_bucket <- function(server_name=.faasr$DefaultDataStore) {
 
   target_s3 <- .faasr$DataStores[[server_name]]
 
+  if (faasr_prefix != ""){
+    bucket <- paste0(target_s3$Bucket, "/", faasr_prefix)
+  } else {
+    bucket <- target_s3$Bucket
+  }
 
   s3 <- arrow::s3_bucket(
-    bucket = target_s3$Bucket,
+    bucket = bucket,
     access_key = target_s3$AccessKey,
     secret_key = target_s3$SecretKey,
     endpoint_override = target_s3$Endpoint
