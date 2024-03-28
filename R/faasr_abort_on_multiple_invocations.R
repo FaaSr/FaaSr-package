@@ -60,7 +60,7 @@ faasr_abort_on_multiple_invocations <- function(faasr, pre) {
     if (!func_done %in% check_fn_done_list){
       res_msg <- paste0('{\"faasr_abort_on_multiple_invocations\":\"not the last trigger invoked - no flag\"}', "\n")
       message(res_msg)
-      return("err")
+      return("abort-on-multiple-invocation")
     }
   }
 
@@ -116,6 +116,6 @@ faasr_abort_on_multiple_invocations <- function(faasr, pre) {
   } else {
     res_msg <- paste0('{\"faasr_abort_on_multiple_invocations\":\"not the last trigger invoked - random number does not match\"}', "\n")
     message(res_msg)
-    return("err")
+    return("abort-on-multiple-invocation")
   }
 }
