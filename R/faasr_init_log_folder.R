@@ -21,7 +21,6 @@ faasr_init_log_folder <- function(faasr) {
 
   faasr_msg <- paste0('{\"faasr_init_log_folder\":\"InvocationID for the workflow: ', faasr$InvocationID,'\"}', "\n")
   message(faasr_msg)
-  faasr_log(faasr_msg)
 
   if (is.null(faasr$LoggingDataStore)){
     target_s3 <- faasr$DefaultDataStore
