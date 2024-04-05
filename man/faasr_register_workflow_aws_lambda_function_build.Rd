@@ -12,7 +12,8 @@ faasr_register_workflow_aws_lambda_function_build(
   cred,
   lambda_server_info,
   memory = 1024,
-  timeout = 600
+  timeout = 600,
+  storage = 512
 )
 }
 \arguments{
