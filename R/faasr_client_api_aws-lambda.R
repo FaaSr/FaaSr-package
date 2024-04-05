@@ -440,12 +440,12 @@ faasr_register_workflow_aws_lambda_function_build <- function(faasr, lambda_func
     )
 
     if(lambda_function_info[[function_name]]$action == "update"){
-      current_lambda_instance$update_function_configuration(FunctionName = function_name, Role = lambda_role_arn, Timeout = aws_lambda_timeout, MemorySize = aws_lambda_memory, EphemeralStorage = aws_lambda_storage)
+      current_lambda_instance$update_function_configuration(FunctionName = function_name, Role = lambda_role_arn, Timeout = aws_lambda_timeout, MemorySize = aws_lambda_memory, EphemeralStorage = list(Size=aws_lambda_storage))
       execute_command_with_retry(function_name, function_image_url, cred, current_lambda_instance)
       cli_alert_success(paste0("Successfully Update the function: ", function_name))
       
     } else if(lambda_function_info[[function_name]]$action == "create"){
-      current_lambda_instance$create_function(FunctionName = function_name, PackageType = "Image", Code = list(ImageUri = function_image_url), Role = lambda_role_arn, Timeout = aws_lambda_timeout, MemorySize = aws_lambda_memory, EphemeralStorage = aws_lambda_storage)  
+      current_lambda_instance$create_function(FunctionName = function_name, PackageType = "Image", Code = list(ImageUri = function_image_url), Role = lambda_role_arn, Timeout = aws_lambda_timeout, MemorySize = aws_lambda_memory, EphemeralStorage = list(Size=aws_lambda_storage))  
       cli_alert_success(paste0("Successfully Create the function: ", function_name))
     }
   }
