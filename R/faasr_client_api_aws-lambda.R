@@ -380,7 +380,7 @@ faasr_register_workflow_aws_lambda_role_create <- function(faasr, cred, lambda_s
 
 # Create aws lambda functions
 faasr_register_workflow_aws_lambda_function_build <- function(faasr, lambda_function_info, function_image_list, aws_lambda_role_name, cred, 
-                                                              lambda_server_info, memory=1024, timeout=600, storage=1024){
+                                                              lambda_server_info, memory=1024, timeout=600, storage=512){
   
   # set configuration for new lambda function
   # ask user to specify the function timeout and memory size
