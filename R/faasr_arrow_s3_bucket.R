@@ -39,7 +39,8 @@ faasr_arrow_s3_bucket <- function(server_name=.faasr$DefaultDataStore, faasr_pre
     bucket = bucket,
     access_key = target_s3$AccessKey,
     secret_key = target_s3$SecretKey,
-    endpoint_override = target_s3$Endpoint
+    endpoint_override = target_s3$Endpoint,
+    region= target_s3$Region
   )
 
   return(s3)
