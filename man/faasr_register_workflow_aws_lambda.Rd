@@ -4,7 +4,13 @@
 \alias{faasr_register_workflow_aws_lambda}
 \title{faasr_register_workflow_aws_lambda}
 \usage{
-faasr_register_workflow_aws_lambda(faasr, cred, memory = 1024, timeout = 600)
+faasr_register_workflow_aws_lambda(
+  faasr,
+  cred,
+  memory = 1024,
+  timeout = 600,
+  storage = 1024
+)
 }
 \arguments{
 \item{faasr}{a list form of the JSON file}
