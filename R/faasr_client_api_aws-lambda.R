@@ -9,7 +9,7 @@
 #' @import cli
 #' @keywords internal
 
-faasr_register_workflow_aws_lambda <- function(faasr, cred, memory=1024, timeout=600){
+faasr_register_workflow_aws_lambda <- function(faasr, cred, memory=1024, timeout=600, storage=1024){
 
   # check function information
   lambda_function_info <- faasr_register_workflow_lambda_function_lists(faasr)
@@ -47,7 +47,8 @@ faasr_register_workflow_aws_lambda <- function(faasr, cred, memory=1024, timeout
   cli_progress_update()
 
   # create aws lambda functions
-  faasr_register_workflow_aws_lambda_function_build(faasr, lambda_function_info, function_image_list, aws_lambda_role_name, cred, lambda_server_info, memory, timeout)
+  faasr_register_workflow_aws_lambda_function_build(faasr, lambda_function_info, function_image_list, aws_lambda_role_name, cred, 
+                                                    lambda_server_info, memory, timeout, storage)
   cli_progress_update()
 
   cli_text(col_cyan("{symbol$menu} {.strong Successfully registered all lambda actions}"))
@@ -378,7 +379,8 @@ faasr_register_workflow_aws_lambda_role_create <- function(faasr, cred, lambda_s
 #' @keywords internal
 
 # Create aws lambda functions
-faasr_register_workflow_aws_lambda_function_build <- function(faasr, lambda_function_info, function_image_list, aws_lambda_role_name, cred, lambda_server_info, memory=1024, timeout=600){
+faasr_register_workflow_aws_lambda_function_build <- function(faasr, lambda_function_info, function_image_list, aws_lambda_role_name, cred, 
+                                                              lambda_server_info, memory=1024, timeout=600, storage=512){
   
   # set configuration for new lambda function
   # ask user to specify the function timeout and memory size
@@ -387,7 +389,7 @@ faasr_register_workflow_aws_lambda_function_build <- function(faasr, lambda_func
   
   aws_lambda_timeout <- as.numeric(timeout)
 
-  if(aws_lambda_timeout >= 900 && aws_lambda_timeout <= 60){
+  if(aws_lambda_timeout > 900 && aws_lambda_timeout < 60){
     cli_alert_danger("Invalid timeout Please provide a numeric value between 60 and 900")
     stop()
   }  
@@ -395,11 +397,19 @@ faasr_register_workflow_aws_lambda_function_build <- function(faasr, lambda_func
   aws_lambda_memory <- as.numeric(memory)
 
   # Check if the input is numeric and between 256 and 10240
-  if(aws_lambda_memory >= 10240 && aws_lambda_memory <= 256){
+  if(aws_lambda_memory > 10240 && aws_lambda_memory < 256){
     cli_alert_danger("Invalid memory size. Please provide a numeric value between 256 and 10240")
     stop()
   }
-  
+
+  aws_lambda_storage <- as.numeric(storage)
+
+  # Check if the input is numeric and between 256 and 10240
+  if(aws_lambda_storage > 10240 && aws_lambda_storage < 512){
+    cli_alert_danger("Invalid ephemeral storage size. Please provide a numeric value between 512 and 10240")
+    stop()
+  }
+
   aws_account_id <- lambda_server_info[[1]]$aws_account_id
   #build lambda role arn
   lambda_role_arn <- paste0("arn:aws:iam::",aws_account_id,":role/", aws_lambda_role_name)
@@ -430,12 +440,12 @@ faasr_register_workflow_aws_lambda_function_build <- function(faasr, lambda_func
     )
 
     if(lambda_function_info[[function_name]]$action == "update"){
-      current_lambda_instance$update_function_configuration(FunctionName = function_name, Role = lambda_role_arn, Timeout = aws_lambda_timeout, MemorySize = aws_lambda_memory)
+      current_lambda_instance$update_function_configuration(FunctionName = function_name, Role = lambda_role_arn, Timeout = aws_lambda_timeout, MemorySize = aws_lambda_memory, EphemeralStorage = list(Size=aws_lambda_storage))
       execute_command_with_retry(function_name, function_image_url, cred, current_lambda_instance)
       cli_alert_success(paste0("Successfully Update the function: ", function_name))
       
     } else if(lambda_function_info[[function_name]]$action == "create"){
-      current_lambda_instance$create_function(FunctionName = function_name, PackageType = "Image", Code = list(ImageUri = function_image_url), Role = lambda_role_arn, Timeout = aws_lambda_timeout, MemorySize = aws_lambda_memory)  
+      current_lambda_instance$create_function(FunctionName = function_name, PackageType = "Image", Code = list(ImageUri = function_image_url), Role = lambda_role_arn, Timeout = aws_lambda_timeout, MemorySize = aws_lambda_memory, EphemeralStorage = list(Size=aws_lambda_storage))  
       cli_alert_success(paste0("Successfully Create the function: ", function_name))
     }
   }
