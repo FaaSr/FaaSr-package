@@ -52,7 +52,7 @@ faasr_test <- function(use_docker=
   cli_alert_success("Create test temporary folders")
 
   # Download schema from github
-  download.file("https://raw.githubusercontent.com/FaaSr/FaaSr-package/main/schema/FaaSr.schema.json", "temp/FaaSr.schema.json")
+  utils::download.file("https://raw.githubusercontent.com/FaaSr/FaaSr-package/main/schema/FaaSr.schema.json", "temp/FaaSr.schema.json")
   
   # start the test
   on.exit(setwd(faasr_wd))
@@ -178,7 +178,7 @@ faasr_user_function_check <- function(faasr, docker_use=FALSE){
     func_name <- faasr$FunctionList[[faasr$FunctionInvoke]]$FunctionName
     user_function <- try(get(func_name), silent=TRUE)
 
-    if (is(user_function, "try-error")){
+    if (methods::is(user_function, "try-error")){
       return(paste0("Can't find User function ",func_name))
     }
 
@@ -220,7 +220,7 @@ faasr_user_function_check <- function(faasr, docker_use=FALSE){
     on.exit(setwd(faasr_wd))
     setwd(faasr_wd)
     
-    if (is(faasr_result, "error")){
+    if (methods::is(faasr_result, "error")){
       check <- FALSE
       err_code <- deparse(faasr_result$call)
 
@@ -252,7 +252,7 @@ faasr_configuration_check <- function(faasr, docker_use=FALSE){
   }
   
   faasr <- try(faasr_parse(toJSON(faasr,auto_unbox=TRUE)), silent=TRUE)
-  if (is(faasr, "try-error")){
+  if (methods::is(faasr, "try-error")){
     # schema errors
     return(attr(faasr, "condition"))
   } 
@@ -280,7 +280,7 @@ faasr_configuration_check <- function(faasr, docker_use=FALSE){
   }
 
   pre <- try(faasr_check_workflow_cycle(faasr), silent=TRUE)
-  if (is(pre, "try-error")){
+  if (methods::is(pre, "try-error")){
     # cycle/unreachable faasr_state_info errors
     return(attr(pre, "condition"))
   }
@@ -444,7 +444,7 @@ faasr_install_cran <- function(packages, lib_path=NULL){
   if (length(packages)==0){
   } else{
     for (package in packages){
-	    install.packages(package, lib=lib_path)
+	    utils::install.packages(package, lib=lib_path)
 	  }
   }
 }
