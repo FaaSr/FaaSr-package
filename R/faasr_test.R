@@ -1,5 +1,5 @@
 docker_default_version <- "latest"
-docker_default_image <- "faasr/test-docker"
+docker_default_image <- "faasr/local-test"
 
 #' @name faasr_test
 #' @title faasr_test
@@ -35,8 +35,8 @@ faasr_test <- function(use_docker=
   faasr <- faasr_replace_values(faasr, cred)
   docker_image <- paste0(use_docker$image, ":", use_docker$version)
 
-  # if no "faasr_data" folder, no execution
-  if (!dir.exists(faasr_data)){
+  # if no "faasr_data" directory created by 'faasr' function, no execution
+  if (!dir.exists("faasr_data")){
     cli_alert_danger("faasr_data directory no found")
     return("")
   }
@@ -54,7 +54,7 @@ faasr_test <- function(use_docker=
   # Download schema from github
   utils::download.file("https://raw.githubusercontent.com/FaaSr/FaaSr-package/main/schema/FaaSr.schema.json", "temp/FaaSr.schema.json")
   
-  # start the test
+  # start the test by calling 'faasr_test_start'
   on.exit(setwd(faasr_wd))
   setwd("temp")
   result <- faasr_test_start(faasr, faasr_data_wd, use_docker$use, docker_image)
@@ -84,6 +84,7 @@ faasr_test_start <- function(faasr, faasr_data_wd, docker_use, docker_image){
   faasr_input <- jsonlite::toJSON(faasr, auto_unbox=TRUE)
 
   # run the test - configuration/user_function tests
+  # if docker_use == TRUE, run the docker image / if docker_use !=TRUE, run the local function.
   if (docker_use){
     result <- system(paste0("docker run --rm --name faasr-",current_func,
                     " --mount type=bind,source='",faasr_data_wd,"',target='/faasr_data' ",
@@ -92,6 +93,8 @@ faasr_test_start <- function(faasr, faasr_data_wd, docker_use, docker_image){
   } else {
     result <- faasr_test_run(faasr)
   }
+
+  # if result != TRUE, it means there's an error. return error message.
   if (result[length(result)] != TRUE && result[length(result)] != "TRUE" ){
     return(result[length(result)])
   }
@@ -119,8 +122,10 @@ faasr_test_start <- function(faasr, faasr_data_wd, docker_use, docker_image){
   return(TRUE)
 }
 
+# faasr_test_run - running the same procedure of FaaSr
 faasr_test_run <- function(faasr, docker_use=FALSE){
 
+  # Read the R scripts, which are given by users
   if (docker_use){
     for (i in list.files("/faasr_data/R")){
       source(paste0("/faasr_data/R/",i))
@@ -136,6 +141,7 @@ faasr_test_run <- function(faasr, docker_use=FALSE){
   current_func <- faasr$FunctionInvoke
   func_name <- faasr$FunctionList[[faasr$FunctionInvoke]]$FunctionName
 
+  # create the 'FunctionInvoke' directory.
   cli::cli_h2(paste0("Start testing: ",current_func))
   if (!dir.exists(current_func)){
     dir.create(current_func)
@@ -144,6 +150,7 @@ faasr_test_run <- function(faasr, docker_use=FALSE){
   on.exit(setwd(faasr_wd))
   setwd(current_func)
 
+  # Start configuration check - this is same procedure to 'faasr_start'
   result <- faasr_configuration_check(faasr, docker_use)
   if (result != TRUE){
     if (result == "next"){
@@ -155,6 +162,7 @@ faasr_test_run <- function(faasr, docker_use=FALSE){
   }
   cli_alert_success("Configuration checked")
 
+  # Download and install dependencies
   check <- faasr_dependency_install(faasr, func_name)
   if (check != TRUE){
     cli_alert_danger(check)
@@ -162,6 +170,8 @@ faasr_test_run <- function(faasr, docker_use=FALSE){
   }
   cli_alert_success("Dependencies installed")
 
+  # Run the user function. 
+  # If it is successful, it returns TRUE, if not, it returns "" and prints the error message.
   result <- faasr_user_function_check(faasr, docker_use)
   if (result != TRUE){
     cli_alert_danger(result)
@@ -171,92 +181,103 @@ faasr_test_run <- function(faasr, docker_use=FALSE){
   return(TRUE)
 }
 
-
+# faasr_user_function_check - check the user function.
 faasr_user_function_check <- function(faasr, docker_use=FALSE){
 
-    faasr_wd <- getwd()
-    func_name <- faasr$FunctionList[[faasr$FunctionInvoke]]$FunctionName
-    user_function <- try(get(func_name), silent=TRUE)
+  # get the user function
+  faasr_wd <- getwd()
+  func_name <- faasr$FunctionList[[faasr$FunctionInvoke]]$FunctionName
+  user_function <- try(get(func_name), silent=TRUE)
 
-    if (methods::is(user_function, "try-error")){
-      return(paste0("Can't find User function ",func_name))
+  # if 'try' function creates the error, return the error.
+  if (methods::is(user_function, "try-error")){
+    return(paste0("Can't find User function ",func_name))
+  }
+
+  # change the user function with local test - local tests don't use FaaS or S3 storage
+  # Parse the user function and check the FaaSr functions.
+  # Replace them with other local test functions.
+  user_call <- trimws(deparse(user_function))
+  if (docker_use){
+    for (i in 1:length(user_call)){
+      user_call[i] <- gsub("FaaSr::faasr_put_file", "faasr_docker_local_test_put_file", user_call[i])
+      user_call[i] <- gsub("faasr_put_file", "faasr_docker_local_test_put_file", user_call[i])
+
+      user_call[i] <- gsub("FaaSr::faasr_get_file", "faasr_docker_local_test_get_file", user_call[i])
+      user_call[i] <- gsub("faasr_get_file", "faasr_docker_local_test_get_file", user_call[i])
+
+      user_call[i] <- gsub("FaaSr::faasr_delete_file", "faasr_docker_local_test_delete_file", user_call[i])
+      user_call[i] <- gsub("faasr_delete_file", "faasr_docker_local_test_delete_file", user_call[i])
+
+      user_call[i] <- gsub("FaaSr::faasr_log", "faasr_local_test_log", user_call[i])
+      user_call[i] <- gsub("faasr_log", "faasr_local_test_log", user_call[i])   
     }
+  } else {
+    for (i in 1:length(user_call)){
+      user_call[i] <- gsub("FaaSr::faasr_put_file", "faasr_local_test_put_file", user_call[i])
+      user_call[i] <- gsub("faasr_put_file", "faasr_local_test_put_file", user_call[i])
 
-    user_call <- trimws(deparse(user_function))
-    if (docker_use){
-      for (i in 1:length(user_call)){
-        user_call[i] <- gsub("FaaSr::faasr_put_file", "faasr_docker_mock_put_file", user_call[i])
-        user_call[i] <- gsub("faasr_put_file", "faasr_docker_mock_put_file", user_call[i])
+      user_call[i] <- gsub("FaaSr::faasr_get_file", "faasr_local_test_get_file", user_call[i])
+      user_call[i] <- gsub("faasr_get_file", "faasr_local_test_get_file", user_call[i])
 
-        user_call[i] <- gsub("FaaSr::faasr_get_file", "faasr_docker_mock_get_file", user_call[i])
-        user_call[i] <- gsub("faasr_get_file", "faasr_docker_mock_get_file", user_call[i])
+      user_call[i] <- gsub("FaaSr::faasr_delete_file", "faasr_local_test_delete_file", user_call[i])
+      user_call[i] <- gsub("faasr_delete_file", "faasr_local_test_delete_file", user_call[i])
 
-        user_call[i] <- gsub("FaaSr::faasr_delete_file", "faasr_docker_mock_delete_file", user_call[i])
-        user_call[i] <- gsub("faasr_delete_file", "faasr_docker_mock_delete_file", user_call[i])
+      user_call[i] <- gsub("FaaSr::faasr_log", "faasr_local_test_log", user_call[i])
+      user_call[i] <- gsub("faasr_log", "faasr_local_test_log", user_call[i])      
+    }   
+  }
+  user_function <- eval(parse(text=user_call))
 
-        user_call[i] <- gsub("FaaSr::faasr_log", "faasr_mock_log", user_call[i])
-        user_call[i] <- gsub("faasr_log", "faasr_mock_log", user_call[i])   
-      }
-    } else {
-      for (i in 1:length(user_call)){
-        user_call[i] <- gsub("FaaSr::faasr_put_file", "faasr_mock_put_file", user_call[i])
-        user_call[i] <- gsub("faasr_put_file", "faasr_mock_put_file", user_call[i])
+  user_args <- faasr_get_user_function_args(faasr) 
 
-        user_call[i] <- gsub("FaaSr::faasr_get_file", "faasr_mock_get_file", user_call[i])
-        user_call[i] <- gsub("faasr_get_file", "faasr_mock_get_file", user_call[i])
-
-        user_call[i] <- gsub("FaaSr::faasr_delete_file", "faasr_mock_delete_file", user_call[i])
-        user_call[i] <- gsub("faasr_delete_file", "faasr_mock_delete_file", user_call[i])
-
-        user_call[i] <- gsub("FaaSr::faasr_log", "faasr_mock_log", user_call[i])
-        user_call[i] <- gsub("faasr_log", "faasr_mock_log", user_call[i])      
-      }   
-    }
-    user_function <- eval(parse(text=user_call))
-
-    user_args <- faasr_get_user_function_args(faasr) 
-
-    faasr_result <- tryCatch({expr=do.call(user_function, user_args)}, error=function(e){e})
-    on.exit(setwd(faasr_wd))
-    setwd(faasr_wd)
+  # Execute the user function.
+  faasr_result <- tryCatch({expr=do.call(user_function, user_args)}, error=function(e){e})
+  on.exit(setwd(faasr_wd))
+  setwd(faasr_wd)
     
-    if (methods::is(faasr_result, "error")){
-      check <- FALSE
-      err_code <- deparse(faasr_result$call)
+  # If there's error, return the message
+  if (methods::is(faasr_result, "error")){
+    check <- FALSE
+    err_code <- deparse(faasr_result$call)
 
-      for (i in 1:length(user_call)){
-        if (err_code[1] == user_call[i]){
-          check <- TRUE
-          return(paste0("Line", i-1, " : ", faasr_result$message))
-        }
-      }   
-      if (!check){
-        return(faasr_result$message)
+    for (i in 1:length(user_call)){
+      if (err_code[1] == user_call[i]){
+        check <- TRUE
+        return(paste0("Line", i-1, " : ", faasr_result$message))
       }
-    } else {
-      if (docker_use){
-        write.table("TRUE", file=paste0("/faasr_data/temp/faasr_state_info/", faasr$FunctionInvoke, ".done"), row.names=F, col.names=F)
-      } else {
-        write.table("TRUE", file=paste0("../faasr_state_info/", faasr$FunctionInvoke, ".done"), row.names=F, col.names=F)
-      }
-      return(TRUE)
+    }   
+    if (!check){
+      return(faasr_result$message)
     }
+  } else {
+    if (docker_use){
+      write.table("TRUE", file=paste0("/faasr_data/temp/faasr_state_info/", faasr$FunctionInvoke, ".done"), row.names=F, col.names=F)
+    } else {
+      write.table("TRUE", file=paste0("../faasr_state_info/", faasr$FunctionInvoke, ".done"), row.names=F, col.names=F)
+    }
+    return(TRUE)
+  }
 }
 
+# check the configuration check - this is same procedure to 'faasr_start'
 faasr_configuration_check <- function(faasr, docker_use=FALSE){
   
+  # copy the schema
   if (docker_use){
     file.copy(from="/faasr_data/temp/FaaSr.schema.json", to="FaaSr.schema.json")
   } else {
     file.copy(from="../FaaSr.schema.json", to="FaaSr.schema.json")
   }
   
+  # check the schema
   faasr <- try(faasr_parse(toJSON(faasr,auto_unbox=TRUE)), silent=TRUE)
   if (methods::is(faasr, "try-error")){
     # schema errors
     return(attr(faasr, "condition"))
   } 
 
+  # check the data storage configuration
   for (datastore in names(faasr$DataStores)){
     endpoint <- faasr$DataStores[[datastore]]$Endpoint
     if ((!is.null(endpoint)) && (endpoint != "") && !startsWith(endpoint, "https")){
@@ -279,12 +300,14 @@ faasr_configuration_check <- function(faasr, docker_use=FALSE){
     }
   }
 
+  # check the workflow cycle.
   pre <- try(faasr_check_workflow_cycle(faasr), silent=TRUE)
   if (methods::is(pre, "try-error")){
     # cycle/unreachable faasr_state_info errors
     return(attr(pre, "condition"))
   }
   
+  # if the number of predecessor nodes is more than 2, skip running.
   if (length(pre)>1){
     for (func in pre) {
       func_done <- paste0(func,".done")
@@ -303,8 +326,8 @@ faasr_configuration_check <- function(faasr, docker_use=FALSE){
 }
 
 
-
-faasr_mock_put_file <- function(server_name=NULL, remote_folder="", remote_file, local_folder=".", local_file){
+# local test function for faasr_put_file
+faasr_local_test_put_file <- function(server_name=NULL, remote_folder="", remote_file, local_folder=".", local_file){
    
   remote_folder <- sub("^/+", "", sub("/+$", "", remote_folder))
   remote_file <- sub("^/+", "", sub("/+$", "", remote_file))
@@ -328,7 +351,8 @@ faasr_mock_put_file <- function(server_name=NULL, remote_folder="", remote_file,
 
 }
 
-faasr_mock_get_file <- function(server_name=NULL, remote_folder="", remote_file, local_folder=".", local_file){
+# local test function for faasr_get_file
+faasr_local_test_get_file <- function(server_name=NULL, remote_folder="", remote_file, local_folder=".", local_file){
   
   remote_folder <- sub("^/+", "", sub("/+$", "", remote_folder))
   remote_file <- sub("^/+", "", sub("/+$", "", remote_file))
@@ -352,7 +376,8 @@ faasr_mock_get_file <- function(server_name=NULL, remote_folder="", remote_file,
 
 }
 
-faasr_mock_delete_file <- function(server_name=NULL, remote_folder="", remote_file){
+# local test function for faasr_delete_file
+faasr_local_test_delete_file <- function(server_name=NULL, remote_folder="", remote_file){
   
   remote_folder <- sub("^/+", "", sub("/+$", "", remote_folder))
   remote_file <- sub("^/+", "", sub("/+$", "", remote_file))
@@ -363,11 +388,13 @@ faasr_mock_delete_file <- function(server_name=NULL, remote_folder="", remote_fi
 
 }
 
-faasr_mock_log <- function(log_message){
+# local test function for faasr_log
+faasr_local_test_log <- function(log_message){
   # TBD
 }
 
-faasr_docker_mock_put_file <- function(server_name=NULL, remote_folder="", remote_file, local_folder=".", local_file){
+# local(docker) test function for faasr_put_file
+faasr_docker_local_test_put_file <- function(server_name=NULL, remote_folder="", remote_file, local_folder=".", local_file){
    
   remote_folder <- sub("^/+", "", sub("/+$", "", remote_folder))
   remote_file <- sub("^/+", "", sub("/+$", "", remote_file))
@@ -391,7 +418,8 @@ faasr_docker_mock_put_file <- function(server_name=NULL, remote_folder="", remot
 
 }
 
-faasr_docker_mock_get_file <- function(server_name=NULL, remote_folder="", remote_file, local_folder=".", local_file){
+# local(docker) test function for faasr_get_file
+faasr_docker_local_test_get_file <- function(server_name=NULL, remote_folder="", remote_file, local_folder=".", local_file){
   
   remote_folder <- sub("^/+", "", sub("/+$", "", remote_folder))
   remote_file <- sub("^/+", "", sub("/+$", "", remote_file))
@@ -415,7 +443,8 @@ faasr_docker_mock_get_file <- function(server_name=NULL, remote_folder="", remot
 
 }
 
-faasr_docker_mock_delete_file <- function(server_name=NULL, remote_folder="", remote_file){
+# local(docker) test function for faasr_delete_file
+faasr_docker_local_test_delete_file <- function(server_name=NULL, remote_folder="", remote_file){
   
   remote_folder <- sub("^/+", "", sub("/+$", "", remote_folder))
   remote_file <- sub("^/+", "", sub("/+$", "", remote_file))
@@ -426,7 +455,7 @@ faasr_docker_mock_delete_file <- function(server_name=NULL, remote_folder="", re
 
 }
 
-
+# installing dependencies
 faasr_dependency_install <- function(faasr, funcname, new_lib=NULL){
 
   # install CRAN packages
@@ -440,6 +469,7 @@ faasr_dependency_install <- function(faasr, funcname, new_lib=NULL){
   return(TRUE)
 }
 
+# Sub function for faasr_dependency_install
 faasr_install_cran <- function(packages, lib_path=NULL){
   if (length(packages)==0){
   } else{
@@ -449,6 +479,7 @@ faasr_install_cran <- function(packages, lib_path=NULL){
   }
 }
 
+# Sub function for faasr_dependency_install
 # function to help install "git packages"
 faasr_install_git_package <- function(ghpackages, lib_path=NULL){
   if (length(ghpackages)==0){
