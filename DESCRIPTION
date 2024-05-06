@@ -52,6 +52,10 @@ Suggests:
     rmarkdown,
     paws.common,
     testthat,
-    knitr
+    knitr,
+    devtools,
+    utils,
+    methods,
+    withr
 Encoding: UTF-8
 RoxygenNote: 7.2.3
