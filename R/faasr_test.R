@@ -472,7 +472,7 @@ faasr_docker_local_test_log <- function(log_message){
 }
 
 # local test function for faasr_log
-faasr_local_test_arrow_s3_bucket <- function(server_name=NULL, faasr_prefix=""){
+faasr_docker_local_test_arrow_s3_bucket <- function(server_name=NULL, faasr_prefix=""){
   s3 <- arrow::SubTreeFileSystem$create("/faasr_data/files")
   return(s3)
 }
