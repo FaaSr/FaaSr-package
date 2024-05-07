@@ -208,8 +208,11 @@ faasr_user_function_check <- function(faasr, docker_use=FALSE){
       user_call[i] <- gsub("FaaSr::faasr_delete_file", "faasr_docker_local_test_delete_file", user_call[i])
       user_call[i] <- gsub("faasr_delete_file", "faasr_docker_local_test_delete_file", user_call[i])
 
-      user_call[i] <- gsub("FaaSr::faasr_log", "faasr_local_test_log", user_call[i])
-      user_call[i] <- gsub("faasr_log", "faasr_local_test_log", user_call[i])   
+      user_call[i] <- gsub("FaaSr::faasr_log", "faasr_docker_local_test_log", user_call[i])
+      user_call[i] <- gsub("faasr_log", "faasr_docker_local_test_log", user_call[i])   
+
+      user_call[i] <- gsub("FaaSr::faasr_arrow_s3_bucket", "faasr_docker_local_test_arrow_s3_bucket", user_call[i])
+      user_call[i] <- gsub("faasr_arrow_s3_bucket", "faasr_docker_local_test_arrow_s3_bucket", user_call[i])   
     }
   } else {
     for (i in 1:length(user_call)){
@@ -223,7 +226,10 @@ faasr_user_function_check <- function(faasr, docker_use=FALSE){
       user_call[i] <- gsub("faasr_delete_file", "faasr_local_test_delete_file", user_call[i])
 
       user_call[i] <- gsub("FaaSr::faasr_log", "faasr_local_test_log", user_call[i])
-      user_call[i] <- gsub("faasr_log", "faasr_local_test_log", user_call[i])      
+      user_call[i] <- gsub("faasr_log", "faasr_local_test_log", user_call[i])
+
+      user_call[i] <- gsub("FaaSr::faasr_arrow_s3_bucket", "faasr_local_test_arrow_s3_bucket", user_call[i])
+      user_call[i] <- gsub("faasr_arrow_s3_bucket", "faasr_local_test_arrow_s3_bucket", user_call[i])         
     }   
   }
   user_function <- eval(parse(text=user_call))
@@ -392,6 +398,12 @@ faasr_local_test_log <- function(log_message){
   # TBD
 }
 
+# local test function for faasr_log
+faasr_local_test_arrow_s3_bucket <- function(server_name=NULL, faasr_prefix=""){
+  s3 <- arrow::SubTreeFileSystem$create("../../files")
+  return(s3)
+}
+
 # local(docker) test function for faasr_put_file
 faasr_docker_local_test_put_file <- function(server_name=NULL, remote_folder="", remote_file, local_folder=".", local_file){
    
@@ -452,6 +464,17 @@ faasr_docker_local_test_delete_file <- function(server_name=NULL, remote_folder=
 
   unlink(delete_file_s3, recursive=TRUE)
 
+}
+
+# local test function for faasr_log
+faasr_docker_local_test_log <- function(log_message){
+  # TBD
+}
+
+# local test function for faasr_log
+faasr_local_test_arrow_s3_bucket <- function(server_name=NULL, faasr_prefix=""){
+  s3 <- arrow::SubTreeFileSystem$create("/faasr_data/files")
+  return(s3)
 }
 
 # installing dependencies
