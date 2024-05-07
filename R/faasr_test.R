@@ -157,7 +157,7 @@ faasr_test_run <- function(faasr, docker_use=FALSE){
       return(TRUE)
     } else{
       cli_alert_danger(result)
-      return(result)
+      return("")
     }
   }
   cli_alert_success("Configuration checked")
