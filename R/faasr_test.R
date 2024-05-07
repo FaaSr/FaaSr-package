@@ -274,7 +274,7 @@ faasr_configuration_check <- function(faasr, docker_use=FALSE){
   faasr <- try(faasr_parse(toJSON(faasr,auto_unbox=TRUE)), silent=TRUE)
   if (methods::is(faasr, "try-error")){
     # schema errors
-    return(attr(faasr, "condition"))
+    return("JSON parsing error")
   } 
 
   # check the data storage configuration
@@ -304,7 +304,7 @@ faasr_configuration_check <- function(faasr, docker_use=FALSE){
   pre <- try(faasr_check_workflow_cycle(faasr), silent=TRUE)
   if (methods::is(pre, "try-error")){
     # cycle/unreachable faasr_state_info errors
-    return(attr(pre, "condition"))
+    return("cycle/unreachable faasr_state_info errors")
   }
   
   # if the number of predecessor nodes is more than 2, skip running.
