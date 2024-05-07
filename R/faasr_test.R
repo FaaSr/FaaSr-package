@@ -111,10 +111,7 @@ faasr_test_start <- function(faasr, faasr_data_wd, docker_use, docker_image){
   for (next_func in next_funcs){
     faasr$FunctionInvoke <- next_func
     faasr_wd <- getwd()
-    print(faasr_wd)
-    print("faasr_test_start")
     on.exit(setwd(faasr_wd))
-    setwd("..")
     cli_alert_info("Trigger Next functions")
     result <- faasr_test_start(faasr, faasr_data_wd, docker_use, docker_image)
     if (result[length(result)] != TRUE){
