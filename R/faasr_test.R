@@ -146,7 +146,6 @@ faasr_test_run <- function(faasr, docker_use=FALSE){
     dir.create(current_func)
   }
   faasr_wd <- getwd()
-  print(faasr_wd)
   on.exit(setwd(faasr_wd))
   setwd(current_func)
 
