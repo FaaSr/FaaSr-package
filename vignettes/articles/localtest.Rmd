@@ -1,0 +1,71 @@
+---
+title: "Testing FaaSr locally on your desktop"
+output: rmarkdown::html_vignette
+description: >
+  This vignette walks you through how to test your FaaSr workflow locally in your computer, without the need for FaaS nor S3 accounts.
+vignette: >
+  %\VignetteIndexEntry{Testing FaaSr locally on your desktop}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r, echo = FALSE, message = FALSE}
+knitr::opts_chunk$set(collapse = T, comment = "#>")
+options(tibble.print_min = 4L, tibble.print_max = 4L)
+library(FaaSr)
+set.seed(1014)
+```
+
+## Overview
+
+While FaaSr is designed to allow you to execute workflows and access data in the cloud, in an automated and unmanaged way,
+it is useful to test workflow executions locally so you can verify desired functionality and debug errors.
+The FaaSr provides a package that allows you to run a workflow locally in your desktop, in one of two ways:
+
+* Native execution, where the functions run in your native R/Rstudio environment in your desktop. This is the default.
+
+* Docker execution, where the functions run in Docker containers in your desktop
+
+In both native and Docker execution, both the data used by your workflows and the R functions are stored in folders/files in your computer
+
+## Setting up folders and code
+
+You need to create, in your working directory, a folder named `faasr_data` (if it doesn't already exist). 
+Inside this folder, you store the payload and credentials file (`payload.json` and `faasr_env` in the example below), and you need to create another folder named `R`. You then need to copy your R functions to this folder.
+So, in your working directory, you should have a folder structure like this:
+
+```{}
+payload.json
+faasr_env
+faasr_data/R/sum.R
+            /mult.R
+            /div.R
+```
+
+You should also copy any input file(s) needed by your workflow within the `faasr_data` folder. This folder is essentially akin to an S3 bucket in your computer, and should be configured as such.
+
+## Preparing for execution
+
+Just as in the [companion vignette for single function](singlefunction.html), you begin by using the `faasr()` main function to load a `payload.json` configuration and `faasr_env` credential file into an R list.
+Note that, for local execution, the credentials in the credential file are ignored. We will use `faasr_example` as the name of the list:
+
+`faasr_example <- faasr(json_path="payload.json", env="faasr_env")`
+
+## Execute the workflow locally
+
+The process is similar to the one described in the [companion vignette for single function](singlefunction.html), but instead of using `$register_workflow` and `$invoke_workflow` for cloud registration/execution, you use `$faasr_test`, as shown below:
+
+`faasr_example$faasr_test()`
+
+If you prefer to execute the workflow using Docker, you need to provide, as an argument to `$faasr_test`, a list with the following elements (note: "latest" and "faasr/local-test" are the default values for the container name and version to use; you may specify your own container if needed):
+
+```{}
+use_docker = list(use=TRUE, version="latest", image="faasr/local-test")
+faasr_example$faasr_test(use_docker)
+```
+
+## Checking the outputs
+
+Your outputs will be stored locally inside the `faasr_data` folder you created.
+
+
