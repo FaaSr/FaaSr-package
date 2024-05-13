@@ -339,7 +339,7 @@ faasr <- function(json_path=NULL, env_path=NULL){
     }
   }
 
-  cred <- faasr_collect_sys_env(svc$json, svc$cred)
+  svc$cred <- faasr_collect_sys_env(svc$json, svc$cred)
 
   succ_msg <- paste0("Successfully get configuration from ", json_path, " and ", env_path)
   cli_alert_success(succ_msg)
@@ -548,7 +548,7 @@ faasr_unset_workflow_timer <- function(target=NULL,...){
   }
   on.exit(setwd(faasr_wd))
   faasr <- svc$json
-  cred <- svc$crec
+  cred <- svc$cred
 
   setwd(faasr_wd)
 
