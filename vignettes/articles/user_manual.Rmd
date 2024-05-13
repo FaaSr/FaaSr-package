@@ -1,0 +1,248 @@
+---
+title: "Reference manual"
+output: rmarkdown::html_vignette
+description: >
+  Reference manual for FaaSr users.
+vignette: >
+  %\VignetteIndexEntry{Reference manual}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r, echo = FALSE, message = FALSE}
+knitr::opts_chunk$set(collapse = T, comment = "#>")
+options(tibble.print_min = 4L, tibble.print_max = 4L)
+library(FaaSr)
+set.seed(1014)
+```
+
+
+## Desktop-side FaaSr Functions 
+
+These are the FaaSr functions that users invoke interactively in their desktop client, e.g. RStudio. 
+They are used to configure, register, and invoke workflows.
+
+### faasr
+
+Usage: `faasr(json_path, env_path)`
+
+`json_path` is a required argument and specifies the path of a FaaSr workflow configuration file
+`env_path` is optional and specifies the path of a file containing credentials for use by FaaSr
+
+This is the first function used to validate and configure a workflow.
+It loads the JSON-formatted workflow configuration file from the path specified by `json_path` and (optionally( credentials from a file path `env_path`. 
+It returns a list that is subsequently used to register and invoke the workflow with functions `list$register_workflow` and `list$invoke_workflow`
+
+Example: `mylist <- faasr(json_path="workflow_file.json", env_path="credentials_file")`
+
+In the example above, the `faasr` function configures a workflow described in the `workflow_file.json` file and loads FaaS and S3 credentials from `credentials_file`.
+If successful, the function returns the `mylist` list
+
+### register_workflow
+
+Usage: `$register_workflow()`
+
+This function registers a workflow with FaaS cloud provider(s). 
+It requires a valid list returned from a previous execution of `faasr()` 
+The cloud providers are specified in `ComputeServers` and `DataStores` of the JSON file provided as input for `faasr()`.
+Their respective credentials are specified in the credentials file also provided as input for `faasr()`.
+
+Example: 
+`mylist <- faasr(json_path="workflow_file.json", env_path="credentials_file")`
+`mylist$register_workflow()`
+
+In the example above, the `mylist` list returned from the `faasr()` function is used to register a workflow
+
+### invoke_workflow
+
+Usage: `$invoke_workflow()`
+
+This function immediately invokes a workflow that has been registered with a FaaS cloud provider. 
+It requires a valid list returned from a previous execution of `faasr()` that has been registered with cloud providers using `$rergister_workflow()`
+
+Example: 
+`mylist <- faasr(json_path="workflow_file.json", env_path="credentials_file")`
+`mylist$register_workflow()`
+`mylist$invoke_workflow()`
+
+
+### set_workflow_timer
+
+Usage: `$set_workflow_timer(cron)`
+
+This function sets up a timer to invoke a workflow that has been registered with a FaaS cloud provider. 
+It requires a valid list returned from a previous execution of `faasr()` that has been registered with cloud providers using `$rergister_workflow()`
+The required argument `cron` is a string that [follows the cron format](https://en.wikipedia.org/wiki/Cron)
+
+Example: 
+`mylist <- faasr(json_path="workflow_file.json", env_path="credentials_file")`
+`mylist$register_workflow()`
+`mylist$set_workflow_timer("*/10 * * * *")`
+
+
+### unset_workflow_timer
+
+Usage: `$unset_workflow_timer(cron)`
+
+This function unsets a timer previously set with `$set_workflow_timer`. 
+It requires a valid list returned from a previous execution of `faasr()` that has been registered with cloud providers using `$rergister_workflow()`
+
+Example: 
+`mylist <- faasr(json_path="workflow_file.json", env_path="credentials_file")`
+`mylist$register_workflow()`
+`mylist$set_workflow_timer("*/10 * * * *")`
+`mylist$unset_workflow_timer()`
+
+
+## Cloud-side FaaSr functions
+
+These are the FaaSr functions that users add to their R functions. 
+They are used to read and write from/to S3 buckets and to generate logs for debugging.
+
+### faasr_get_file
+
+Usage: `faasr_get_file(server_name, remote_folder, remote_file, local_folder, local_file)`
+
+This function gets (i.e. downloads) a file from an S3 bucket to be used by the FaaSr function.
+
+`server_name` is a string with name of the S3 bucket to use; it must match a name declared in the workflow configuration JSON file.
+This is an optional argument; if not provided, the default S3 server specified as `DefaultDataStore` in the workflow configuration JSON file is used.
+
+`remote_folder` is string with the name of the remote folder where the file is to be downloaded from. This is an optional argument that defaults to `""`
+
+`remote_file` is a string with the name for the file to be downloaded from the S3 bucket. This is a required arguemnt.
+
+`local_folder` is a string with the name of the local folder where the file to be downloaded is stored. This is an optional argument that defaults to `"."`
+
+`local_file` is a string with the name for the file downloaded from the S3 bucket. This is a required arguemnt.
+
+Examples:
+`faasr_get_file(remote_folder="myfolder", remote_file="myinput1.csv", local_file="input1.csv")`
+`faasr_get_file(server_name="My_Minio_Bucket", remote_file="myinput2.csv", local_file="input2.csv")`
+
+
+### faasr_put_file
+
+Usage: `faasr_put_file(server_name, local_folder, local_file, remote_folder, remote_file)`
+
+This function puts (i.e. uploads) a file from the local FaaSr function to an S3 bucket.
+
+`server_name` is a string with name of the S3 bucket to use; it must match a name declared in the workflow configuration JSON file.
+This is an optional argument; if not provided, the default S3 server specified as `DefaultDataStore` in the workflow configuration JSON file is used.
+
+`local_folder` is a string with the name of the local folder where the file to be uploaded is stored. This is an optional argument that defaults to `"."`
+
+`local_file` is a string with the name for the file to be uploaded to the S3 bucket. This is a required arguemnt.
+
+`remote_folder` is string with the name of the remote folder where the file is to be uploaded to. This is an optional argument that defaults to `""`
+
+`remote_file` is a string with the name for the file to be uploaded to the S3 bucket. This is a required arguemnt.
+
+
+Examples:
+`faasr_put_file(local_file="output.csv", remote_folder="myfolder", remote_file="myoutput.csv")`
+`faasr_get_file(server_name="My_Minio_Bucket", local_file="output.csv", remote_file="myoutput.csv")`
+
+
+### faasr_get_folder_list
+
+Usage: `folderlist <- faasr_get_folder_list(server_name, faasr_prefix)`
+
+This function returns a list with the contents of a folder in the S3 bucket. 
+
+`server_name` is a string with name of the S3 bucket to use; it must match a name declared in the workflow configuration JSON file.
+This is an optional argument; if not provided, the default S3 server specified as `DefaultDataStore` in the workflow configuration JSON file is used.
+
+`faasr_prefix` is a string with the prefix of the folder in the S3 bucket. This is an optional argument that defaults to `""`
+
+Examples:
+`mylist1 <- faasr_get_folder_list(server_name="My_Minio_Bucket", faasr_prefix="myfolder")`
+`mylist2 <- faasr_get_folder_list(server_name="My_Minio_Bucket", faasr_prefix="myfolder/mysubfolder")`
+
+### faasr_delete_file
+
+Usage: `faasr_delete_file(server_name, remote_folder, remote_file)`
+
+This function deletes a file from the S3 bucket.
+
+`server_name` is a string with name of the S3 bucket to use; it must match a name declared in the workflow configuration JSON file.
+This is an optional argument; if not provided, the default S3 server specified as `DefaultDataStore` in the workflow configuration JSON file is used.
+
+`remote_folder` is string with the name of the remote folder where the file is to be deleted from. This is an optional argument that defaults to `""`
+
+`remote_file` is a string with the name for the file to be deleted from the S3 bucket. This is a required arguemnt.
+
+Examples:
+`faasr_delete_file(remote_folder="myfolder", remote_file="myoutput.csv")`
+`faasr_delete_file(server_name="My_Minio_Bucket", remote_file="myoutput.csv")`
+
+
+### faasr_arrow_s3_bucket
+
+Usage: `faasr_arrow_s3_bucket(server_name, faasr_prefix)`
+
+This function configures an S3 bucket to use with Apache Arrow.
+
+`server_name` is a string with name of the S3 bucket to use; it must match a name declared in the workflow configuration JSON file.
+This is an optional argument; if not provided, the default S3 server specified as `DefaultDataStore` in the workflow configuration JSON file is used.
+
+`faasr_prefix` is a string with the prefix of the folder in the S3 bucket. This is an optional argument that defaults to `""`
+
+It returns a list that is subsequently used with the Arrow package.
+
+Examples:
+`mys3 <- faasr_arrow_s3_bucket()`
+`myothers3 <- faasr_arrow_s3_bucket(server_name="My_Minio_Bucket", faasr_prefix="myfolder")`
+`frame_input1 <- arrow::read_csv_arrow(mys3$path(file.path(folder, input1)))`
+`frame_input2 <- arrow::read_csv_arrow(mys3$path(file.path(folder, input2)))`
+`arrow::write_csv_arrow(frame_output, mys3$path(file.path(folder, output)))`
+
+
+### faasr_log
+
+Usage: `faasr_log(log_message)`
+
+This function writes a log message to a file in the S3 bucket, to help with debugging.
+The default S3 server for logs is `DefaultDataStore` as specified in the workflow configuration JSON file.
+This default can be overridden with `LoggingDataStore` in  the workflow configuration JSON file.
+
+`log_message` is a string with the message to be logged.
+
+Example:
+`log_msg <- paste0('Function compute_sum finished; output written to ', folder, '/', output, ' in default S3 bucket')`
+`faasr_log(log_msg)`
+
+
+## File formats 
+
+### JSON configuration file
+
+The workflow JSON configuration file is [described by the FaaSr JSON schema](https://github.com/FaaSr/FaaSr-package/blob/main/schema/FaaSr.schema.json).
+
+A recommended way to create and manage JSON configuration files is to use the [FaaSr workflow builder](https://faasr.shinyapps.io/faasr-json-builder/) Shiny app
+
+### Credentials file
+
+The credentials file used by FaaSr has key-value string pairs, stored one per line in a text file, with format:
+
+`"key":"value"`
+
+The key is the name of the credential (which must match the name of the cloud server in a configurration file)
+The value is the crredential itself
+
+Example:
+```
+"My_GitHub_Account_TOKEN"="REPLACE_WITH_YOUR_GITHUB_TOKEN"
+"My_Minio_Bucket_ACCESS_KEY"="REPLACE_WITH_ACCESS_KEY"
+"My_Minio_Bucket_SECRET_KEY"="REPLACE_WITH_SECRET_KEY"
+"My_OW_Account_API_KEY"="REPLACE_WITH_YOUR_OPENWHISK_ID:SECRET_KEY"
+"My_Lambda_Account_ACCESS_KEY"="REPLACE_WITH_YOUR_AWS_LAMBDA_ACCESS_KEY"
+"My_Lambda_Account_SECRET_KEY"="REPLACE_WITH_YOUR_AWS_LAMBDA_SECRET_KEY"
+```
+
+The example shows credentials for the following accounts:
+
+* A GitHub token for FaaS ComputeServer `My_GitHub_Account`
+* Access and secret keys for S3 DataStore `My_Minio_Bucket`
+* API key for FaaS OpenWhisk account `My_OW_Account`
+* Access and secret keys for FaaS Amazon Lambda account `My_Lambda_Account`
