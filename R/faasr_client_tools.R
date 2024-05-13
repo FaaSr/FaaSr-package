@@ -81,9 +81,10 @@ faasr_collect_sys_env <- function(faasr, cred){
       if (is.null(cred[[cred_name]])){
         real_cred <- Sys.getenv(cred_name)
         if (real_cred == ""){
-          ask_cred <- list(askpass::askpass(paste0("Enter keys for ", cred_name)))
-          names(ask_cred) <- cred_name
-          do.call(Sys.setenv, ask_cred)
+          ask_cred <- askpass::askpass(paste0("Enter keys for ", cred_name))
+          ask_cred_list <- list(ask_cred)
+          names(ask_cred_list) <- cred_name
+          do.call(Sys.setenv, ask_cred_list)
           cred[[cred_name]] <- ask_cred
           #err_msg <- paste0("faasr_collect_sys_env: ",cred_name," requires values")
           #cli_alert_warning(err_msg)
@@ -104,9 +105,10 @@ faasr_collect_sys_env <- function(faasr, cred){
       if (is.null(cred[[cred_name]])){
         real_cred <- Sys.getenv(cred_name)
         if (real_cred == ""){
-          ask_cred <- list(askpass::askpass(paste0("Enter keys for ", cred_name)))
-          names(ask_cred) <- cred_name
-          do.call(Sys.setenv, ask_cred)
+          ask_cred <- askpass::askpass(paste0("Enter keys for ", cred_name))
+          ask_cred_list <- list(ask_cred)
+          names(ask_cred_list) <- cred_name
+          do.call(Sys.setenv, ask_cred_list)
           cred[[cred_name]] <- ask_cred
         } else{
           cred[[cred_name]] <- real_cred
@@ -125,9 +127,10 @@ faasr_collect_sys_env <- function(faasr, cred){
       if (is.null(cred[[cred_name_ac]])){
         real_cred <- Sys.getenv(cred_name_ac)
         if (real_cred == ""){
-          ask_cred <- list(askpass::askpass(paste0("Enter keys for ", cred_name_ac)))
-          names(ask_cred) <- cred_name_ac
-          do.call(Sys.setenv, ask_cred)
+          ask_cred <- askpass::askpass(paste0("Enter keys for ", cred_name_ac))
+          ask_cred_list <- list(ask_cred)
+          names(ask_cred_list) <- cred_name_ac
+          do.call(Sys.setenv, ask_cred_list)
           cred[[cred_name_ac]] <- ask_cred
         } else{
           cred[[cred_name_ac]] <- real_cred
@@ -141,9 +144,10 @@ faasr_collect_sys_env <- function(faasr, cred){
       if (is.null(cred[[cred_name_sc]])){
         real_cred <- Sys.getenv(cred_name_sc)
         if (real_cred == ""){
-          ask_cred <- list(askpass::askpass(paste0("Enter keys for ", cred_name_sc)))
-          names(ask_cred) <- cred_name_sc
-          do.call(Sys.setenv, ask_cred)
+          ask_cred <- askpass::askpass(paste0("Enter keys for ", cred_name_sc))
+          ask_cred_list <- list(ask_cred)
+          names(ask_cred_list) <- cred_name_sc
+          do.call(Sys.setenv, ask_cred_list)
           cred[[cred_name_sc]] <- ask_cred
         } else{
           cred[[cred_name_sc]] <- real_cred
@@ -174,9 +178,10 @@ faasr_collect_sys_env <- function(faasr, cred){
     if (is.null(cred[[cred_name_ac]])){
       real_cred <- Sys.getenv(cred_name_ac)
       if (real_cred == ""){
-        ask_cred <- list(askpass::askpass(paste0("Enter keys for ", cred_name_ac)))
-        names(ask_cred) <- cred_name_ac
-        do.call(Sys.setenv, ask_cred)
+        ask_cred <- askpass::askpass(paste0("Enter keys for ", cred_name_ac))
+        ask_cred_list <- list(ask_cred)
+        names(ask_cred_list) <- cred_name_ac
+        do.call(Sys.setenv, ask_cred_list)
         cred[[cred_name_ac]] <- ask_cred
       } else{
         cred[[cred_name_ac]] <- real_cred
@@ -185,9 +190,10 @@ faasr_collect_sys_env <- function(faasr, cred){
     if (is.null(cred[[cred_name_sc]])){
       real_cred <- Sys.getenv(cred_name_sc)
       if (real_cred == ""){
-        ask_cred <- list(askpass::askpass(paste0("Enter keys for ", cred_name_sc)))
-        names(ask_cred) <- cred_name_sc
-        do.call(Sys.setenv, ask_cred)
+        ask_cred <- askpass::askpass(paste0("Enter keys for ", cred_name_sc))
+        ask_cred_list <- list(ask_cred)
+        names(ask_cred_list) <- cred_name_sc
+        do.call(Sys.setenv, ask_cred_list)
         cred[[cred_name_sc]] <- ask_cred
       } else{
         cred[[cred_name_sc]] <- real_cred
