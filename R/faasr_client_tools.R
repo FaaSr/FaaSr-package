@@ -166,8 +166,10 @@ faasr_collect_sys_env <- function(faasr, cred){
     if (is.null(cred_name_sc)){
       cred_name_sc <- paste0(faas_cred, "_SECRET_KEY")
     }
-    if (faasr$DataStores[[data_cred]]$Anonymous == TRUE){
-      next
+    if (!is.null(faasr$DataStores[[data_cred]]$Anonymous)){
+      if (faasr$DataStores[[data_cred]]$Anonymous == TRUE){
+        next
+      }
     }
     if (is.null(cred[[cred_name_ac]])){
       real_cred <- Sys.getenv(cred_name_ac)
