@@ -355,6 +355,15 @@ faasr <- function(json_path=NULL, env_path=NULL){
     succ_msg <- paste0("Create the FaaSr directory: ", faasr_data)
     cli_alert_success(succ_msg)
   }
+  if (!dir.exists(paste0(faasr_data, "/R"))){
+    dir.create(paste0(faasr_data, "/R"))
+  }
+  if (!dir.exists(paste0(faasr_data, "/files"))){
+    dir.create(paste0(faasr_data, "/files"))
+  }
+  if (!dir.exists(paste0(faasr_data, "/temp"))){
+    dir.create(paste0(faasr_data, "/temp"))
+  }
 
   cli_alert_success("Ready to use FaaSr client tools:")
   cli_ol()
