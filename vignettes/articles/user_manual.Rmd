@@ -48,8 +48,10 @@ The cloud providers are specified in `ComputeServers` and `DataStores` of the JS
 Their respective credentials are specified in the credentials file also provided as input for `faasr()`.
 
 Example: 
-`mylist <- faasr(json_path="workflow_file.json", env_path="credentials_file")`
-`mylist$register_workflow()`
+```
+mylist <- faasr(json_path="workflow_file.json", env_path="credentials_file")
+mylist$register_workflow()
+```
 
 In the example above, the `mylist` list returned from the `faasr()` function is used to register a workflow
 
@@ -60,10 +62,12 @@ Usage: `$invoke_workflow()`
 This function immediately invokes a workflow that has been registered with a FaaS cloud provider. 
 It requires a valid list returned from a previous execution of `faasr()` that has been registered with cloud providers using `$rergister_workflow()`
 
-Example: 
-`mylist <- faasr(json_path="workflow_file.json", env_path="credentials_file")`
-`mylist$register_workflow()`
-`mylist$invoke_workflow()`
+Example:
+```
+mylist <- faasr(json_path="workflow_file.json", env_path="credentials_file")
+mylist$register_workflow()
+mylist$invoke_workflow()
+```
 
 
 ### set_workflow_timer
@@ -75,10 +79,11 @@ It requires a valid list returned from a previous execution of `faasr()` that ha
 The required argument `cron` is a string that [follows the cron format](https://en.wikipedia.org/wiki/Cron)
 
 Example: 
-`mylist <- faasr(json_path="workflow_file.json", env_path="credentials_file")`
-`mylist$register_workflow()`
-`mylist$set_workflow_timer("*/10 * * * *")`
-
+```
+mylist <- faasr(json_path="workflow_file.json", env_path="credentials_file")
+mylist$register_workflow()
+mylist$set_workflow_timer("*/10 * * * *")
+```
 
 ### unset_workflow_timer
 
@@ -87,12 +92,13 @@ Usage: `$unset_workflow_timer(cron)`
 This function unsets a timer previously set with `$set_workflow_timer`. 
 It requires a valid list returned from a previous execution of `faasr()` that has been registered with cloud providers using `$rergister_workflow()`
 
-Example: 
-`mylist <- faasr(json_path="workflow_file.json", env_path="credentials_file")`
-`mylist$register_workflow()`
-`mylist$set_workflow_timer("*/10 * * * *")`
-`mylist$unset_workflow_timer()`
-
+Example:
+``` 
+mylist <- faasr(json_path="workflow_file.json", env_path="credentials_file")
+mylist$register_workflow()
+mylist$set_workflow_timer("*/10 * * * *")
+mylist$unset_workflow_timer()
+```
 
 ## Cloud-side FaaSr functions
 
@@ -117,9 +123,10 @@ This is an optional argument; if not provided, the default S3 server specified a
 `local_file` is a string with the name for the file downloaded from the S3 bucket. This is a required arguemnt.
 
 Examples:
-`faasr_get_file(remote_folder="myfolder", remote_file="myinput1.csv", local_file="input1.csv")`
-`faasr_get_file(server_name="My_Minio_Bucket", remote_file="myinput2.csv", local_file="input2.csv")`
-
+```
+faasr_get_file(remote_folder="myfolder", remote_file="myinput1.csv", local_file="input1.csv")
+faasr_get_file(server_name="My_Minio_Bucket", remote_file="myinput2.csv", local_file="input2.csv")
+```
 
 ### faasr_put_file
 
@@ -140,9 +147,10 @@ This is an optional argument; if not provided, the default S3 server specified a
 
 
 Examples:
-`faasr_put_file(local_file="output.csv", remote_folder="myfolder", remote_file="myoutput.csv")`
-`faasr_get_file(server_name="My_Minio_Bucket", local_file="output.csv", remote_file="myoutput.csv")`
-
+```
+faasr_put_file(local_file="output.csv", remote_folder="myfolder", remote_file="myoutput.csv")
+faasr_get_file(server_name="My_Minio_Bucket", local_file="output.csv", remote_file="myoutput.csv")
+```
 
 ### faasr_get_folder_list
 
@@ -156,8 +164,10 @@ This is an optional argument; if not provided, the default S3 server specified a
 `faasr_prefix` is a string with the prefix of the folder in the S3 bucket. This is an optional argument that defaults to `""`
 
 Examples:
-`mylist1 <- faasr_get_folder_list(server_name="My_Minio_Bucket", faasr_prefix="myfolder")`
-`mylist2 <- faasr_get_folder_list(server_name="My_Minio_Bucket", faasr_prefix="myfolder/mysubfolder")`
+```
+mylist1 <- faasr_get_folder_list(server_name="My_Minio_Bucket", faasr_prefix="myfolder")
+mylist2 <- faasr_get_folder_list(server_name="My_Minio_Bucket", faasr_prefix="myfolder/mysubfolder")
+```
 
 ### faasr_delete_file
 
@@ -173,9 +183,10 @@ This is an optional argument; if not provided, the default S3 server specified a
 `remote_file` is a string with the name for the file to be deleted from the S3 bucket. This is a required arguemnt.
 
 Examples:
-`faasr_delete_file(remote_folder="myfolder", remote_file="myoutput.csv")`
-`faasr_delete_file(server_name="My_Minio_Bucket", remote_file="myoutput.csv")`
-
+```
+faasr_delete_file(remote_folder="myfolder", remote_file="myoutput.csv")
+faasr_delete_file(server_name="My_Minio_Bucket", remote_file="myoutput.csv")
+```
 
 ### faasr_arrow_s3_bucket
 
@@ -191,12 +202,13 @@ This is an optional argument; if not provided, the default S3 server specified a
 It returns a list that is subsequently used with the Arrow package.
 
 Examples:
-`mys3 <- faasr_arrow_s3_bucket()`
-`myothers3 <- faasr_arrow_s3_bucket(server_name="My_Minio_Bucket", faasr_prefix="myfolder")`
-`frame_input1 <- arrow::read_csv_arrow(mys3$path(file.path(folder, input1)))`
-`frame_input2 <- arrow::read_csv_arrow(mys3$path(file.path(folder, input2)))`
-`arrow::write_csv_arrow(frame_output, mys3$path(file.path(folder, output)))`
-
+```
+mys3 <- faasr_arrow_s3_bucket()
+myothers3 <- faasr_arrow_s3_bucket(server_name="My_Minio_Bucket", faasr_prefix="myfolder")
+frame_input1 <- arrow::read_csv_arrow(mys3$path(file.path(folder, input1)))
+frame_input2 <- arrow::read_csv_arrow(mys3$path(file.path(folder, input2)))
+arrow::write_csv_arrow(frame_output, mys3$path(file.path(folder, output)))
+```
 
 ### faasr_log
 
@@ -209,9 +221,10 @@ This default can be overridden with `LoggingDataStore` in  the workflow configur
 `log_message` is a string with the message to be logged.
 
 Example:
-`log_msg <- paste0('Function compute_sum finished; output written to ', folder, '/', output, ' in default S3 bucket')`
-`faasr_log(log_msg)`
-
+```
+log_msg <- paste0('Function compute_sum finished; output written to ', folder, '/', output, ' in default S3 bucket')
+faasr_log(log_msg)
+```
 
 ## File formats 
 
