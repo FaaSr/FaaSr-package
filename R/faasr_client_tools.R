@@ -601,7 +601,8 @@ faasr_get_log_df <- function(){
 
   # Format dates and create data frame if any data exists
   if (length(uuids) > 0) {
-    dates <- as.POSIXct(dates, format="%Y-%m-%d %H:%M:%S", tz="")
+    # dates <- as.POSIXct(dates, format="%Y-%m-%d %H:%M:%S", tz="")
+    dates <- as.POSIXct(dates, tz="", origin = "1970-01-01")
     logs_df <- data.frame(UUID = uuids, Date = dates, FunctionName = function_names)
     logs_df <- logs_df[order(logs_df$Date, logs_df$UUID), ]
     rownames(logs_df) <- NULL
@@ -752,7 +753,8 @@ faasr_delete_log_date <- function(target_date) {
     # Filter and delete immediately
     if (length(list_log_files$Contents) > 0) {
       objects_to_delete <- lapply(list_log_files$Contents, function(x) {
-        object_date <- as.POSIXct(x$LastModified, format="%Y-%m-%d %H:%M:%S", tz="GMT") - 4*3600
+        # object_date <- as.POSIXct(x$LastModified, format="%Y-%m-%d %H:%M:%S", tz="GMT") - 4*3600
+        object_date <- as.POSIXct(x$LastModified, origin = "1970-01-01", tz="GMT") - 4*3600
         object_date <- as.Date(object_date)
         
         if (object_date <= target_date) {
