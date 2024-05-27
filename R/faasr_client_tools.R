@@ -602,7 +602,7 @@ faasr_get_log_df <- function(){
   # Format dates and create data frame if any data exists
   if (length(uuids) > 0) {
     # dates <- as.POSIXct(dates, format="%Y-%m-%d %H:%M:%S", tz="")
-    dates <- as.POSIXct(dates, tz="", origin = "1970-01-01")
+    dates <- as.POSIXct(dates, tz="GMT", origin = "1970-01-01") - 4*3600
     logs_df <- data.frame(UUID = uuids, Date = dates, FunctionName = function_names)
     logs_df <- logs_df[order(logs_df$Date, logs_df$UUID), ]
     rownames(logs_df) <- NULL
@@ -766,10 +766,11 @@ faasr_delete_log_date <- function(target_date) {
       objects_to_delete <- Filter(Negate(is.null), objects_to_delete)
 
       if (length(objects_to_delete) > 0) {
-        delete_response <- s3$delete_objects(
-          Bucket = log_server$Bucket,
-          Delete = list(Objects = objects_to_delete)
-        )
+        # temporary comment out the delete function for testing
+        # delete_response <- s3$delete_objects(
+        #   Bucket = log_server$Bucket,
+        #   Delete = list(Objects = objects_to_delete)
+        # )
         total_deleted <- total_deleted + length(objects_to_delete)
       }
     }
