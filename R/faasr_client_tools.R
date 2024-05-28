@@ -766,11 +766,10 @@ faasr_delete_log_date <- function(target_date) {
       objects_to_delete <- Filter(Negate(is.null), objects_to_delete)
 
       if (length(objects_to_delete) > 0) {
-        # temporary comment out the delete function for testing
-        # delete_response <- s3$delete_objects(
-        #   Bucket = log_server$Bucket,
-        #   Delete = list(Objects = objects_to_delete)
-        # )
+        delete_response <- s3$delete_objects(
+          Bucket = log_server$Bucket,
+          Delete = list(Objects = objects_to_delete)
+        )
         total_deleted <- total_deleted + length(objects_to_delete)
       }
     }
