@@ -38,7 +38,7 @@ faasr_register_workflow <- function(...){
   }
   on.exit(setwd(faasr_wd))
   faasr <- svc$json
-  cred <- faasr_collect_sys_env(faasr,svc$cred)
+  cred <- svc$cred
   
   setwd(faasr_wd)
 
@@ -61,6 +61,7 @@ faasr_register_workflow <- function(...){
 #' @param cred a list form of the credentials
 #' @return credential list
 #' @import cli
+#' @import askpass
 #' @keywords internal
 
 # collect system envrionment
@@ -80,8 +81,13 @@ faasr_collect_sys_env <- function(faasr, cred){
       if (is.null(cred[[cred_name]])){
         real_cred <- Sys.getenv(cred_name)
         if (real_cred == ""){
-          err_msg <- paste0("faasr_collect_sys_env: ",cred_name," requires values")
-          cli_alert_warning(err_msg)
+          ask_cred <- askpass::askpass(paste0("Enter keys for ", cred_name))
+          ask_cred_list <- list(ask_cred)
+          names(ask_cred_list) <- cred_name
+          do.call(Sys.setenv, ask_cred_list)
+          cred[[cred_name]] <- ask_cred
+          #err_msg <- paste0("faasr_collect_sys_env: ",cred_name," requires values")
+          #cli_alert_warning(err_msg)
         } else{
           cred[[cred_name]] <- real_cred
         }
@@ -99,8 +105,11 @@ faasr_collect_sys_env <- function(faasr, cred){
       if (is.null(cred[[cred_name]])){
         real_cred <- Sys.getenv(cred_name)
         if (real_cred == ""){
-          err_msg <- paste0("faasr_collect_sys_env: ",cred_name," requires values")
-          cli_alert_warning(err_msg)
+          ask_cred <- askpass::askpass(paste0("Enter keys for ", cred_name))
+          ask_cred_list <- list(ask_cred)
+          names(ask_cred_list) <- cred_name
+          do.call(Sys.setenv, ask_cred_list)
+          cred[[cred_name]] <- ask_cred
         } else{
           cred[[cred_name]] <- real_cred
         }
@@ -118,8 +127,11 @@ faasr_collect_sys_env <- function(faasr, cred){
       if (is.null(cred[[cred_name_ac]])){
         real_cred <- Sys.getenv(cred_name_ac)
         if (real_cred == ""){
-          err_msg <- paste0("faasr_collect_sys_env: ",cred_name_ac," requires values")
-          cli_alert_warning(err_msg)
+          ask_cred <- askpass::askpass(paste0("Enter keys for ", cred_name_ac))
+          ask_cred_list <- list(ask_cred)
+          names(ask_cred_list) <- cred_name_ac
+          do.call(Sys.setenv, ask_cred_list)
+          cred[[cred_name_ac]] <- ask_cred
         } else{
           cred[[cred_name_ac]] <- real_cred
         }
@@ -132,8 +144,11 @@ faasr_collect_sys_env <- function(faasr, cred){
       if (is.null(cred[[cred_name_sc]])){
         real_cred <- Sys.getenv(cred_name_sc)
         if (real_cred == ""){
-          err_msg <- paste0("faasr_collect_sys_env: ",cred_name_sc," requires values")
-          cli_alert_warning(err_msg)
+          ask_cred <- askpass::askpass(paste0("Enter keys for ", cred_name_sc))
+          ask_cred_list <- list(ask_cred)
+          names(ask_cred_list) <- cred_name_sc
+          do.call(Sys.setenv, ask_cred_list)
+          cred[[cred_name_sc]] <- ask_cred
         } else{
           cred[[cred_name_sc]] <- real_cred
         }
@@ -151,24 +166,35 @@ faasr_collect_sys_env <- function(faasr, cred){
     if (is.null(cred_name_ac)){
       cred_name_ac <- paste0(faas_cred, "_ACCESS_KEY")
     }
-    if (is.null(cred[[cred_name_ac]])){
-      real_cred <- Sys.getenv(cred_name_ac)
-      if (real_cred == ""){
-        err_msg <- paste0("faasr_collect_sys_env: ",cred_name_ac," requires values")
-        cli_alert_warning(err_msg)
-      } else{
-        cred[[cred_name_ac]] <- real_cred
-      }
-    }
     cred_name_sc <- faasr$DataStores[[data_cred]]$SecretKey
     if (is.null(cred_name_sc)){
       cred_name_sc <- paste0(faas_cred, "_SECRET_KEY")
     }
+    if (!is.null(faasr$DataStores[[data_cred]]$Anonymous)){
+      if (faasr$DataStores[[data_cred]]$Anonymous == TRUE){
+        next
+      }
+    }
+    if (is.null(cred[[cred_name_ac]])){
+      real_cred <- Sys.getenv(cred_name_ac)
+      if (real_cred == ""){
+        ask_cred <- askpass::askpass(paste0("Enter keys for ", cred_name_ac))
+        ask_cred_list <- list(ask_cred)
+        names(ask_cred_list) <- cred_name_ac
+        do.call(Sys.setenv, ask_cred_list)
+        cred[[cred_name_ac]] <- ask_cred
+      } else{
+        cred[[cred_name_ac]] <- real_cred
+      }
+    }
     if (is.null(cred[[cred_name_sc]])){
       real_cred <- Sys.getenv(cred_name_sc)
       if (real_cred == ""){
-        err_msg <- paste0("faasr_collect_sys_env: ",cred_name_sc," requires values")
-        cli_alert_warning(err_msg)
+        ask_cred <- askpass::askpass(paste0("Enter keys for ", cred_name_sc))
+        ask_cred_list <- list(ask_cred)
+        names(ask_cred_list) <- cred_name_sc
+        do.call(Sys.setenv, ask_cred_list)
+        cred[[cred_name_sc]] <- ask_cred
       } else{
         cred[[cred_name_sc]] <- real_cred
       }
@@ -312,6 +338,9 @@ faasr <- function(json_path=NULL, env_path=NULL){
       }
     }
   }
+
+  svc$cred <- faasr_collect_sys_env(svc$json, svc$cred)
+
   succ_msg <- paste0("Successfully get configuration from ", json_path, " and ", env_path)
   cli_alert_success(succ_msg)
 
@@ -325,6 +354,15 @@ faasr <- function(json_path=NULL, env_path=NULL){
     dir.create(faasr_data)
     succ_msg <- paste0("Create the FaaSr directory: ", faasr_data)
     cli_alert_success(succ_msg)
+  }
+  if (!dir.exists(paste0(faasr_data, "/R"))){
+    dir.create(paste0(faasr_data, "/R"))
+  }
+  if (!dir.exists(paste0(faasr_data, "/files"))){
+    dir.create(paste0(faasr_data, "/files"))
+  }
+  if (!dir.exists(paste0(faasr_data, "/temp"))){
+    dir.create(paste0(faasr_data, "/temp"))
   }
 
   cli_alert_success("Ready to use FaaSr client tools:")
@@ -405,7 +443,7 @@ faasr_invoke_workflow <- function(FunctionInvoke=NULL, ...){
   }
   on.exit(setwd(faasr_wd))
   faasr <- svc$json
-  cred <- faasr_collect_sys_env(faasr,svc$cred)
+  cred <- svc$cred
   
   setwd(faasr_wd)
   
@@ -466,7 +504,7 @@ faasr_set_workflow_timer <- function(cron, target=NULL, ...){
   }
   on.exit(setwd(faasr_wd))
   faasr <- svc$json
-  cred <- faasr_collect_sys_env(faasr,svc$cred)
+  cred <- svc$cred
   if (is.null(target)){
     target <- faasr$FunctionInvoke
   }
@@ -519,7 +557,7 @@ faasr_unset_workflow_timer <- function(target=NULL,...){
   }
   on.exit(setwd(faasr_wd))
   faasr <- svc$json
-  cred <- faasr_collect_sys_env(faasr,svc$cred)
+  cred <- svc$cred
 
   setwd(faasr_wd)
 
