@@ -5,7 +5,7 @@ Version: 1.2.1
 Authors@R: c(person("Figueiredo", "Renato", role = c("aut", "cre", "ths", "cph"),
                     email = "renatof@ufl.edu",
                     comment = c(ORCID = "0000-0001-9841-6060")),
-             person("Park", "Sungjae", role = "aut"),
+             person("Park", "Sungjae", role = "aut", comment = c(ORCID = "0009-0000-5357-804X")),
              person("Mu", "Nan", role = "ctb"),
              person("Ku", "Yun-Jung", role = "ctb"),
              person("Daneshmand", "Vahid", role = "ctb"),
