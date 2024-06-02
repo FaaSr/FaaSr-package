@@ -40,7 +40,11 @@ faasr_get_file <- function(server_name=.faasr$DefaultDataStore, remote_folder=""
   # 3: file_name ended with "/" ("/remote/folder", "file_name/")
   remote_folder <- sub("^/+", "", sub("/+$", "", remote_folder))
   remote_file <- sub("^/+", "", sub("/+$", "", remote_file))
-  get_file_s3 <- paste0(remote_folder, "/", remote_file)
+  if (remote_folder == ""){
+    get_file_s3 <- remote_file
+  } else {
+    get_file_s3 <- paste0(remote_folder, "/", remote_file)
+  }
 
   # takes same way with remote folder & file
   local_folder <- sub("^/+", "", sub("/+$", "", local_folder))
