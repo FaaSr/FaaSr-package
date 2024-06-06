@@ -489,7 +489,7 @@ faasr_invoke_workflow <- function(FunctionInvoke=NULL, ...){
 #' @examples
 #' if (interactive()){
 #' test <- faasr("test.json", "env")
-#' test$set_workflow_timer(""*/5 * * * *)
+#' test$set_workflow_timer("*/5 * * * *")
 #' }
 
 
@@ -584,15 +584,13 @@ faasr_unset_workflow_timer <- function(target=NULL,...){
 #' information configured with the user's S3 bucket
 #' This can be useful in debugging by helping the user
 #' identify and download a particular log
-#' @param no parameters
-#' @param ... a string for underlying functions
-#' @return a data frame with log information
+#' @return this function returns nothing
 #' @import cli
 #' @export 
 #' @examples
 #' if (interactive()){
 #' test <- faasr("test.json", "env")
-#' logs <- test$faasr_get_log_df()
+#' test$faasr_get_log_df()
 #' }
 
 faasr_get_log_df <- function(){
@@ -817,7 +815,7 @@ faasr_delete_log <- function(uuid){
 #' deletes all FaaSr logs of a given date  
 #' This function deleted all FaaSr log files in a given
 #' date from the user's S3 FaaSrLog bucket
-#' @param uuid the UUID of the log to retrieve
+#' @param target_date the date (yyyy-mm-dd) of the log data
 #' @return nothing is returned
 #' @import cli
 #' @export 
@@ -826,7 +824,6 @@ faasr_delete_log <- function(uuid){
 #' test <- faasr("test.json", "env")
 #' logs <- test$faasr_delete_log_date('2024-06-05')
 #' }
-#' 
 #' 
 
 faasr_delete_log_date <- function(target_date) {
