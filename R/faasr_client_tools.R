@@ -489,7 +489,7 @@ faasr_invoke_workflow <- function(FunctionInvoke=NULL, ...){
 #' @examples
 #' if (interactive()){
 #' test <- faasr("test.json", "env")
-#' test$set_workflow_timer
+#' test$set_workflow_timer(""*/5 * * * *)
 #' }
 
 
@@ -543,7 +543,7 @@ faasr_set_workflow_timer <- function(cron, target=NULL, ...){
 #' @examples
 #' if (interactive()){
 #' test <- faasr("test.json", "env")
-#' test$unset_workflow_timer
+#' test$unset_workflow_timer()
 #' }
 
 # unset the timer
@@ -576,6 +576,24 @@ faasr_unset_workflow_timer <- function(target=NULL,...){
   }
 }
 .faasr_user$operations$unset_workflow_timer <- faasr_unset_workflow_timer
+
+#' @title faasr_get_log_df
+#' @description 
+#' returns a data frame with FaaSr logs stored in S3 
+#' This function queries and aggregates FaaSr log 
+#' information configured with the user's S3 bucket
+#' This can be useful in debugging by helping the user
+#' identify and download a particular log
+#' @param no parameters
+#' @param ... a string for underlying functions
+#' @return a data frame with log information
+#' @import cli
+#' @export 
+#' @examples
+#' if (interactive()){
+#' test <- faasr("test.json", "env")
+#' logs <- test$faasr_get_log_df()
+#' }
 
 faasr_get_log_df <- function(){
   # get the "svc" by using "faasr_get_svc" and define the required variables.
@@ -657,6 +675,25 @@ faasr_get_log_df <- function(){
 
 .faasr_user$operations$get_log_df <- faasr_get_log_df
 
+#' @title faasr_get_log
+#' @description 
+#' downloads a FaaSr log file stored in S3 
+#' This function downloads a specific FaaSr log file
+#' from the user's S3 FaaSrLog bucket to local disk
+#' This can be useful in debugging by helping the user
+#' retrieve the specific log of a FaaSr run
+#' @param uuid the UUID of the log to retrieve
+#' @return nothing is returned; log is downloaded
+#' @import cli
+#' @export 
+#' @examples
+#' if (interactive()){
+#' test <- faasr("test.json", "env")
+#' logs <- test$faasr_get_log('SOME-UUID')
+#' }
+#' 
+#' 
+
 faasr_get_log <- function(uuid){
   # get the "svc" by using "faasr_get_svc" and define the required variables.
   svc <- .faasr_get_svc()
@@ -715,6 +752,23 @@ faasr_get_log <- function(uuid){
 }
 .faasr_user$operations$get_log <- faasr_get_log
 
+#' @title faasr_delete_log
+#' @description 
+#' deletes a FaaSr log file stored in S3 
+#' This function deleted a specific FaaSr log file
+#' from the user's S3 FaaSrLog bucket
+#' @param uuid the UUID of the log to retrieve
+#' @return nothing is returned
+#' @import cli
+#' @export 
+#' @examples
+#' if (interactive()){
+#' test <- faasr("test.json", "env")
+#' logs <- test$faasr_delete_log('SOME-UUID')
+#' }
+#' 
+#' 
+
 faasr_delete_log <- function(uuid){
   # get the "svc" by using "faasr_get_svc" and define the required variables.
   svc <- .faasr_get_svc()
@@ -758,6 +812,22 @@ faasr_delete_log <- function(uuid){
 }
 .faasr_user$operations$delete_log <- faasr_delete_log
 
+#' @title faasr_delete_log_date
+#' @description 
+#' deletes all FaaSr logs of a given date  
+#' This function deleted all FaaSr log files in a given
+#' date from the user's S3 FaaSrLog bucket
+#' @param uuid the UUID of the log to retrieve
+#' @return nothing is returned
+#' @import cli
+#' @export 
+#' @examples
+#' if (interactive()){
+#' test <- faasr("test.json", "env")
+#' logs <- test$faasr_delete_log_date('2024-06-05')
+#' }
+#' 
+#' 
 
 faasr_delete_log_date <- function(target_date) {
   svc <- .faasr_get_svc()
@@ -827,6 +897,15 @@ faasr_delete_log_date <- function(target_date) {
 }
 
 .faasr_user$operations$delete_log_date <- faasr_delete_log_date
+
+#' @title faasr_get_storage_instance
+#' @description 
+#' Helper function to assist log querying/downloading
+#' from S3 bucket
+#' @param faasr list with parsed and validated Payload
+#' @param cred  credentials
+#' @return a list with log server and s3 configuration for paws
+#' @keywords internal
 
 faasr_get_storage_instance <- function(faasr, cred){
    storage_info <- list()
