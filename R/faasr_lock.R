@@ -35,6 +35,7 @@ faasr_rsm <- function(faasr) {
   )
   cnt <- 0
   max_cnt <- 4
+  max_wait <- 13
 
   # Make a loop
   while(TRUE) {
@@ -45,6 +46,12 @@ faasr_rsm <- function(faasr) {
 	  s3$delete_object(Key=flag_name, Bucket=target_s3$Bucket)
 	  if (cnt > max_cnt){
 	    Sys.sleep(2^max_cnt)
+		cnt <- cnt+1
+		if (cnt > max_wait){
+		  err_msg <- paste0('{\"faasr_rsm\":\"Lock Timeout\"}', "\n")
+		  message(err_msg)
+		  stop()
+		}
 	  } else {
 	    Sys.sleep(2^cnt)
 	    cnt <- cnt+1
@@ -81,6 +88,7 @@ faasr_acquire<-function(faasr) {
 	Lock <- faasr_rsm(faasr)
 	cnt <- 0
 	max_cnt <- 4
+	max_wait <- 13
 	# if function acquires a lock, it gets out of the loop
 	while(TRUE) {
 		# if Lock is TRUE i.e., this function has a lock, return TRUE i.e., get out of the While loop
@@ -90,7 +98,13 @@ faasr_acquire<-function(faasr) {
 		# if it doesn't, keep trying to get the flag&lock by calling faasr_rsm again until it returns TRUE.
 		# before retrying, sleep exponential to cnt
 		  if (cnt > max_cnt){
-		    Sys.sleep(2^max_cnt)
+	        Sys.sleep(2^max_cnt)
+		    cnt <- cnt+1
+		    if (cnt > max_wait){
+			  err_msg <- paste0('{\"faasr_acquire\":\"Lock Acquire Timeout\"}', "\n")
+			  message(err_msg)
+			  stop()
+		    }
 		  } else {
 		    Sys.sleep(2^cnt)
 		    cnt <- cnt+1
