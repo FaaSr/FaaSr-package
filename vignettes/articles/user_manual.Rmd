@@ -116,11 +116,11 @@ This is an optional argument; if not provided, the default S3 server specified a
 
 `remote_folder` is string with the name of the remote folder where the file is to be downloaded from. This is an optional argument that defaults to `""`
 
-`remote_file` is a string with the name for the file to be downloaded from the S3 bucket. This is a required arguemnt.
+`remote_file` is a string with the name for the file to be downloaded from the S3 bucket. This is a required argument.
 
 `local_folder` is a string with the name of the local folder where the file to be downloaded is stored. This is an optional argument that defaults to `"."`
 
-`local_file` is a string with the name for the file downloaded from the S3 bucket. This is a required arguemnt.
+`local_file` is a string with the name for the file downloaded from the S3 bucket. This is a required argument.
 
 Examples:
 ```
@@ -139,11 +139,11 @@ This is an optional argument; if not provided, the default S3 server specified a
 
 `local_folder` is a string with the name of the local folder where the file to be uploaded is stored. This is an optional argument that defaults to `"."`
 
-`local_file` is a string with the name for the file to be uploaded to the S3 bucket. This is a required arguemnt.
+`local_file` is a string with the name for the file to be uploaded to the S3 bucket. This is a required argument.
 
 `remote_folder` is string with the name of the remote folder where the file is to be uploaded to. This is an optional argument that defaults to `""`
 
-`remote_file` is a string with the name for the file to be uploaded to the S3 bucket. This is a required arguemnt.
+`remote_file` is a string with the name for the file to be uploaded to the S3 bucket. This is a required argument.
 
 
 Examples:
@@ -180,7 +180,7 @@ This is an optional argument; if not provided, the default S3 server specified a
 
 `remote_folder` is string with the name of the remote folder where the file is to be deleted from. This is an optional argument that defaults to `""`
 
-`remote_file` is a string with the name for the file to be deleted from the S3 bucket. This is a required arguemnt.
+`remote_file` is a string with the name for the file to be deleted from the S3 bucket. This is a required argument.
 
 Examples:
 ```
@@ -240,8 +240,8 @@ The credentials file used by FaaSr has key-value string pairs, stored one per li
 
 `"key":"value"`
 
-The key is the name of the credential (which must match the name of the cloud server in a configurration file)
-The value is the crredential itself
+The key is the name of the credential (which must match the name of the cloud server in a configuration file)
+The value is the credential itself
 
 Example:
 ```

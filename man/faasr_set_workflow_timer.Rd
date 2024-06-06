@@ -25,6 +25,6 @@ This can be used as a cross-platform function
 \examples{
 if (interactive()){
 test <- faasr("test.json", "env")
-test$set_workflow_timer
+test$set_workflow_timer("*/5 * * * *")
 }
 }
