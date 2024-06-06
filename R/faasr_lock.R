@@ -49,8 +49,8 @@ faasr_rsm <- function(faasr) {
 		cnt <- cnt+1
 		if (cnt > max_wait){
 		  err_msg <- paste0('{\"faasr_rsm\":\"Lock Timeout\"}', "\n")
-          message(err_msg)
-          stop()
+		  message(err_msg)
+		  stop()
 		}
 	  } else {
 	    Sys.sleep(2^cnt)
@@ -101,9 +101,9 @@ faasr_acquire<-function(faasr) {
 	        Sys.sleep(2^max_cnt)
 		    cnt <- cnt+1
 		    if (cnt > max_wait){
-		      err_msg <- paste0('{\"faasr_acquire\":\"Lock Acquire Timeout\"}', "\n")
-              message(err_msg)
-              stop()
+			  err_msg <- paste0('{\"faasr_acquire\":\"Lock Acquire Timeout\"}', "\n")
+			  message(err_msg)
+			  stop()
 		    }
 		  } else {
 		    Sys.sleep(2^cnt)
