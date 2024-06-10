@@ -1,3 +1,10 @@
+# FaaSr 1.3.0
+
+* Support anonymous access to arrow/S3 buckets 
+* Self-abort on a timeout while waiting for a lock
+* Improve credential management in Rstudio
+* Add logging functions to faasr_client_tools.R
+
 # FaaSr 1.2.1
 
 * Fix bugs for local execution functions.
