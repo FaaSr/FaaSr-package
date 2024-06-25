@@ -62,7 +62,7 @@ The FaaSr software is itself written in R. The main GitHub repository, FaaSr-Pac
 The primary client-side functions exposed to users allow them to: 1) register workflows with FaaS providers, 2) invoke workflows as either a one-off, or to set timer schedules for triggering workflows on pre-specified intervals, and 3) copy execution logs from S3 storage to their desktop. The client-side interfaces build on the  `faasr` function, which creates an object instance in memory in the R session for the user, and which can then be subsequently used to register and invoke functions. This function takes as arguments the name of a JSON-formatted[@pezoa2016foundations] workflow configuration file, and (optionally) the name of a file storing FaaS/S3 cloud provider credentials. The JSON schema for this file is also stored in the FaaSr-Package repository. Here’s an example:  
 
 ```r
-faasr_instance <- FaaSr::faasr(“payload.json”)`
+faasr_instance <- FaaSr::faasr("payload.json")
 ```
 
 With the instance `faasr_instance` returned by `faasr` function, users can register actions in the workflow to the FaaS provider(s) specified in the workflow JSON configuration. For example: 
@@ -80,7 +80,7 @@ faasr_instance$invoke_workflow()
 Users can also call `set_workflow_timer` to establish a timer event that will automatically invoke the workflow. This is based on the cron[@reznick1993using] specification of time intervals. For example:
  
 ```r
-faasr_instance$set_workflow_timer(“*/5 * * * *”)
+faasr_instance$set_workflow_timer("*/5 * * * *")
 ```
 
 The FaaSr server-side interfaces perform various operations, on behalf of the user, in stubs that are automatically inserted before and after user function invocation. These include: 1) reading the JSON workflow configuration file payload, 2) validating it against the FaaSr schema, 3) checking for reachability of S3 storage, 4) executing the user-provided function, 5) triggering the invocation of downstream function(s) in the workflow, and 6) storing logs. These functions are invoked at runtime by the containers deployed in an event-driven fashion by FaaS providers; the entry point of the container invokes the FaaSr package. Furthermore, some of the server-side interfaces are exposed to users, and implement functions to: 1) use S3 storage to download (get) and upload (put) full objects as files, 2) use Apache Arrow over S3 to efficiently access objects stored in columnar format using Apache Parquet, and 3) storing logs. Examples include:
@@ -89,7 +89,7 @@ The FaaSr server-side interfaces perform various operations, on behalf of the us
 faasr_get_file(remote_folder=folder, remote_file=input1, local_file="df0.csv")
 faasr_put_file(local_file="df1.csv", remote_folder=folder, remote_file=output1)
 s3 <- faasr_arrow_s3_bucket()
-faasr_log('Function compute_sum finished’)
+faasr_log("Function compute_sum finished")
 ```
 
 The software also includes a FaaSr-Docker repository with code and actions used to build, configure, and upload container images to the respective container registers for the three platforms currently supported by FaaSr (GitHub’s GCR, AWS’s ECR, and DockerHub). These are used to build the base and default runtime environment for FaaSr (based on Rocker and TidyVerse) as well as for advanced users who may want to build their custom images starting from the base image.
