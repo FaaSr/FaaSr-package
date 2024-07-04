@@ -41,7 +41,8 @@
             "FaaSServer":{"type":"string","minLength": 1},
             "FunctionName":{"type":"string","minLength": 1},
             "Arguments":{"type":"object"},
-            "InvokeNext":{"type":["string", "array"]}
+            "InvokeNext":{"type":["string", "array"]},
+            "Rank":{"type":"string"}
           },
           "required":["FaaSServer", "FunctionName"],
           "additionalProperties": false
