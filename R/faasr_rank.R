@@ -10,8 +10,8 @@
 #' if (interactive()){
 #' rank_info <- faasr_rank()
 #' }
-#' Rank <- rank_info[1]
-#' MaxRank <- rank_info[2] 
+#' Rank <- rank_info$Rank
+#' MaxRank <- rank_info$MaxRank 
 
 faasr_rank <- function(){
   current_func <- .faasr$FunctionInvoke
