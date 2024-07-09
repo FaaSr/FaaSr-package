@@ -38,9 +38,11 @@ log_msg <- paste0('Function compute_sum finished; output written to ', folder, '
 faasr_log(log_msg)
 ```
 
-## Checking the logs
+## Accessing logs
 
-Since logs are stored in S3, you may use any S3-compatible client to browse the logs. For example, using `minioclient`:
+Logs are stored in S3. You may use any S3-compatible client to browse the logs, or use FaaSr functions to help you list and download them. 
+
+For example, using `minioclient`:
 
 `mc_ls("play/faasr/FaaSrLog/")`
 
@@ -51,6 +53,24 @@ We'll assume UUID `2f66208d-63eb-4fd9-b54b-7bebcc970421` in the examples below; 
 Each action's log is written as a file with the action's name and extension `.txt`. For example, the log for `Action1` would be:
 
 `mc_cat("play/faasr/FaaSrLog/2f66208d-63eb-4fd9-b54b-7bebcc970421/Action1.txt")`
+
+While minioclient helps you browse the log files server, FaaSr provides these following helper functions
+
+`$get_log_df`
+
+Queries for all logs in your S3 bucket and writes a data frame with this information to file named `faasr_output_logs.txt` in your current working directory.
+
+`$get_log("2f66208d-63eb-4fd9-b54b-7bebcc970421")`
+
+Downloads the logs from the S3 bucket for a particular UUID (which you can determine by inspecting `faasr_output_logs.txt`)
+
+`$delete_log("2f66208d-63eb-4fd9-b54b-7bebcc970421")`
+
+Deletes a specific log from the S3 bucket given its UUID
+
+`$delete_log_date("2024-06-11")`
+
+Deletes all logs older than (and including) the given date
 
 ## Locating specific UUID
 
