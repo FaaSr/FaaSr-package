@@ -56,10 +56,20 @@ The FaaSr software makes it easy for scientists to execute computational workflo
 # Statement of need
 Scientific research increasingly requires extensive data and computing resources to execute complex workflows that are increasingly event-driven. Cloud computing has emerged as a scalable solution to meet these demands. However, traditional Infrastructure-as-a-Service (IaaS) models often prove to be costly and require server management, presenting challenges to many scientists. In particular, this presents barriers to entry for small to medium teams and in domains where users are not accustomed to cloud server deployment and management and/or cluster and high-performance computing environments. Function-as-a-Service serverless computing has the potential to address these concerns by providing a cost-effective alternative where users are not burdened with server management and can simply focus on writing application logic instead. Nevertheless, today’s FaaS platforms still present barriers to entry with respect to usability for scientists, particularly those who heavily rely on the R programming language, because: 1) R is not widely supported by commercial and open-source FaaS platforms as a runtime target, and 2) different FaaS providers use different, non-compatible APIs. While there are systems that enable Python applications to be used in FaaS (such as NumpyWren[@Shankar18], PyWren[@Jonas17], and FuncX[@chard20]), there is a growing need to support R-native applications. This need is addressed by FaaSr through the use of containers that encapsulate an R-based runtime environment supporting the execution of user-provided functions. In addition, while existing systems are tailored to a specific FaaS platform, there is a need to support cross-platform execution to avoid vendor lock-in. This need is addressed by FaaSr by hiding provider-specific APIs behind function interfaces that work consistently across multiple serverless providers, including AWS Lambda, GitHub Actions, and OpenWhisk. Furthermore, there is a need to support complex scientific workflows to express the order of execution of functions, as well as parallelism. This need is addressed by FaaSr in a way that remains serverless in nature and does not require dedicated/managed workflow engines.
 
+# Design
+The FaaSr package consists of server-side and client-side functions. The server-side functions are executed when an action is deployed by a FaaS platform. The FaaSr server-side interfaces perform various operations, on behalf of the user, in stubs that are automatically inserted before and after user function invocation. These include: 1) reading the JSON workflow configuration file payload, 2) validating it against the FaaSr schema, 3) checking for reachability of S3 storage, 4) executing the user-provided function, 5) triggering the invocation of downstream function(s) in the workflow, and 6) storing logs. These functions are invoked at runtime by the containers deployed in an event-driven fashion by FaaS providers; the entry point of the container invokes the FaaSr package. Furthermore, some of the server-side interfaces are exposed to users, and implement functions to: 1) use S3 storage to download (get) and upload (put) full objects as files, 2) use Apache Arrow over S3 to efficiently access objects stored in columnar format using Apache Parquet, and 3) store logs. 
+
+The client-side functions are executed iteratively by a user from their desktop environment (e.g. RStudio). The primary client-side functions exposed to users allow them to: 1) register workflows with FaaS providers, 2) invoke workflows as either a one-off or to set timer schedules for triggering workflows at pre-specified intervals, and 3) copy execution logs from S3 storage to their desktop. The client-side interfaces build on the  `faasr` function, which creates an object instance in memory in the R session for the user, and which can then be subsequently used to register and invoke functions. This function takes as arguments the name of a JSON-formatted[@pezoa2016foundations] workflow configuration file, and (optionally) the name of a file storing FaaS/S3 cloud provider credentials. The JSON schema for this file is also stored in the FaaSr-Package repository.
+
+FaaSr supports the execution of workflows that can be expressed as a Directed Acyclic Graph (DAG) of functions. The graph (specifying functions and their dependences) is described in JSON format, which can be generated automatically from a Web-based graphical editor using the FaaSr-JSON-Builder tool[@faasr-json-builder] . \autoref{fig:workflow} shows an example workflow DAG graph with ten functions for an ecological forecasting application.
+
+![Fig. 1. FaaSr Example Workflow.\label{fig:workflow}](FaaSr_example_workflow.png)
+
+
 # Description of Software
 The FaaSr software is itself written in R. The main GitHub repository, FaaSr-Package, implements the core functionalities to register and invoke functions and to access data at runtime via S3 as well as via Apache Arrow[@arrow] over S3. FaaSr exposes both a client-side interface (intended for end users interactively using R/RStudio environments) and a server-side interface (intended for runtime invocation once functions are executed on FaaS platforms). These use cURL[@hostetter1997curl] and API-based packages httr[@httr] and paws[@paws] for sending requests to three supported FaaS providers: GitHub Actions, OpenWhisk, and AWS Lambda. Users are only required to have accounts, keys, and proper access policies for those providers that they wish to utilize.
 
-The primary client-side functions exposed to users allow them to: 1) register workflows with FaaS providers, 2) invoke workflows as either a one-off or to set timer schedules for triggering workflows at pre-specified intervals, and 3) copy execution logs from S3 storage to their desktop. The client-side interfaces build on the  `faasr` function, which creates an object instance in memory in the R session for the user, and which can then be subsequently used to register and invoke functions. This function takes as arguments the name of a JSON-formatted[@pezoa2016foundations] workflow configuration file, and (optionally) the name of a file storing FaaS/S3 cloud provider credentials. The JSON schema for this file is also stored in the FaaSr-Package repository. Here’s an example:
+The client-side interface is available by invoking the FaaSr::faasr() function with a valid payload as argument:
 
 ```r
 faasr_instance <- FaaSr::faasr("payload.json")
@@ -83,12 +93,27 @@ Users can also call `set_workflow_timer` to establish a timer event that will au
 faasr_instance$set_workflow_timer("*/5 * * * *")
 ```
 
-The FaaSr server-side interfaces perform various operations, on behalf of the user, in stubs that are automatically inserted before and after user function invocation. These include: 1) reading the JSON workflow configuration file payload, 2) validating it against the FaaSr schema, 3) checking for reachability of S3 storage, 4) executing the user-provided function, 5) triggering the invocation of downstream function(s) in the workflow, and 6) storing logs. These functions are invoked at runtime by the containers deployed in an event-driven fashion by FaaS providers; the entry point of the container invokes the FaaSr package. Furthermore, some of the server-side interfaces are exposed to users, and implement functions to: 1) use S3 storage to download (get) and upload (put) full objects as files, 2) use Apache Arrow over S3 to efficiently access objects stored in columnar format using Apache Parquet, and 3) store logs. Examples include:
+The server-side interface allows functions to interact with storage. For example, to download a file from an S3 server to local storage:
 
 ```r
 faasr_get_file(remote_folder=folder, remote_file=input1, local_file="df0.csv")
+```
+
+To upload a file from local storage to an S3 server:
+
+```r
 faasr_put_file(local_file="df1.csv", remote_folder=folder, remote_file=output1)
+```
+
+To read/write from an S3 bucket with Apache Arrow and Parquet:
+
+```r
 s3 <- faasr_arrow_s3_bucket()
+```
+
+To write a log message:
+
+```r
 faasr_log("Function compute_sum finished")
 ```
 
