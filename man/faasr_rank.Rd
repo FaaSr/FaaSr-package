@@ -17,7 +17,8 @@ This function is used by users in the container.
 # This function can be run only in the container
 if (interactive()){
 rank_info <- faasr_rank()
-}
-Rank <- rank_info$Rank
 MaxRank <- rank_info$MaxRank 
+Rank <- rank_info$Rank
+}
+
 }
