@@ -44,6 +44,16 @@ faasr_abort_on_multiple_invocations <- function(faasr, pre) {
 
   id_folder <- paste0(faasr$FaaSrLog,"/",faasr$InvocationID)
 
+  for (pre_func in pre){
+    if (length(faasr$FunctionList[[pre_func]]$Rank != 0)){
+      parts <- unlist(strsplit(faasr$FunctionList[[pre_func]]$Rank, "[/]"))
+      pre <- setdiff(pre, pre_func)
+      for (rank in 1:parts[2]){
+        pre <- c(pre, paste0(pre_func, ".",rank))
+      }
+    }
+  }
+
   # Step 1: First, we check if all possible predecessor Actions are marked "done"
   # This is done by checking if a file named "func.done" exists in S3, where func is the name of the predecessor
   # If all possible predecessors are "done", we continue to step 2: below to check which of those should execute

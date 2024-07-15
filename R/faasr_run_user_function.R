@@ -46,6 +46,10 @@ faasr_run_user_function <- function(.faasr){
   if (!dir.exists(log_folder)) {
     dir.create(log_folder, recursive=TRUE)
   }
+  if (length(.faasr$FunctionList[[.faasr$FunctionInvoke]]$Rank != 0)){
+    parts <- unlist(strsplit(.faasr$FunctionList[[.faasr$FunctionInvoke]]$Rank, "[/]"))
+    .faasr$FunctionInvoke <- paste0(.faasr$FunctionInvoke, ".", parts[1])
+  }
   file_name <- paste0(.faasr$FunctionInvoke, ".done")
   write.table("TRUE", file=paste0(log_folder, "/", file_name), row.names=F, col.names=F)
   faasr_put_file(local_folder=log_folder, local_file=file_name, remote_folder=log_folder, remote_file=file_name)

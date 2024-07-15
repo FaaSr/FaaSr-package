@@ -41,7 +41,12 @@ faasr_check_workflow_cycle <- function(faasr){
 
   # build the graph indicating adjacent nodes, e.g., "F1":["F2","F3"], so on.
   for (func in names(faasr$FunctionList)) {
-    graph[[func]] <- faasr$FunctionList[[func]]$InvokeNext
+    if (length(faasr$FunctionList[[func]]$InvokeNext) != 0){
+      for (invoke_next in faasr$FunctionList[[func]]$InvokeNext){
+        parts <- unlist(strsplit(invoke_next, "[()]"))
+        graph[[func]] <- unique(c(graph[[func]], parts[1]))
+      }
+    }
   }
 
   # check next functions of FunctionInvoke are in the function list
