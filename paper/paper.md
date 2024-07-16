@@ -10,11 +10,9 @@ authors:
     equal-contrib: true
     affiliation: 1
   - name: Yun-Jung Ku
-    orcid: 0000-0000-0000-0000
     equal-contrib: false
     affiliation: 1
   - name: Nan Mu
-    orcid: 0000-0000-0000-0000
     equal-contrib: false
     affiliation: 1
   - name: Vahid Daneshmand
@@ -41,7 +39,7 @@ affiliations:
  - name: Department of Forest Resources and Environmental Conservation and Virginia Tech Center for Ecosystem Forecasting, Virginia Tech, VA, USA
    index: 3
 
-date: 00 Jun 2024
+date: 15 Jul 2024
 bibliography: paper.bib
 
 # Optional fields if submitting to a AAS journal too, see this blog post:
