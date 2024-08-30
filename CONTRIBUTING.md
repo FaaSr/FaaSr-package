@@ -29,7 +29,7 @@ All types of contributions are encouraged and valued. See the [Table of Contents
 ## Code of Conduct
 
 This project and everyone participating in it is governed by the
-[FaaSr Code of Conduct](https://github.com/FaaSr/FaaSr-packageblob/master/CODE_OF_CONDUCT.md).
+[FaaSr Code of Conduct](https://github.com/FaaSr/FaaSr-package/blob/main/CODE_OF_CONDUCT.md).
 By participating, you are expected to uphold this code. Please report unacceptable behavior
 to <>.
 
@@ -150,4 +150,4 @@ We also appreciate documentation enhancements as issues and pull requests.
 We are happy to include you in the team if you would like to contribute to the project in any ways you can - code, documentation, use cases, testing. If you'd like to join the team, please [sign up to our user's group](https://groups.io/g/FaaSr) and introduce yourself to the team (or feel free to contact one of the project contributors on GitHub).
 
 ## Attribution
-We maintain a list of contributors in the [DESCRIPTION](https://github.com/FaaSr/FaaSr-packageblob/master/DESCRIPTION) file that is used for submissions to our [CRAN package](https://cran.r-project.org/web/packages/FaaSr/index.html) where we provide attribution to users who make significant contributions to the code.
+We maintain a list of contributors in the [DESCRIPTION](https://github.com/FaaSr/FaaSr-package/blob/main/DESCRIPTION) file that is used for submissions to our [CRAN package](https://cran.r-project.org/web/packages/FaaSr/index.html) where we provide attribution to users who make significant contributions to the code.
