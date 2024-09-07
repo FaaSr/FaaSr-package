@@ -33,7 +33,11 @@ This is the first function used to validate and configure a workflow.
 It loads the JSON-formatted workflow configuration file from the path specified by `json_path` and (optionally( credentials from a file path `env_path`. 
 It returns a list that is subsequently used to register and invoke the workflow with functions `list$register_workflow` and `list$invoke_workflow`
 
-Example: `mylist <- faasr(json_path="workflow_file.json", env_path="credentials_file")`
+Example: 
+
+```r
+mylist <- faasr(json_path="workflow_file.json", env_path="credentials_file")
+```
 
 In the example above, the `faasr` function configures a workflow described in the `workflow_file.json` file and loads FaaS and S3 credentials from `credentials_file`.
 If successful, the function returns the `mylist` list
@@ -48,7 +52,8 @@ The cloud providers are specified in `ComputeServers` and `DataStores` of the JS
 Their respective credentials are specified in the credentials file also provided as input for `faasr()`.
 
 Example: 
-```
+
+```r
 mylist <- faasr(json_path="workflow_file.json", env_path="credentials_file")
 mylist$register_workflow()
 ```
@@ -63,7 +68,8 @@ This function immediately invokes a workflow that has been registered with a Faa
 It requires a valid list returned from a previous execution of `faasr()` that has been registered with cloud providers using `$rergister_workflow()`
 
 Example:
-```
+
+```r
 mylist <- faasr(json_path="workflow_file.json", env_path="credentials_file")
 mylist$register_workflow()
 mylist$invoke_workflow()
@@ -79,7 +85,8 @@ It requires a valid list returned from a previous execution of `faasr()` that ha
 The required argument `cron` is a string that [follows the cron format](https://en.wikipedia.org/wiki/Cron)
 
 Example: 
-```
+
+```r
 mylist <- faasr(json_path="workflow_file.json", env_path="credentials_file")
 mylist$register_workflow()
 mylist$set_workflow_timer("*/10 * * * *")
@@ -93,7 +100,8 @@ This function unsets a timer previously set with `$set_workflow_timer`.
 It requires a valid list returned from a previous execution of `faasr()` that has been registered with cloud providers using `$rergister_workflow()`
 
 Example:
-``` 
+
+```r
 mylist <- faasr(json_path="workflow_file.json", env_path="credentials_file")
 mylist$register_workflow()
 mylist$set_workflow_timer("*/10 * * * *")
@@ -123,7 +131,8 @@ This is an optional argument; if not provided, the default S3 server specified a
 `local_file` is a string with the name for the file downloaded from the S3 bucket. This is a required argument.
 
 Examples:
-```
+
+```r
 faasr_get_file(remote_folder="myfolder", remote_file="myinput1.csv", local_file="input1.csv")
 faasr_get_file(server_name="My_Minio_Bucket", remote_file="myinput2.csv", local_file="input2.csv")
 ```
@@ -147,7 +156,8 @@ This is an optional argument; if not provided, the default S3 server specified a
 
 
 Examples:
-```
+
+```r
 faasr_put_file(local_file="output.csv", remote_folder="myfolder", remote_file="myoutput.csv")
 faasr_get_file(server_name="My_Minio_Bucket", local_file="output.csv", remote_file="myoutput.csv")
 ```
@@ -164,7 +174,8 @@ This is an optional argument; if not provided, the default S3 server specified a
 `faasr_prefix` is a string with the prefix of the folder in the S3 bucket. This is an optional argument that defaults to `""`
 
 Examples:
-```
+
+```r
 mylist1 <- faasr_get_folder_list(server_name="My_Minio_Bucket", faasr_prefix="myfolder")
 mylist2 <- faasr_get_folder_list(server_name="My_Minio_Bucket", faasr_prefix="myfolder/mysubfolder")
 ```
@@ -183,7 +194,8 @@ This is an optional argument; if not provided, the default S3 server specified a
 `remote_file` is a string with the name for the file to be deleted from the S3 bucket. This is a required argument.
 
 Examples:
-```
+
+```r
 faasr_delete_file(remote_folder="myfolder", remote_file="myoutput.csv")
 faasr_delete_file(server_name="My_Minio_Bucket", remote_file="myoutput.csv")
 ```
@@ -202,7 +214,8 @@ This is an optional argument; if not provided, the default S3 server specified a
 It returns a list that is subsequently used with the Arrow package.
 
 Examples:
-```
+
+```r
 mys3 <- faasr_arrow_s3_bucket()
 myothers3 <- faasr_arrow_s3_bucket(server_name="My_Minio_Bucket", faasr_prefix="myfolder")
 frame_input1 <- arrow::read_csv_arrow(mys3$path(file.path(folder, input1)))
@@ -221,7 +234,8 @@ This default can be overridden with `LoggingDataStore` in  the workflow configur
 `log_message` is a string with the message to be logged.
 
 Example:
-```
+
+```r
 log_msg <- paste0('Function compute_sum finished; output written to ', folder, '/', output, ' in default S3 bucket')
 faasr_log(log_msg)
 ```

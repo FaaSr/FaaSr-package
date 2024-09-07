@@ -15,7 +15,7 @@ faasr_init_log_folder <- function(faasr) {
   # if InvocationID doesn't have valid form, generate a UUID
   if (length(faasr$InvocationID) == 0) {
     faasr$InvocationID<-UUIDgenerate()
-  } else if (UUIDvalidate(faasr$InvocationID) == FALSE) {
+  } else if (isFALSE(UUIDvalidate(faasr$InvocationID))) {
     faasr$InvocationID<-UUIDgenerate()
   }
 
