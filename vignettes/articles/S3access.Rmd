@@ -46,7 +46,7 @@ These examples come from the [companion vignette for single function](singlefunc
 FaaSr provides a function `faasr_arrow_s3_bucket()` that returns an Arrow object that can then be used in your code.
 For example, the `compute_sum` function described in the [companion vignette for simple workflow](twofunctionworkflow.html) can be re-written to use Arrow as follows:
 
-```{}
+```r
 library(arrow)
 
 compute_sum_arrow <- function(folder, input1, input2, output) {

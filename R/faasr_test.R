@@ -60,7 +60,7 @@ faasr_test <- function(use_docker=
   result <- faasr_test_start(faasr, faasr_data_wd, use_docker$use, docker_image)
 
   # if result==TRUE, it is successful. Else, failed with "result" data.
-  if (result == TRUE){
+  if (isTRUE(result)) {
     on.exit(setwd(faasr_wd))
     setwd(faasr_wd)
     cli_alert_success("Function execution successfully")

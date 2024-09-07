@@ -30,7 +30,7 @@ faasr_s3_check <- function(faasr){
       faasr$DataStores[[server]]$Region <- "us-east-1"
     }
     if (!is.null(faasr$DataStores[[server]]$Anonymous)){
-      if (as.logical(faasr$DataStores[[server]]$Anonymous) == TRUE){
+      if (isTRUE(as.logical(faasr$DataStores[[server]]$Anonymous))){
         next
       }
     }
