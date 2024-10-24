@@ -120,7 +120,7 @@ The software also includes a FaaSr-Docker repository [@faasr-docker] with code a
 Finally, the software also includes a FaaSr-JSON-Builder repository [@faasr-json-builder] with code for an R-native graphical user interface Shiny app that allows users to create and edit workflows interactively and generate FaaSr schema-compliant JSON files.
 
 # Documentation
-The software has been released on The Comprehensive R Archive Network (CRAN) (https://cran.r-project.org/web/packages/FaaSr/index.html) and the documentation is available on both CRAN and the FaaSr website (https://faasr.io/documentation)
+The software has been released on The Comprehensive R Archive Network (CRAN) ([https://cran.r-project.org/web/packages/FaaSr/](https://cran.r-project.org/web/packages/FaaSr/)) and the documentation is available on both CRAN and the FaaSr website ([https://faasr.io/documentation](https://faasr.io/documentation))
 
 # Acknowledgements
 FaaSr is funded in part by grants from the National Science Foundation (OAC-2311123, OAC-2311124, EF-2318861, EF-2318862). Any opinions, findings, and conclusions or recommendations expressed in this material are those of the author(s) and do not necessarily reflect the views of the National Science Foundation.
