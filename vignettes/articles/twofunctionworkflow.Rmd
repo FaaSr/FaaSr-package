@@ -34,7 +34,7 @@ Use the GitHub web site to create a new repository, named `FaaSr_single_function
 Create a file `compute_sum.R` file in the `FaaSr_single_function_code` repository you created in the [companion vignette for single function](singlefunction.html), copying and pasting the code below. 
 This function reads the CSV files created by `create_sample_date.R`, computes their sum, and uploads the output to an S3 bucket:
 
-```{}
+```r
 compute_sum <- function(folder, input1, input2, output) {
   # Download two input files from bucket, generate a sum of their contents, and write back to bucket
   # The function uses the default S3 bucket name, configured in the FaaSr JSON 
@@ -72,7 +72,7 @@ You will again use the [FaaSr workflow builder Shiny app](https://faasr.shinyapp
 5. Under `Function FaaS Server`, leave the default `My_GitHub_Account` - this is the name of the server you configured in the previous step.
 6. Under `Function Arguments`, enter the following arguments, which will be passed to the `compute_sum()` function:
 
-```{}
+```r
 folder="myexample",
 input1="sample1.csv",
 input2="sample2.csv",
