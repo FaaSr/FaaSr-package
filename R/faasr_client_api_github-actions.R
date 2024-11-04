@@ -58,8 +58,8 @@ faasr_register_workflow_github_actions <- function(faasr, cred, cron=NULL, runne
     faasr_register_workflow_github_create_env(server,repo)
     cli_alert_success("Create github env files")
     # create the payload file
-    faasr_register_workflow_github_create_payload(faasr,repo)
-    cli_alert_success("Create github payload file")
+    #faasr_register_workflow_github_create_payload(faasr,repo)
+    #cli_alert_success("Create github payload file")
     # create the README file
     faasr_register_workflow_github_create_readme(repo)
     cli_alert_success("Create github REAME file")
@@ -489,29 +489,6 @@ faasr_register_workflow_git_remote_env <- function(repo, cred, token){
     stop()
   }
 
-
-  # set the repo variable
-  url <- paste0("repos/",repo,"/actions/variables")
-  body <- list(name="PAYLOAD_REPO", value=paste0(repo,'/payload.json'))
-  response <- faasr_httr_request(body=body, token=token, url=url, type="POST")
-  if (response$status_code==201){
-    cli_alert_success("Successfully set variables")
-  } else if (response$status_code==409){
-    # if variable already exists, update the variable
-    url <- paste0("repos/",repo,"/actions/variables/PAYLOAD_REPO")
-    response <- faasr_httr_request(body=body, token=token, url=url, type="PATCH")
-    if (response$status_code==204){
-      cli_alert_success("Successfully set variables")
-    } else {
-      cli_alert_danger("Error: Failed to set variables")
-      setwd(cwd)
-      stop()
-    }
-  } else {
-    cli_alert_danger("Error: Failed to set variables")
-    setwd(cwd)
-    stop()
-  }
   setwd(cwd)
 }
 
@@ -534,8 +511,7 @@ faasr_workflow_invoke_github <- function(faasr, cred, faas_name, actionname){
 
   # define the required variables.
   token <- cred[[paste0(faas_name,"_TOKEN")]]
-  input_id <- faasr$InvocationID
-  input_faasr_log <- faasr$FaaSrLog
+  faasr <- jsonlite::toJSON(faasr, auto_unbox=TRUE)
   repo <- paste0(faasr$ComputeServers[[faas_name]]$UserName,"/",faasr$ComputeServers[[faas_name]]$ActionRepoName)
   git_ref <- faasr$ComputeServers[[faas_name]]$Branch
   if (!endsWith(actionname,".yml") && !endsWith(actionname,".yaml")){
@@ -549,9 +525,7 @@ faasr_workflow_invoke_github <- function(faasr, cred, faas_name, actionname){
   body <- list(
     ref = git_ref,
     inputs = list(
-      ID = input_id,
-      InvokeName = actionname,
-      FaaSrLog = input_faasr_log
+      PAYLOAD = faasr
     )
   )
   response <- faasr_httr_request(body=body, token=token, url=url, type="POST")

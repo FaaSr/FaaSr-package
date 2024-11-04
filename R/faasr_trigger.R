@@ -188,7 +188,8 @@ faasr_trigger <- function(faasr) {
             inputs <- list(
               ID = input_id,
               InvokeName = input_invokename,
-        FaaSrLog = input_faasr_log
+        FaaSrLog = input_faasr_log,
+        PAYLOAD = jsonlite::toJSON(faasr, auto_unbox=TRUE)
             )
 
             # Set the URL for the REST API endpoint of next action
