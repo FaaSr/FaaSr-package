@@ -1,0 +1,20 @@
+bibentry(
+  "Article",
+  title = "FaaSr: Cross-Platform Function-as-a-Service Serverless Scientific Workflows in R",
+  author = "Sungjae Park, R Quinn Thomas, Cayelan C Carey, Austin D Delany, Yun-Jung Ku, Mary E Lofton, Renato J Figueiredo",
+  year = 2024,
+  journal = "2024 IEEE 20th International Conference on e-Science (e-Science)",
+  doi = "10.1109/e-Science62913.2024.10678660",
+)
+
+bibentry(
+  "Article",
+  title = "FaaSr: R Package for Function-as-a-Service Cloud Computing",
+  author = "Sungjae Park, Yun-Jung Ku, Nan Mu, Vahid Daneshmand, Mary E Lofton, R Quinn Thomas, Cayelan C Carey, Renato J Figueiredo",
+  journal = "Journal of Open Source Software",
+  year = 2024,
+  volume = 9,
+  number = 103,
+  pages = 7027,
+  doi = "10.21105/joss.07027"
+)
