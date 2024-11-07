@@ -194,7 +194,7 @@ faasr_trigger <- function(faasr) {
                 }
               )
               }
-            for (data_js in names(svc$json$DataStores)){
+            for (data_js in names(faasr$DataStores)){
               faasr$DataStores[[data_js]]$AccessKey <- paste0(data_js,"_ACCESS_KEY")
               faasr$DataStores[[data_js]]$SecretKey <- paste0(data_js,"_SECRET_KEY")
             }
