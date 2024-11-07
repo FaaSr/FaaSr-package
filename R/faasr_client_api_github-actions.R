@@ -511,7 +511,6 @@ faasr_workflow_invoke_github <- function(faasr, cred, faas_name, actionname){
 
   # define the required variables.
   token <- cred[[paste0(faas_name,"_TOKEN")]]
-  faasr <- jsonlite::toJSON(faasr, auto_unbox=TRUE)
   repo <- paste0(faasr$ComputeServers[[faas_name]]$UserName,"/",faasr$ComputeServers[[faas_name]]$ActionRepoName)
   git_ref <- faasr$ComputeServers[[faas_name]]$Branch
   if (!endsWith(actionname,".yml") && !endsWith(actionname,".yaml")){
@@ -525,7 +524,7 @@ faasr_workflow_invoke_github <- function(faasr, cred, faas_name, actionname){
   body <- list(
     ref = git_ref,
     inputs = list(
-      PAYLOAD = faasr
+      PAYLOAD = jsonlite::toJSON(faasr, auto_unbox=TRUE)
     )
   )
   response <- faasr_httr_request(body=body, token=token, url=url, type="POST")
