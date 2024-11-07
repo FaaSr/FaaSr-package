@@ -1,4 +1,4 @@
-workflow_basic_path <- "https://raw.githubusercontent.com/FaaSr/FaaSr-package/main/schema/workflow_template.yml"
+workflow_basic_path <- "https://raw.githubusercontent.com/spark0510/FaaSr-package/branch76-github/schema/workflow_template.yml"
 workflow_timer_path <- "https://raw.githubusercontent.com/FaaSr/FaaSr-package/main/schema/workflow_with_cron_template.yml"
 #TBD. workflow_runner_path <- ""
 #TBD. workflow_runner_w_timer_path <- ""
@@ -511,8 +511,6 @@ faasr_workflow_invoke_github <- function(faasr, cred, faas_name, actionname){
 
   # define the required variables.
   token <- cred[[paste0(faas_name,"_TOKEN")]]
-  input_id <- faasr$InvocationID
-  input_faasr_log <- faasr$FaaSrLog
   repo <- paste0(faasr$ComputeServers[[faas_name]]$UserName,"/",faasr$ComputeServers[[faas_name]]$ActionRepoName)
   git_ref <- faasr$ComputeServers[[faas_name]]$Branch
   if (!endsWith(actionname,".yml") && !endsWith(actionname,".yaml")){
@@ -526,9 +524,6 @@ faasr_workflow_invoke_github <- function(faasr, cred, faas_name, actionname){
   body <- list(
     ref = git_ref,
     inputs = list(
-      ID = input_id,
-      InvokeName = actionname,
-      FaaSrLog = input_faasr_log,
       PAYLOAD = jsonlite::toJSON(faasr, auto_unbox=TRUE)
     )
   )
