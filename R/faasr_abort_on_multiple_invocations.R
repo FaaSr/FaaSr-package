@@ -75,7 +75,7 @@ faasr_abort_on_multiple_invocations <- function(faasr, pre) {
   }
 
   # generate random number to be appended to a file named "$FunctionInvoke.candidate"
-  random_number <- sample(1:10000000, 1)
+  random_number <- sample.int(.Machine$integer.max, 1)
 
   # Check whether local directory exists, if not, create one.
   if (!dir.exists(id_folder)) {

@@ -171,7 +171,7 @@ faasr_collect_sys_env <- function(faasr, cred){
       cred_name_sc <- paste0(faas_cred, "_SECRET_KEY")
     }
     if (!is.null(faasr$DataStores[[data_cred]]$Anonymous)){
-      if (faasr$DataStores[[data_cred]]$Anonymous == TRUE){
+      if (isTRUE(faasr$DataStores[[data_cred]]$Anonymous)){
         next
       }
     }
@@ -259,7 +259,7 @@ faasr <- function(json_path=NULL, env_path=NULL){
   svc <- .faasr_user$operations
   svc$cred <- list()
   svc$json <- jsonlite::fromJSON(json_path)
-  svc$path <- list(json=json_path, env=env_path, id=paste0("faasr_",sample(100000, size=1)))
+  svc$path <- list(json=json_path, env=env_path, id=paste0("faasr_",sample.int(.Machine$integer.max, size=1)))
   svc$wd <- faasr_wd
   
   # Check the ComputeServers
@@ -355,14 +355,14 @@ faasr <- function(json_path=NULL, env_path=NULL){
     succ_msg <- paste0("Create the FaaSr directory: ", faasr_data)
     cli_alert_success(succ_msg)
   }
-  if (!dir.exists(paste0(faasr_data, "/R"))){
-    dir.create(paste0(faasr_data, "/R"))
+  if (!dir.exists(file.path(faasr_data, "R"))){
+    dir.create(file.path(faasr_data, "R"))
   }
-  if (!dir.exists(paste0(faasr_data, "/files"))){
-    dir.create(paste0(faasr_data, "/files"))
+  if (!dir.exists(file.path(faasr_data, "files"))){
+    dir.create(file.path(faasr_data, "files"))
   }
-  if (!dir.exists(paste0(faasr_data, "/temp"))){
-    dir.create(paste0(faasr_data, "/temp"))
+  if (!dir.exists(file.path(faasr_data, "temp"))){
+    dir.create(file.path(faasr_data, "temp"))
   }
 
   cli_alert_success("Ready to use FaaSr client tools:")

@@ -25,6 +25,7 @@ With the knowledge gained from this tutorial, you will be able to also run FaaSr
 ## Requirements
 
 The main requirements to follow this vignette are: 
+
 * FaaSr installed in RStudio in your desktop
 * Git installed in your computer
 * minioclient installed in your desktop (optional, but recommended - you can also use other S3 clients)
@@ -68,7 +69,7 @@ Use the GitHub web site to create a new repository, named `FaaSr_single_function
 Create a file `create_sample_data.R` file in this repository, copying and pasting the code below. 
 This function creates two synthetic .csv files and uploads to an S3 bucket:
 
-```{}
+```r
 create_sample_data <- function(folder, output1, output2) {
 
   # Create sample files for FaaSr example and stores in an S3 bucket
@@ -136,7 +137,7 @@ You will use the [FaaSr workflow builder](https://faasr.shinyapps.io/faasr-json-
 4. Under `Function FaaS Server`, leave the default `My_GitHub_Account` - this is the name of the server you configured in the previous step.
 5. Under `Function Arguments`, enter the following arguments, which will be passed to the `create_sample_data()` function:
 
-```{}
+```r
 folder="myexample",
 output1="sample1.csv",
 output2="sample2.csv"

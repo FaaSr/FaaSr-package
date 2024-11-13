@@ -380,7 +380,7 @@ faasr_register_workflow_github_create_yml_file <- function(faasr, actionname, re
 faasr_register_workflow_git_local_repo <- function(repo,ref){
   cwd <- getwd()
   on.exit(setwd(cwd))
-  setwd(paste0(faasr_gh_local_repo,"/",repo))
+  setwd(file.path(faasr_gh_local_repo, repo))
   
   # create local git repo
   system("git init", ignore.stderr=TRUE, ignore.stdout=TRUE)
@@ -409,7 +409,7 @@ faasr_register_workflow_git_local_repo <- function(repo,ref){
 faasr_register_workflow_git_remote_repo <- function(token,check,private,repo,ref){
   cwd <- getwd()
   on.exit(setwd(cwd))
-  setwd(paste0(faasr_gh_local_repo,"/",repo))
+  setwd(file.path(faasr_gh_local_repo, repo))
   # get env
   repo_a <- strsplit(repo, "/")
   repo_p <- repo_a[[1]]
@@ -459,7 +459,7 @@ faasr_register_workflow_git_remote_repo <- function(token,check,private,repo,ref
 faasr_register_workflow_git_remote_env <- function(repo, cred, token){
   cwd <- getwd()
   on.exit(setwd(cwd))
-  setwd(paste0(faasr_gh_local_repo,"/",repo))
+  setwd(file.path(faasr_gh_local_repo, repo))
   # get public key
   url <- paste0("repos/",repo,"/actions/secrets/public-key")
   response <- faasr_httr_request(body=body, token=token, url=url, type="GET")
