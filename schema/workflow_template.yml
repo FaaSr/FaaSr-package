@@ -2,14 +2,8 @@ name: Running Action- <<actionname>>
 on:
   workflow_dispatch:
     inputs:
-      ID:
-        description: 'InvocationID'
-        required: false
-      InvokeName:
-        description: 'FunctionInvoke'
-        required: true
-      FaaSrLog:
-        description: 'FaaSrLog'
+      PAYLOAD:
+        description: 'Payload'
         required: false
 
 jobs:
@@ -19,10 +13,7 @@ jobs:
     env:
       SECRET_PAYLOAD: ${{ secrets.SECRET_PAYLOAD }}
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-      PAYLOAD_REPO: ${{ vars.PAYLOAD_REPO }}
-      INPUT_ID: ${{ github.event.inputs.ID || '<<id>>'  }}
-      INPUT_INVOKENAME: ${{ github.event.inputs.InvokeName || '<<actionname>>' }}
-      INPUT_FAASRLOG: ${{ github.event.inputs.FaaSrLog || '<<folder>>'  }}
+      PAYLOAD: ${{ github.event.inputs.PAYLOAD }}
     steps:
     - name: run Rscript
       run: |

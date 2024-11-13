@@ -173,23 +173,42 @@ faasr_trigger <- function(faasr) {
             username <- faasr$ComputeServers[[next_server]]$UserName
             reponame <- faasr$ComputeServers[[next_server]]$ActionRepoName
             repo <- paste0(username, "/", reponame)
-      if (!endsWith(invoke_next_function,".yml") && !endsWith(invoke_next_function,".yaml")){
-              invoke_next_function <- paste0(invoke_next_function,".yml")
+            if (!endsWith(invoke_next_function,".yml") && !endsWith(invoke_next_function,".yaml")){
+              workflow_file <- paste0(invoke_next_function,".yml")
+            } else {
+              workflow_file <- invoke_next_function
             }
-      workflow_file <- invoke_next_function
             git_ref <- faasr$ComputeServers[[next_server]]$Branch
 
-      # Set inputs for the workflow trigger event with InvocationID and Next_Invoke_Function_Name
-            input_id <- faasr$InvocationID
-            input_invokename <- faasr$FunctionInvoke
-      input_faasr_log <- faasr$FaaSrLog
-
+            # Make a copy of faasr
+            faasr_git <- faasr
+            
+            # Hide all credentials before sending the payload to the github actions
+            for (faas_js in names(faasr_git$ComputeServers)){
+              switch (faasr_git$ComputeServers[[faas_js]]$FaaSType,
+                "GitHubActions"={
+                  faasr_git$ComputeServers[[faas_js]]$Token <- paste0(faas_js,"_TOKEN")
+                },
+                "Lambda"={
+                  faasr_git$ComputeServers[[faas_js]]$AccessKey <- paste0(faas_js,"_ACCESS_KEY")
+                  faasr_git$ComputeServers[[faas_js]]$SecretKey <- paste0(faas_js,"_SECRET_KEY")
+                },
+                "OpenWhisk"={
+                  faasr_git$ComputeServers[[faas_js]]$API.key <- paste0(faas_js,"_API_KEY")
+                }
+              )
+              }
+            for (data_js in names(faasr_git$DataStores)){
+              faasr_git$DataStores[[data_js]]$AccessKey <- paste0(data_js,"_ACCESS_KEY")
+              faasr_git$DataStores[[data_js]]$SecretKey <- paste0(data_js,"_SECRET_KEY")
+            }
             # The inputs for the workflow
             inputs <- list(
-              ID = input_id,
-              InvokeName = input_invokename,
-        FaaSrLog = input_faasr_log
+            PAYLOAD = jsonlite::toJSON(faasr_git, auto_unbox=TRUE)
             )
+
+            # Delete the copy to ensure the memory
+            remove(faasr_git)
 
             # Set the URL for the REST API endpoint of next action
             url <- paste0("https://api.github.com/repos/", repo, "/actions/workflows/", workflow_file, "/dispatches")

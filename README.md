@@ -8,6 +8,8 @@
 [![R-CMD-check](https://github.com/spark0510/FaaSr-package/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/spark0510/FaaSr-package/actions/workflows/R-CMD-check.yaml)
 [![CRAN
 status](https://www.r-pkg.org/badges/version/FaaSr)](https://cran.r-project.org/package=FaaSr)
+[![DOI](https://joss.theoj.org/papers/10.21105/joss.07027/status.svg)](https://doi.org/10.21105/joss.07027)
+
 <!-- badges: end -->
 
 ## Overview
