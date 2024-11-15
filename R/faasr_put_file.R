@@ -48,10 +48,11 @@ faasr_put_file <- function(server_name=.faasr$DefaultDataStore, local_folder="."
     put_file <- local_file
   # If not, takes same way with remote folder & file
   } else{
-    local_folder <- sub("^/+", "", sub("/+$", "", local_folder))
+    local_folder <- sub("/+$", "", local_folder)  # First remove trailing slashes
+    local_folder <- sub("^/+", "/", local_folder) # Replace multiple leading slashes with single slash
     local_file <- sub("^/+", "", sub("/+$", "", local_file))
     put_file <- paste0(local_folder,"/",local_file)
-  }  
+  }
  
   s3 <- paws.storage::s3(
 	  config=list(
