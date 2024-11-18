@@ -1,0 +1,22 @@
+name: Running Action- <<actionname>>
+on:
+  workflow_dispatch:
+    inputs:
+      PAYLOAD:
+        description: 'Payload'
+        required: false
+
+jobs:
+  run_docker_image:
+    runs-on: ubuntu-latest
+    container: <<container_name>>
+    env:
+      SECRET_PAYLOAD: ${{ secrets.SECRET_PAYLOAD }}
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      PAYLOAD: ${{ github.event.inputs.PAYLOAD }}
+    steps:
+    - name: run Rscript
+      run: |
+        cd /action
+        Rscript faasr_start_invoke_github-actions.R
+
