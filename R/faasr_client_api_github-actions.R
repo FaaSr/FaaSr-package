@@ -1,5 +1,49 @@
-workflow_basic_path <- "https://raw.githubusercontent.com/FaaSr/FaaSr-package/main/schema/workflow_template.yml"
-workflow_timer_path <- "https://raw.githubusercontent.com/FaaSr/FaaSr-package/main/schema/workflow_with_cron_template.yml"
+workflow_basic_schema <- "name: Running Action- <<actionname>>
+on:
+  workflow_dispatch:
+    inputs:
+      PAYLOAD:
+        description: 'Payload'
+        required: false
+
+jobs:
+  run_docker_image:
+    runs-on: ubuntu-latest
+    container: <<container_name>>
+    env:
+      SECRET_PAYLOAD: ${{ secrets.SECRET_PAYLOAD }}
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      PAYLOAD: ${{ github.event.inputs.PAYLOAD }}
+    steps:
+    - name: run Rscript
+      run: |
+        cd /action
+        Rscript faasr_start_invoke_github-actions.R"
+
+workflow_timer_schema <- "name: Running Action- <<actionname>>
+on:
+  schedule:
+    - cron: '<<cron>>'
+  workflow_dispatch:
+    inputs:
+      PAYLOAD:
+        description: 'Payload'
+        required: false
+
+jobs:
+  run_docker_image:
+    runs-on: ubuntu-latest
+    container: <<container_name>>
+    env:
+      SECRET_PAYLOAD: ${{ secrets.SECRET_PAYLOAD }}
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      PAYLOAD: ${{ github.event.inputs.PAYLOAD }}
+    steps:
+    - name: run Rscript
+      run: |
+        cd /action
+        Rscript faasr_start_invoke_github-actions.R"
+
 #TBD. workflow_runner_path <- ""
 #TBD. workflow_runner_w_timer_path <- ""
 
@@ -352,13 +396,13 @@ faasr_register_workflow_github_create_yml_file <- function(faasr, actionname, re
     }
   } else {
     if (is.null(cron)){
-      contents_git <- readLines(workflow_basic_path)
+      contents_git <- workflow_basic_schema
     } else {
-      contents_git <- readLines(workflow_timer_path)
+      contents_git <- workflow_timer_schema
     }
   }
   # create customized contents by using "glue"
-  contents_git <- paste(contents_git, collapse = "\n")
+  #contents_git <- paste(contents_git, collapse = "\n")
   contents <- glue::glue(contents_git, .open = "<<", .close = ">>")
   if (!endsWith(actionname,".yml")){
     actionname <- paste0(actionname,".yml")
