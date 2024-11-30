@@ -3,7 +3,7 @@
 #' @description 
 #' Check 
 #' 1. server's Endpoint&Region and Endpoint has a valid form(http).
-#' 2. send a req for the list of buckets to check the status of s3 servers.
+#' 2. send a req for the head of the bucket to check the status of s3 servers.
 #' 3. Check that the bucket name exists.
 #' @param faasr list with parsed and validated Payload
 #' @return faasr list with parsed and validated payload
@@ -11,9 +11,7 @@
 #' @keywords internal
 
 globalVariables(".faasr")
-
 faasr_s3_check <- function(faasr){
-
   for(server in names(faasr$DataStores)){
     endpoint_check <- faasr$DataStores[[server]]$Endpoint
     region_check <- faasr$DataStores[[server]]$Region
@@ -36,24 +34,19 @@ faasr_s3_check <- function(faasr){
     }
     s3<-paws.storage::s3(
       config=list(
-	      credentials=list(
-	        creds=list(
-		        access_key_id=faasr$DataStores[[server]]$AccessKey,
-		        secret_access_key=faasr$DataStores[[server]]$SecretKey
-		      )
-	      ),
-	    endpoint=faasr$DataStores[[server]]$Endpoint,
-	    region=faasr$DataStores[[server]]$Region
-	  )
+        credentials=list(
+          creds=list(
+            access_key_id=faasr$DataStores[[server]]$AccessKey,
+            secret_access_key=faasr$DataStores[[server]]$SecretKey
+          )
+        ),
+        endpoint=faasr$DataStores[[server]]$Endpoint,
+        region=faasr$DataStores[[server]]$Region
+      )
     )
-    check <- try(s3$list_buckets(), silent=TRUE)
+    check <- try(s3$head_bucket(Bucket = faasr$DataStores[[server]]$Bucket), silent=TRUE)
     if(is.list(check)){
-      bucket_names <- lapply(check$Buckets, function(bucket) bucket$Name)
-      if(!(faasr$DataStores[[server]]$Bucket %in% bucket_names)){
-        msg <- paste0('{\"faasr_s3_check\":\"S3 server ',server,' failed with message: No such bucket\"}', "\n")
-        message(msg)
-        stop()
-      }
+      next
     }else{
       msg <- paste0('{\"faasr_s3_check\":\"S3 server ',server,' failed with message: Data store server unreachable\"}', "\n")
       message(msg)
