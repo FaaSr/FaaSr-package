@@ -47,7 +47,8 @@ faasr_get_file <- function(server_name=.faasr$DefaultDataStore, remote_folder=""
   }
 
   # takes same way with remote folder & file
-  local_folder <- sub("^/+", "", sub("/+$", "", local_folder))
+  local_folder <- sub("/+$", "", local_folder)  # First remove trailing slashes
+  local_folder <- sub("^/+", "/", local_folder) # Replace multiple leading slashes with single slash
   local_file <- sub("^/+", "", sub("/+$", "", local_file))
   get_file <- paste0(local_folder,"/",local_file)
    
