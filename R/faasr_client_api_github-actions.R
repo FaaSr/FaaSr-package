@@ -13,6 +13,7 @@ jobs:
     env:
       SECRET_PAYLOAD: ${{ secrets.SECRET_PAYLOAD }}
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      PAYLOAD_REPO: ${{ vars.PAYLOAD_REPO }}
       PAYLOAD: ${{ github.event.inputs.PAYLOAD }}
     steps:
     - name: run Rscript
@@ -37,6 +38,7 @@ jobs:
     env:
       SECRET_PAYLOAD: ${{ secrets.SECRET_PAYLOAD }}
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      PAYLOAD_REPO: ${{ vars.PAYLOAD_REPO }}
       PAYLOAD: ${{ github.event.inputs.PAYLOAD }}
     steps:
     - name: run Rscript
