@@ -102,7 +102,7 @@ faasr_register_workflow_github_actions <- function(faasr, cred, cron=NULL, runne
     faasr_register_workflow_github_create_env(server,repo)
     cli_alert_success("Create github env files")
     # create the payload file
-    #faasr_register_workflow_github_create_payload(faasr,repo)
+    faasr_register_workflow_github_create_payload(faasr,repo)
     #cli_alert_success("Create github payload file")
     # create the README file
     faasr_register_workflow_github_create_readme(repo)
