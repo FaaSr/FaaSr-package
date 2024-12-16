@@ -13,6 +13,7 @@ jobs:
     env:
       SECRET_PAYLOAD: ${{ secrets.SECRET_PAYLOAD }}
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      PAYLOAD_REPO: ${{ vars.PAYLOAD_REPO }}
       PAYLOAD: ${{ github.event.inputs.PAYLOAD }}
     steps:
     - name: run Rscript
@@ -37,6 +38,7 @@ jobs:
     env:
       SECRET_PAYLOAD: ${{ secrets.SECRET_PAYLOAD }}
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      PAYLOAD_REPO: ${{ vars.PAYLOAD_REPO }}
       PAYLOAD: ${{ github.event.inputs.PAYLOAD }}
     steps:
     - name: run Rscript
@@ -102,7 +104,7 @@ faasr_register_workflow_github_actions <- function(faasr, cred, cron=NULL, runne
     faasr_register_workflow_github_create_env(server,repo)
     cli_alert_success("Create github env files")
     # create the payload file
-    #faasr_register_workflow_github_create_payload(faasr,repo)
+    faasr_register_workflow_github_create_payload(faasr,repo)
     #cli_alert_success("Create github payload file")
     # create the README file
     faasr_register_workflow_github_create_readme(repo)
