@@ -534,7 +534,29 @@ faasr_register_workflow_git_remote_env <- function(repo, cred, token){
     setwd(cwd)
     stop()
   }
-
+  
+  # set the repo variable
+  url <- paste0("repos/",repo,"/actions/variables")
+  body <- list(name="PAYLOAD_REPO", value=paste0(repo,'/payload.json'))
+  response <- faasr_httr_request(body=body, token=token, url=url, type="POST")
+  if (response$status_code==201){
+    cli_alert_success("Successfully set variables")
+  } else if (response$status_code==409){
+    # if variable already exists, update the variable
+    url <- paste0("repos/",repo,"/actions/variables/PAYLOAD_REPO")
+    response <- faasr_httr_request(body=body, token=token, url=url, type="PATCH")
+    if (response$status_code==204){
+      cli_alert_success("Successfully set variables")
+    } else {
+      cli_alert_danger("Error: Failed to set variables")
+      setwd(cwd)
+      stop()
+    }
+  } else {
+    cli_alert_danger("Error: Failed to set variables")
+    setwd(cwd)
+    stop()
+  }
   setwd(cwd)
 }
 
