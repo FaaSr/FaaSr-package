@@ -3,6 +3,7 @@ Async
 CMD
 CRON
 ComputeServer
+DOI
 DataStore
 DefaultDataStore
 FaaS
