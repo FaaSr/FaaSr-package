@@ -3,7 +3,7 @@ Package: FaaSr
 Title: FaaS (Function as a Service) Package
 Version: 1.4.3
 Authors@R: c(person("Figueiredo", "Renato", role = c("aut", "cre", "ths", "cph"),
-                    email = "renatof@ufl.edu",
+                    email = "renato.figueiredo@oregonstate.edu",
                     comment = c(ORCID = "0000-0001-9841-6060")),
              person("Park", "Sungjae", role = "aut", comment = c(ORCID = "0009-0000-5357-804X")),
              person("Mu", "Nan", role = "ctb"),

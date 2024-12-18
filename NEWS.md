@@ -1,3 +1,9 @@
+# FaaSr 1.4.3
+* Support triggering of multiple parallel executions from an action
+* Added faasr_rank() method to determine the rank of a parallel invocation
+* Support passing of payloads through API invocation for GitHub Actions
+* Improvement of faasr_s3_check() to support AWS S3 buckets
+
 # FaaSr 1.3.0
 
 * Support anonymous access to arrow/S3 buckets 
