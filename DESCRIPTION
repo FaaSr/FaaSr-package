@@ -12,7 +12,7 @@ Authors@R: c(person("Figueiredo", "Renato", role = c("aut", "cre", "ths", "cph")
              person("Thomas", "R. Quinn", role = "aut"),
              person("Carey", "Cayelan", role = "ctb")
 	     )
-Maintainer: Figueiredo Renato <renatof@ufl.edu>
+Maintainer: Figueiredo Renato <renato.figueiredo@oregonstate.edu>
 Description: Allows users to create and deploy the workflow with multiple functions
     in Function-as-a-Service (FaaS) cloud computing platforms.
     The 'FaaSr' package makes it simpler for R developers to use FaaS platforms by providing the following functionality:
