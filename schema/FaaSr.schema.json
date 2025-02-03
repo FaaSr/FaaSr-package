@@ -58,7 +58,7 @@
         "":{
           "type":"object",
           "properties":{
-            "FaaSType":{"enum":["OpenWhisk", "GitHubActions", "Lambda"]},
+            "FaaSType":{"enum":["OpenWhisk", "GitHubActions", "Lambda", "GoogleCloud"]},
             "Region":{"type":"string","minLength": 1},
             "Endpoint":{"type":"string","minLength": 1},
             "Namespace":{"type":"string","minLength": 1},
