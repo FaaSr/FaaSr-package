@@ -106,8 +106,8 @@ faasr_trigger <- function(faasr) {
               message(succ_msg)
               #faasr_log(succ_msg) # TODO: Add this back in
             } else {
-              err_msg <- paste0('{\"faasr_trigger\":\"GoogleCloud: Error invoking: ', faasr$FunctionInvoke, ' - ', content(response)$error, '\"}\n')
-              message(err_msg)
+              #err_msg <- paste0('{\"faasr_trigger\":\"GoogleCloud: Error invoking: ', faasr$FunctionInvoke, ' - ', content(response)$error, '\"}\n')
+              message(response)
               #faasr_log(err_msg) # TODO: Add this back in
             }
           },
