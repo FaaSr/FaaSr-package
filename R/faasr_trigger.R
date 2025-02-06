@@ -79,7 +79,8 @@ faasr_trigger <- function(faasr) {
             endpoint <- faasr$ComputeServers[[next_server]]$Endpoint
             namespace <- faasr$ComputeServers[[next_server]]$Namespace
             region <- faasr$ComputeServers[[next_server]]$Region
-            endpoint <- paste0(endpoint, namespace, "/locations/", region, "/jobs/faasrjob:run")
+            actionname <- invoke_next_function
+            endpoint <- paste0(endpoint, namespace, "/locations/", region, "/jobs/", actionname, ":run")
 
             token <- faasr$ComputeServers[[next_server]]$AccessKey
 
