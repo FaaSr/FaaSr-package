@@ -46,7 +46,7 @@ faasr_register_workflow <- function(...){
   check <- faasr_register_workflow_openwhisk(faasr,cred,...)
   check <- faasr_register_workflow_github_actions(faasr,cred)
   check <- faasr_register_workflow_aws_lambda(faasr,cred,...)
-  
+  check <- faasr_register_workflow_google_cloud(faasr,cred,...)
 }
 .faasr_user$operations$register_workflow <- faasr_register_workflow
 
@@ -151,6 +151,28 @@ faasr_collect_sys_env <- function(faasr, cred){
           cred[[cred_name_sc]] <- ask_cred
         } else{
           cred[[cred_name_sc]] <- real_cred
+        }
+      }
+
+    # if it is GoogleCloud, use key types for "AccessKey"
+    # if given cred_name(servername + key type) is empty, set it up
+    # if "cred" doesn't have a value, use "Sys.getenv" to get the real key.
+    # if "Sys.getenv" value is empty, return an error message
+    } else if (faasr$ComputeServers[[faas_cred]]$FaaSType=="GoogleCloud"){
+      cred_name_ac <- faasr$ComputeServers[[faas_cred]]$AccessKey
+      if (is.null(cred_name_ac)){
+        cred_name_ac <- paste0(faas_cred, "_ACCESS_KEY")
+      }
+      if (is.null(cred[[cred_name_ac]])){
+        real_cred <- Sys.getenv(cred_name_ac)
+        if (real_cred == ""){
+          ask_cred <- askpass::askpass(paste0("Enter keys for ", cred_name_ac))
+          ask_cred_list <- list(ask_cred)
+          names(ask_cred_list) <- cred_name_ac
+          do.call(Sys.setenv, ask_cred_list)
+          cred[[cred_name_ac]] <- ask_cred
+        } else{
+          cred[[cred_name_ac]] <- real_cred
         }
       }
     }
@@ -301,6 +323,16 @@ faasr <- function(json_path=NULL, env_path=NULL){
                 }
               }
               svc$json$ComputeServers[[faas_js]]$API.key <- paste0(faas_js,"_API_KEY")
+            },
+            # If it is GoogleCloud and key is given by JSON file, replace it into representative(servername+token)
+            # Real key will be stored in the cred
+            "GoogleCloud"={
+              if (!is.null(svc$json$ComputeServers[[faas_js]]$AccessKey)){
+                if (svc$json$ComputeServers[[faas_js]]$AccessKey != paste0(faas_js,"_ACCESS_KEY")){
+                  svc$cred[[paste0(faas_js,"_ACCESS_KEY")]] <- svc$json$ComputeServers[[faas_js]]$AccessKey
+                }
+              }
+              svc$json$ComputeServers[[faas_js]]$AccessKey <- paste0(faas_js,"_ACCESS_KEY")
             }
     )
   }
@@ -469,6 +501,10 @@ faasr_invoke_workflow <- function(FunctionInvoke=NULL, ...){
          # If first action is openwhisk, use ibmcloud
          "OpenWhisk"={
            faasr_workflow_invoke_openwhisk(faasr, cred, faas_name, actionname, ...)
+         },
+         # If first action is GoogleCloud, use GoogleCloud
+         "GoogleCloud"={
+           faasr_workflow_invoke_google_cloud(faasr, cred, faas_name, actionname, ...)
          })
 }
 .faasr_user$operations$invoke_workflow <- faasr_invoke_workflow
@@ -524,6 +560,9 @@ faasr_set_workflow_timer <- function(cron, target=NULL, ...){
     faasr_set_workflow_timer_ld(faasr,cred,target,cron)
   } else if (type == "OpenWhisk"){
     faasr_set_workflow_timer_ow(faasr,cred,target,cron, ...)
+  } else if (type == "GoogleCloud"){
+    #faasr_set_workflow_timer_gcp(faasr,cred,target,cron, ...)
+    print("Google Cloud timer to be implemented")
   }
 }
 .faasr_user$operations$set_workflow_timer <- faasr_set_workflow_timer
@@ -573,6 +612,9 @@ faasr_unset_workflow_timer <- function(target=NULL,...){
     faasr_set_workflow_timer_ld(faasr,cred, target, cron=NULL, unset=TRUE)
   } else if (type == "OpenWhisk"){
     faasr_set_workflow_timer_ow(faasr,cred,target, cron=NULL, unset=TRUE,...)
+  } else if (type == "GoogleCloud"){
+    #faasr_set_workflow_timer_gcp(faasr,cred,target, cron=NULL, unset=TRUE,...)
+    print("Google Cloud timer to be implemented")
   }
 }
 .faasr_user$operations$unset_workflow_timer <- faasr_unset_workflow_timer

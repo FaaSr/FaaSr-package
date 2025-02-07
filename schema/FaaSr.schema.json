@@ -75,6 +75,15 @@
           "allOf":[
             {
               "if": {
+                "properties": {"FaaSType":{"const": "GoogleCloud"}},
+                "required":["FaaSType"]
+              },
+              "then": {
+                "required":["Namespace", "AccessKey", "Region"]
+              }
+            },
+            {
+              "if": {
                 "properties": {"FaaSType":{"const": "OpenWhisk"}},
                 "required":["FaaSType"]
               },
