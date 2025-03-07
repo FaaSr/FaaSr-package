@@ -68,7 +68,7 @@ faasr_register_workflow_google_cloud <- function(faasr, cred, ssl=TRUE, memory=1
 
 #' @title faasr_gcp_httr_request
 #' @description 
-#' the help function to send the curl request to the google cloud
+#' unction to send the curl request to the google cloud run api
 #' by using the "httr" library. 
 #' @param faasr a list form of the JSON file
 #' @param server a string for the target server
@@ -111,8 +111,71 @@ faasr_gcp_httr_request <- function(faasr, server, action, type, body=NULL, ssl=T
     'Authorization' = paste("Bearer", token)
   )
 
-  print(paste("Sending request to", endpoint))
-  # send the REST request (POST/GET/DELETE) with timeout
+  # print(paste("Sending request to", endpoint))
+  # send the REST request (POST/GET/PATCH/DELETE) with timeout
+  response <- func(
+    url = endpoint,
+    add_headers(.headers = headers),
+    body = body,
+    encode = "json",
+    httr::config(ssl_verifypeer = ssl, ssl_verifyhost = ssl),
+    accept_json()
+  )
+
+  return(response)
+}
+
+
+
+#' @title faasr_gcp_cloud_scheduler_httr_request
+#' @description 
+#' function to send the curl request to the google cloud scheduler
+#' by using the "httr" library. 
+#' @param faasr a list form of the JSON file
+#' @param server a string for the target server
+#' @param action a string for the target action: /actions, /triggers, /rules
+#' @param type REST API values; GET/PUT/DELETE/PATCH/POST
+#' @param body a list of body
+#' @param ssl SSL CA check; for the SSL certificate: FALSE
+#' @param namespace a string for the specific namespace e.g., /whisk.system
+#' @return an integer value for the response
+#' @import httr
+#' @import cli
+#' @keywords internal
+
+# help sending httr requests
+faasr_gcp_cloud_scheduler_httr_request <- function(faasr, server, action, type, body=NULL, ssl=TRUE, namespace=NULL){
+
+  if(is.null(faasr$ComputeServers[[server]]$SchedulerEndpoint)){
+    endpoint <- "https://cloudscheduler.googleapis.com/v1/projects/"
+  } else {
+    endpoint <- faasr$ComputeServers[[server]]$SchedulerEndpoint
+  }
+
+  if (is.null(namespace)){
+    namespace <- faasr$ComputeServers[[server]]$Namespace
+  }
+  region <- faasr$ComputeServers[[server]]$Region
+  endpoint <- paste0(endpoint, namespace, "/locations/", region, action)
+
+  if (!is.null(faasr$ComputeServers[[server]]$SSL) && length(faasr$ComputeServers[[server]]$SSL)!=0){
+      ssl <- as.logical(toupper(faasr$ComputeServers[[server]]$SSL))
+  }
+  
+  token <- faasr$ComputeServers[[server]]$AccessKey
+
+  # get functions depending on "type"
+  func <- get(type)
+
+  # write headers
+  headers <- c(
+    'accept' = 'application/json',
+    'Content-Type' = 'application/json',
+    'Authorization' = paste("Bearer", token)
+  )
+
+  # print(paste("Sending request to", endpoint))
+  # send the REST request (POST/GET/PATCH/DELETE) with timeout
   response <- func(
     url = endpoint,
     add_headers(.headers = headers),
@@ -166,16 +229,16 @@ faasr_register_workflow_google_cloud_action_lists <- function(faasr) {
 #' @param action a string for the target action: /actions, /triggers, /rules
 #' @param server a string for the target server
 #' @param faasr a list form of the JSON file
-#' @param all_gcloud_jobs a list of all existing gcloud jobs
+#' @param all_jobs a list of all existing gcloud jobs
 #' @return a logical value; if exists, return TRUE, 
 #' doesn't exist, return FALSE
 #' @import cli
 #' @keywords internal
 
-faasr_register_workflow_google_cloud_check_exists <- function(action, server, faasr, all_gcloud_jobs){
+faasr_register_workflow_google_cloud_check_exists <- function(action, server, faasr, all_jobs){
 
   current_job_name <- paste0("projects/", faasr$ComputeServers[[server]]$Namespace, "/locations/", faasr$ComputeServers[[server]]$Region, "/jobs/", action)
-  for(job in all_gcloud_jobs)
+  for(job in all_jobs)
   {
     if(job$name == current_job_name)
     {
@@ -190,25 +253,26 @@ faasr_register_workflow_google_cloud_check_exists <- function(action, server, fa
 }
 
 
-#' @title faasr_register_workflow_google_cloud_check_delete_job_user_input
+#' @title faasr_register_workflow_google_cloud_check_user_input
 #' @description 
-#' Ask user input for the google cloud
+#' Ask user input for overwriting the google cloud job
 #' @param check a logical value for target existence
 #' @param actionname a string for the target action name
-#' @return a logical value for delete
+#' @return a logical value for overwrite
 #' @import cli
 #' @keywords internal
 
-faasr_register_workflow_google_cloud_check_delete_job_user_input <- function(check, actionname){
-  # if given values already exists, ask the user to update the action
-  delete_job <- FALSE
+faasr_register_workflow_google_cloud_check_user_input <- function(check, actionname){
+  overwrite <- FALSE
   if (check){
-    cli_alert_info(paste0("Do you want to delete and create the job?[y/n]"))
+    cli_alert_info(paste0("Do you want to overwrite the job?[y/n]"))
 
     while(TRUE) {
       check <- readline()
       if (check=="y" || check=="") {
-        delete_job <- TRUE
+        overwrite <- TRUE
+        succ_msg <- paste0("Proceed to overwriting existing job - ", actionname)
+        cli_alert_success(succ_msg)
         break
       } else if(check=="n") {
         stop()
@@ -217,34 +281,9 @@ faasr_register_workflow_google_cloud_check_delete_job_user_input <- function(che
       }
     }
   }
-  return(delete_job)
+  return(overwrite)
 }
 
-
-#' @title faasr_register_workflow_google_cloud_check_create_job_user_input
-#' @description 
-#' Ask user input for the google cloud
-#' @param actionname a string for the target action name
-#' @import cli
-#' @keywords internal
-
-faasr_register_workflow_google_cloud_check_create_job_user_input <- function(actionname){
-  # if given values already exists, ask the user to update the action
-    cli_alert_info(paste0("Proceed to create the job - ", actionname, "?[y/n]"))
-
-    while(TRUE) {
-      check <- readline()
-      if (check=="y" || check=="") {
-        break
-      } else if(check=="n") {
-        err_msg <- paste0("Google cloud job creation cancelled for the function - ", actionname)
-        cli_alert_danger(err_msg)
-        stop()
-      } else {
-        cli_alert_warning("Enter \"y\" or \"n\": ")
-      }
-    }
-}
 
 #' @title faasr_register_workflow_google_cloud_create_action
 #' @description 
@@ -264,20 +303,13 @@ faasr_register_workflow_google_cloud_check_create_job_user_input <- function(act
 # create an action
 faasr_register_workflow_google_cloud_create_action <- function(ssl, actionname, server, faasr, memory, timeout, check) {
   
-  delete_job <- faasr_register_workflow_google_cloud_check_delete_job_user_input(check, actionname)
-  if (delete_job){
-    # delete the gcloud job
+  action <- paste0("/jobs?jobId=", actionname)
+  request_type <- "POST"
+  overwrite <- faasr_register_workflow_google_cloud_check_user_input(check, actionname)
+  if (overwrite){
+    # update the gcloud job, overwrites the parameters
+    request_type <- "PATCH"
     action <- paste0("/jobs/", actionname)
-    response <- faasr_gcp_httr_request(faasr, server, action, type="DELETE")
-    if (response$status_code==200 || response$status_code==202){
-      succ_msg <- paste0("Successfully deleted gcloud job for the function - ", actionname)
-      cli_alert_success(succ_msg)
-      faasr_register_workflow_google_cloud_check_create_job_user_input(actionname)
-    } else {
-      err_msg <- paste0("Error deleting gcloud job for the function - ", actionname, ": ", content(response)$error)
-      cli_alert_danger(err_msg)
-      stop()
-    }
   }
 
   # actioncontainer can be either default or user-customized
@@ -306,8 +338,7 @@ faasr_register_workflow_google_cloud_create_action <- function(ssl, actionname, 
     )
   )
 
-  action <- paste0("/jobs?jobId=", actionname)
-  response <- faasr_gcp_httr_request(faasr, server, action, type="POST", body=body, ssl)
+  response <- faasr_gcp_httr_request(faasr, server, action, type=request_type, body=body, ssl)
   if (response$status_code==200 || response$status_code==202){
     succ_msg <- paste0("Successfully created gcloud job for the function - ", actionname)
     cli_alert_success(succ_msg)
@@ -367,172 +398,124 @@ faasr_workflow_invoke_google_cloud <- function(faasr, cred, faas_name, actionnam
 }
 
 
-# #' @title faasr_set_workflow_timer_google_cloud
-# #' @description 
-# #' # set/unset workflow cron timer for google cloud
-# #' @param faasr a list form of the JSON file
-# #' @param cred a list form of the credentials
-# #' @param target a string for the target action
-# #' @param cron a string for cron data e.g., */5 * * * *
-# #' @param unset a logical value; set timer(FALSE) or unset timer(TRUE)
-# #' @param ssl SSL CA check; for the SSL certificate: FALSE
-# #' @import httr
-# #' @import cli
-# #' @keywords internal
+#' @title faasr_set_workflow_timer_google_cloud
+#' @description 
+#' # set/unset workflow cron timer for google cloud
+#' @param faasr a list form of the JSON file
+#' @param cred a list form of the credentials
+#' @param target a string for the target action
+#' @param cron a string for cron data e.g., */5 * * * *
+#' @param unset a logical value; set timer(FALSE) or unset timer(TRUE)
+#' @param ssl SSL CA check; for the SSL certificate: FALSE
+#' @import httr
+#' @import cli
+#' @keywords internal
 
-# # set workflow timer for google cloud
-# faasr_set_workflow_timer_gcp <- function(faasr, cred, target, cron, unset=FALSE, ssl=TRUE){
+# set workflow timer for google cloud
+faasr_set_workflow_timer_gcp <- function(faasr, cred, target, cron, unset=FALSE, ssl=TRUE){
 
-#   # set variables
-#   server <- faasr$FunctionList[[target]]$FaaSServer
-#   trigger_name <- paste0(target,"_trigger")
-#   rule_name <- paste0(target,"_rule")
-#   api_key <- faasr$ComputeServers[[server]]$API.key
-#   namespace <- faasr$ComputeServers[[server]]$Namespace
+  # set variables
+  server <- faasr$FunctionList[[target]]$FaaSServer
+  scheduler_name <- paste0(target, "_trigger")
+  action <- "/jobs"
 
-#   # json should get out two layers, so escaping letter should be twice
-#   faasr <- faasr_replace_values(faasr, cred)
+  faasr <- faasr_replace_values(faasr, cred)
+
+  response <- faasr_gcp_cloud_scheduler_httr_request(faasr, server, action, type="GET")
+    if (response$status_code==200 || response$status_code==202){
+        all_scheduler_jobs <- content(response)$jobs
+        succ_msg <- paste0("All exising gcloud scheduler jobs fetched: ", length(content(response)$jobs), " jobs")
+        cli_alert_success(succ_msg)
+    } else {
+        err_msg <- paste0("Error fetching all exising gcloud scheduler jobs: ", content(response)$error)
+        cli_alert_danger(err_msg)
+        stop()
+    }
    
-#   # if unset==TRUE, delete the rule and trigger
-#   if (unset==TRUE){
-#     action <- paste0("triggers/", trigger_name) 
-#     check <- faasr_register_workflow_google_cloud_check_exists(ssl, action, server,faasr)
+  # if unset==TRUE, delete the rule and trigger
+  if (unset==FALSE){
+
+    request_type <- "POST"
+    check <- faasr_register_workflow_google_cloud_check_exists(scheduler_name, server, faasr, all_scheduler_jobs)
     
-#     overwrite <- faasr_register_workflow_google_cloud_check_user_input(check, trigger_name, type="trigger")
-#     if (overwrite == "true"){
-#       action_performed <- "Create"
-#     } else{
-#       action_performed <- "Update"
-#     }
+    overwrite <- faasr_register_workflow_google_cloud_check_user_input(check, scheduler_name)
+    if (overwrite){
+      # update the existing trigger
+      request_type <- "PATCH"
+      action <- paste0("/jobs/", scheduler_name)
+    }
 
-#     action <- paste0(action, "?overwrite=",overwrite)
-#     response <- faasr_gcp_httr_request(faasr, server, action, type="PUT", ssl)
-#     ####response handling: status code
-#     if (response$status_code==200 || response$status_code==202){
-#       succ_msg <- paste0("Successfully ", action_performed," the trigger - ", trigger_name)
-#       cli_alert_success(succ_msg)
-#     } else {
-#       err_msg <- paste0("Error  ", action_performed," the trigger - ", trigger_name,": ",content(response)$error)
-#       cli_alert_danger(err_msg)
-#       stop()
-#     }
+    namespace <- faasr$ComputeServers[[server]]$Namespace
+    region <- faasr$ComputeServers[[server]]$Region
+    job_endpoint <- faasr$ComputeServers[[server]]$Endpoint
+    if (!startsWith(job_endpoint, "https://")){
+      job_endpoint <- paste0("https://", job_endpoint)
+    }
+    job_endpoint <- paste0(job_endpoint, namespace, "/locations/", region, "/jobs/", target, ":run")
 
-#     ## fire the alarm
-#     namespace_system <- "whisk.system"
-#     action <- paste0("actions/alarms/alarm?blocking=false&result=false")
-#     body <- list(
-#       authKey = api_key,
-#       cron = cron,
-#       trigger_payload = faasr,
-#       lifecycleEvent = "CREATE",
-#       triggerName = trigger_name
-#     )
-#     response <- faasr_gcp_httr_request(faasr, server, action, type="POST", body=body, ssl, namespace=namespace_system)
-#     ####response handling: status code
-#     if (response$status_code==200 || response$status_code==202){
-#       succ_msg <- paste0("Successfully fire the alarm")
-#       cli_alert_success(succ_msg)
-#     } else {
-#       err_msg <- paste0("Error fire the alarm: ",content(response)$error)
-#       cli_alert_danger(err_msg)
-#       stop()
-#     }
+    faasr_args <- list(
+      overrides = list(
+        containerOverrides = list(
+          list(
+            args = toJSON(faasr, auto_unbox = TRUE)
+          )
+        )
+        # taskCount = 1, # Configures as per need while invoking the job
+        # timeout = paste0(service_timeout_seconds, "s")  # Set service timeout
+      )
+    )
 
-#     # check the rule
-#     action <- paste0("rules/", rule_name) 
-#     check <- faasr_register_workflow_google_cloud_check_exists(ssl, action, server,faasr)
+    json_body <- toJSON(faasr_args, auto_unbox = TRUE)
+    encoded_body <- base64encode(charToRaw(json_body))
+
+    # Create a body
+    body <- list(
+      name = paste0("projects/", namespace, "/locations/", region, "/jobs/", scheduler_name),
+      description = "FaaSr Cloud Scheduler",
+      schedule = cron,
+      timeZone = "UTC",
+      httpTarget = list(
+        httpMethod = "POST",
+        uri = job_endpoint,
+        body = encoded_body,  # Corrected encoding
+        oauthToken = list(
+          serviceAccountEmail = faasr$ComputeServers[[server]]$ServiceAccount
+        )
+      )
+    )
+    response <- faasr_gcp_cloud_scheduler_httr_request(faasr, server, action, type=request_type, body=body, ssl)
+    # response handling: status code
+    if (response$status_code==200 || response$status_code==202){
+      succ_msg <- paste0("Successfully triggered gcloud scheduler job")
+      cli_alert_success(succ_msg)
+    } else {
+      err_msg <- paste0("Error triggering gcloud scheduler job: ", content(response)$error)
+      cli_alert_danger(err_msg)
+      stop()
+    }
+
+  # if unset=FALSE, delete the cloud scheduler trigger
+  } else {
     
-#     overwrite <- "true"
+    check <- faasr_register_workflow_google_cloud_check_exists(scheduler_name, server, faasr, all_scheduler_jobs)
     
-#     # create the rule
-#     action <- paste0(action, "?overwrite=",overwrite)
-#     body <- list(
-#       name = rule_name,
-#       status = "",
-#       trigger = paste0("/", namespace, "/", trigger_name),
-#       action = paste0("/", namespace, "/", target)
-#     )
-#     response <- faasr_gcp_httr_request(faasr, server, action, type="PUT", body=body, ssl)
-#     ####response handling: status code
-#     if (response$status_code==200 || response$status_code==202){
-#       succ_msg <- paste0("Successfully ", action_performed," the rule - ", rule_name)
-#       cli_alert_success(succ_msg)
-#     } else {
-#       err_msg <- paste0("Error  ", action_performed," the rule - ", rule_name,": ",content(response)$error)
-#       cli_alert_danger(err_msg)
-#       stop()
-#     }
-
-
-#   # if unset=FALSE, set the rule and trigger
-#   } else {
+    if (!check){
+      err_msg <- paste0("Error: No gcloud scheduler job ", scheduler_name, " found")
+      cli_alert_danger(err_msg)
+      stop()
+    }
     
-#     action <- paste0("triggers/", trigger_name) 
-#     check <- faasr_register_workflow_google_cloud_check_exists(ssl, action, server,faasr)
-#     if (!check){
-#       err_msg <- paste0("Error: No ",trigger_name," found")
-#       cli_alert_danger(err_msg)
-#       stop()
-#     }
-    
-#     ## stop the alarm
-#     namespace <- "whisk.system"
-#     action <- paste0("actions/alarms/alarm?blocking=false&result=false")
-#     body <- list(
-#       authKey = api_key,
-#       lifecycleEvent = "DELETE",
-#       triggerName = trigger_name
-#     )
-#     response <- faasr_gcp_httr_request(faasr, server, action, type="POST", body=body, ssl, namespace=namespace)
-#     ####response handling: status code
-#     if (response$status_code==200 || response$status_code==202){
-#       succ_msg <- paste0("Successfully Stop the alarm")
-#       cli_alert_success(succ_msg)
-#     } else {
-#       err_msg <- paste0("Error Stop the alarm: ",content(response)$error)
-#       cli_alert_danger(err_msg)
-#       stop()
-#     }
-
-#     # delete the trigger
-#     action <- paste0("triggers/", trigger_name) 
-#     response <- faasr_gcp_httr_request(faasr, server, action, type="DELETE", ssl)
-#     ####response handling: status code
-#     if (response$status_code==200 || response$status_code==202){
-#       succ_msg <- paste0("Successfully Delete the trigger - ", trigger_name)
-#       cli_alert_success(succ_msg)
-#     } else {
-#       err_msg <- paste0("Error Delete the trigger - ", trigger_name,": ",content(response)$error)
-#       cli_alert_danger(err_msg)
-#       stop()
-#     }
-
-
-#     # check the rule
-#     action <- paste0("rules/", rule_name) 
-#     check <- faasr_register_workflow_google_cloud_check_exists(ssl, action, server,faasr)
-#     if (!check){
-#       err_msg <- paste0("Error: No ",rule_name," found")
-#       cli_alert_danger(err_msg)
-#       stop()
-#     }
-    
-#     # disable the rule
-#     action <- paste0(action, "?overwrite=true")
-#     body <- list(
-#       status = "inactive",
-#       trigger = "null",
-#       action = "null"
-#     )
-#     response <- faasr_gcp_httr_request(faasr, server, action, type="POST", body=body, ssl)
-#     ####response handling: status code
-#     if (response$status_code==200 || response$status_code==202){
-#       succ_msg <- paste0("Successfully Delete the rule - ", rule_name)
-#       cli_alert_success(succ_msg)
-#     } else {
-#       err_msg <- paste0("Error Delete the rule - ", rule_name,": ",content(response)$error)
-#       cli_alert_danger(err_msg)
-#       stop()
-#     }
-#   }
-# }
+    ## delete the gcloud scheduler job
+    delete_action <- paste0("/jobs/", scheduler_name)
+    response <- faasr_gcp_cloud_scheduler_httr_request(faasr, server, delete_action, type="DELETE")
+    #response handling: status code
+    if (response$status_code==200 || response$status_code==202){
+      succ_msg <- paste0("Successfully deleted gcloud scheduler job - ", scheduler_name)
+      cli_alert_success(succ_msg)
+    } else {
+      err_msg <- paste0("Error in deleting gcloud scheduler job - ", scheduler_name, ": ", content(response)$error)
+      cli_alert_danger(err_msg)
+      stop()
+    }
+  }
+}

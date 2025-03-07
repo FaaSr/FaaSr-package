@@ -561,8 +561,7 @@ faasr_set_workflow_timer <- function(cron, target=NULL, ...){
   } else if (type == "OpenWhisk"){
     faasr_set_workflow_timer_ow(faasr,cred,target,cron, ...)
   } else if (type == "GoogleCloud"){
-    #faasr_set_workflow_timer_gcp(faasr,cred,target,cron, ...)
-    print("Google Cloud timer to be implemented")
+    faasr_set_workflow_timer_gcp(faasr,cred,target,cron, ...)
   }
 }
 .faasr_user$operations$set_workflow_timer <- faasr_set_workflow_timer
@@ -613,8 +612,7 @@ faasr_unset_workflow_timer <- function(target=NULL,...){
   } else if (type == "OpenWhisk"){
     faasr_set_workflow_timer_ow(faasr,cred,target, cron=NULL, unset=TRUE,...)
   } else if (type == "GoogleCloud"){
-    #faasr_set_workflow_timer_gcp(faasr,cred,target, cron=NULL, unset=TRUE,...)
-    print("Google Cloud timer to be implemented")
+    faasr_set_workflow_timer_gcp(faasr,cred,target, cron=NULL, unset=TRUE,...)
   }
 }
 .faasr_user$operations$unset_workflow_timer <- faasr_unset_workflow_timer
