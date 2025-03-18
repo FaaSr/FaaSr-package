@@ -4,6 +4,7 @@
 #' `test` Uses "arrow" library to set up the configurations with given json file and 
 #' provide the object to the users
 #' @param server_name for string, default value is faasr$DefaultDataStore
+#' @param faasr_config optional configuration to use instead of global .faasr
 #' @return s3 representing object for "arrow"
 #' @export
 #' @examples
@@ -15,11 +16,23 @@
 
 globalVariables(".faasr")
 
-faasr_arrow_s3_bucket <- function(server_name=.faasr$DefaultDataStore, faasr_prefix="") {
+faasr_arrow_s3_bucket <- function(server_name=.faasr$DefaultDataStore, faasr_prefix="",faasr_config=NULL) {
+  
+  if (!is.null(faasr_config)) {
+    # Use the provided config
+    config <- faasr_config
+    server_name <- config$DefaultDataStore
+    
+  } else {
+    # Use the original behavior with global .faasr
+    config <- .faasr
+    
+  }
+  
   # Check that an S3 server_name has been defined
   # If not, log an error and abort
 
-  if (server_name %in% names(.faasr$DataStores)) {
+  if (server_name %in% names(config$DataStores)) {
     NULL
   } else {
     err_msg <- paste0('{\"faasr_get_arrow\":\"Invalid data server name: ',server_name,'\"}', "\n")
@@ -27,7 +40,7 @@ faasr_arrow_s3_bucket <- function(server_name=.faasr$DefaultDataStore, faasr_pre
     stop()
   }
 
-  target_s3 <- .faasr$DataStores[[server_name]]
+  target_s3 <- config$DataStores[[server_name]]
 
   if (faasr_prefix != ""){
     bucket <- paste0(target_s3$Bucket, "/", faasr_prefix)

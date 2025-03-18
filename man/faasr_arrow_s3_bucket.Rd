@@ -5,6 +5,8 @@
 \title{faasr_arrow_s3_bucket}
 \arguments{
 \item{server_name}{for string, default value is faasr$DefaultDataStore}
+
+\item{faasr_config}{optional configuration to use instead of global .faasr}
 }
 \value{
 s3 representing object for "arrow"

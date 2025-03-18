@@ -7,6 +7,8 @@
 \item{server_name}{string with name of the S3 bucket to use; must match a name declared in the faasr list}
 
 \item{faasr_prefix}{string with prefix of objects in the S3 bucket}
+
+\item{faasr_config}{optional configuration to use instead of global .faasr}
 }
 \value{
 object_list a list of objects in the bucket

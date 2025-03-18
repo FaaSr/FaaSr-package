@@ -13,6 +13,8 @@
 \item{remote_folder}{string with the name of the remote folder where the file is to be uploaded to}
 
 \item{remote_file}{string with the name for the file once uploaded to the S3 bucket}
+
+\item{faasr_config}{optional configuration to use instead of global .faasr}
 }
 \value{
 return nothing / put the file into the bucket
