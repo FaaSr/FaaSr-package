@@ -6,7 +6,7 @@
 #' @return graph a graph representation of the Workflow
 #' @keywords internal
 
-# workflow implementation - check loop iteratively, predecessors.
+
 # check workflows for cycle. Returns predecessor list
 faasr_check_workflow_cycle <- function(faasr){
 
