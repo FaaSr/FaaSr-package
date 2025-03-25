@@ -7,92 +7,100 @@
 #' @keywords internal
 
 # workflow implementation - check loop iteratively, predecessors.
+# check workflows for cycle. Returns predecessor list
 faasr_check_workflow_cycle <- function(faasr){
-  
-  # implement dfs - recursive function
-  dfs <- function(start, target, stack){
 
-    # find target in the graph's successor. If it matches, there's a loop
-    if (target %in% graph[[start]]) {
-	    err_msg <- paste0('{\"faasr_check_workflow_cycle\":\"function loop found in ',target,'\"}', "\n")
-	    message(err_msg)
-	    stop()
+  # implement dfs cycle detection - recursive function (returns boolean)
+  is_cyclic <- function(node){
+    # check that current action is in function list
+    if (!(node %in% names(faasr$FunctionList))){
+      err_msg <- paste0('{\"faasr_check_workflow_cycle\":\"invalid function trigger: ',node,'\"}', "\n")
+      message(err_msg)
+      stop()
+      }
+
+    # if the current action is already in the recursive call stack
+    # then there must be a cycle
+    if (isTRUE(stack[[node]])) {
+      return(TRUE)
 	  }
 
-	  # add start, marking as "visited"
-	  stack <- c(stack, start)
+	  # mark action as visited and add it to recursive call stack
+	  stack[[node]] <<- TRUE
+    visited[[node]] <<- TRUE
 
-	  # set one of the successors as another "start"
-	  for (func in graph[[start]]) {
-
-	    # if new "start" has been visited, do nothing
-	    if (func %in% stack) {
-	      NULL
-	    # if not, keep checking the DAG.
-	    } else {
-	      stack <- dfs(func, target, stack)
-	    }
-	  }
-    return(stack)
+	  # recursively check all of the
+    # action's successors
+    if(!is.null(adj_graph[[node]])){
+      for (action in adj_graph[[node]]) {
+        # if the successor action's branch creates a cycle
+        # then the graph is cyclical
+        if (!(isTRUE(visited[[action]])) && is_cyclic(action)) {
+	        err_msg <- paste0('{\"faasr_check_workflow_cycle\":\"cycle created by ', node, ' invoking ', action, '\"}', "\n")
+	        message(err_msg)
+	        stop()
+        # if the successor is in the recursion call stack, then
+        # there must be a  cycle
+        } else if (isTRUE(stack[[action]])) {
+	        err_msg <- paste0('{\"faasr_check_workflow_cycle\":\"cycle detected in graph create by ', node, ' invoking ', action, '\"}', "\n")
+	        message(err_msg)
+	        stop()
+        }
+      }
+    }
+    # Finished exploring branch. Remove node from recursion stack
+    stack[[node]] <<- FALSE
+    return(FALSE)
   }
 	
-  # build empty lists for the graph and predecessors.
-  graph <- list()
+  # build empty lists for the graph
+  adj_graph <- list()
 
   # build the graph indicating adjacent nodes, e.g., "F1":["F2","F3"], so on.
   for (func in names(faasr$FunctionList)) {
     if (length(faasr$FunctionList[[func]]$InvokeNext) != 0){
       for (invoke_next in faasr$FunctionList[[func]]$InvokeNext){
         parts <- unlist(strsplit(invoke_next, "[()]"))
-        graph[[func]] <- unique(c(graph[[func]], parts[1]))
+        adj_graph[[func]] <- unique(c(adj_graph[[func]], parts[1]))
       }
     }
   }
 
-  # check next functions of FunctionInvoke are in the function list
-  for (func in names(graph)){
-    for (path in graph[[func]]){
-      if (!(path %in% names(faasr$FunctionList))){
-        err_msg <- paste0('{\"faasr_check_workflow_cycle\":\"invalid next function ',path,' is found in ',func,'\"}', "\n")
-        message(err_msg)
-        stop()
-      }
+  # call faasr_predecessors_list and get a list of function:predecessor pairs
+  pre <- faasr_predecessors_list(faasr, adj_graph)
+
+  # finds first function in the graph
+  start <- FALSE
+  for(func in names(faasr$FunctionList)){
+    if(is.null(pre[[func]])){
+      start <- TRUE
+      first_func <- func
     }
   }
-  # build an empty list of stacks - this will prevent the infinite loop
-  stack <- list()
-  # do dfs starting with faasr$FunctionInvoke.
-  dfs(faasr$FunctionInvoke, faasr$FunctionInvoke, stack)
-	
-  # call faasr_predecessors_list and get a list of function:predecessor sets.
-  pre <- faasr_predecessors_list(faasr, graph)
 
-  # find the initial function(pre==0)
-  check <- TRUE
-  for (func in names(faasr$FunctionList)){
-    if (is.null(pre[[func]])){
-      check <- FALSE
-      # build an empty list of stacks - this will prevent the infinite loop
-      stack <- list()
-      # if it is the initial function, do dfs starting with it to find stacks.
-      stack <- dfs(func, func, stack)
-
-      # check unreachable states by comparing function list and stack
-      for (func in names(faasr$FunctionList)){
-        if (!(func %in% stack)){
-          err_msg <- paste0('{\"faasr_check_workflow_cycle\":\"unreachable state is found in ',func,'\"}', "\n")
-          message(err_msg)
-          stop()
-        }
-      }
-    }
-  }
-  # if there's no function having no predecessors, it means that there's a loop.
-  if (check){
+  # if there is no functions with no predecessors, then there is a cycle
+  if(start == FALSE){
     err_msg <- paste0('{\"faasr_check_workflow_cycle\":\"function loop found: no initial node\"}', "\n")
     message(err_msg)
     stop()
   }
+
+  # build an empty recursion call stack
+  stack <- list()
+  # build an empty visited list
+  visited <- list()
+  # do dfs cycle detection starting with first action
+  cycle <- is_cyclic(first_func)
 	
+  # check for unreachable functions
+  check <- TRUE
+  for (func in names(faasr$FunctionList)){
+    if(!(func %in% names(visited))){
+      err_msg <- paste0('{\"faasr_check_workflow_cycle\":\"unreachable action: ',func,'\"}', "\n")
+      message(err_msg)
+      stop()
+    }
+  }
+	# return predecessor list for current action
   return(pre[[faasr$FunctionInvoke]])
 }
