@@ -42,7 +42,7 @@ faasr_check_workflow_cycle <- function(faasr){
         # if the successor is in the recursion call stack, then
         # there must be a  cycle
         } else if (isTRUE(stack[[action]])) {
-	        err_msg <- paste0('{\"faasr_check_workflow_cycle\":\"cycle detected in graph create by ', node, ' invoking ', action, '\"}', "\n")
+	        err_msg <- paste0('{\"faasr_check_workflow_cycle\":\"cycle detected in graph created by ', node, ' invoking ', action, '\"}', "\n")
 	        message(err_msg)
 	        stop()
         }
