@@ -66,9 +66,10 @@ faasr_register_workflow_google_cloud <- function(faasr, cred, ssl=TRUE, memory=1
   cli_text(col_cyan("{symbol$menu} {.strong Successfully registered all google cloud actions}"))
 }
 
+
 #' @title faasr_gcp_httr_request
 #' @description 
-#' unction to send the curl request to the google cloud run api
+#' function to send the curl request to the google cloud run api
 #' by using the "httr" library. 
 #' @param faasr a list form of the JSON file
 #' @param server a string for the target server
@@ -77,7 +78,7 @@ faasr_register_workflow_google_cloud <- function(faasr, cred, ssl=TRUE, memory=1
 #' @param body a list of body
 #' @param ssl SSL CA check; for the SSL certificate: FALSE
 #' @param namespace a string for the specific namespace e.g., /whisk.system
-#' @return an integer value for the response
+#' @return response object from the google cloud run api
 #' @import httr
 #' @import cli
 #' @keywords internal
@@ -126,7 +127,6 @@ faasr_gcp_httr_request <- function(faasr, server, action, type, body=NULL, ssl=T
 }
 
 
-
 #' @title faasr_gcp_cloud_scheduler_httr_request
 #' @description 
 #' function to send the curl request to the google cloud scheduler
@@ -138,7 +138,7 @@ faasr_gcp_httr_request <- function(faasr, server, action, type, body=NULL, ssl=T
 #' @param body a list of body
 #' @param ssl SSL CA check; for the SSL certificate: FALSE
 #' @param namespace a string for the specific namespace e.g., /whisk.system
-#' @return an integer value for the response
+#' @return response object from the google cloud run api
 #' @import httr
 #' @import cli
 #' @keywords internal
@@ -226,7 +226,7 @@ faasr_register_workflow_google_cloud_action_lists <- function(faasr) {
 #' Check the remote repository is existing on the google cloud
 #' by sending the GET request.
 #' If it exists, return TRUE, doesn't exist, return FALSE
-#' @param action a string for the target action: /actions, /triggers, /rules
+#' @param action a string for the target action
 #' @param server a string for the target server
 #' @param faasr a list form of the JSON file
 #' @param all_jobs a list of all existing gcloud jobs
@@ -293,8 +293,8 @@ faasr_register_workflow_google_cloud_check_user_input <- function(check, actionn
 #' @param actionname a string for the target action name
 #' @param server a string for the target server
 #' @param faasr a list form of the JSON file
-#' @param memory an integer for the max size of memory
-#' @param timeout an integer for the max length of timeout
+#' @param memory an integer for the max size of memory (MB)
+#' @param timeout an integer for the max length of timeout (seconds)
 #' @param check a logical value for target existence
 #' @import httr
 #' @import cli
