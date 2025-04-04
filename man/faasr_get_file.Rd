@@ -13,6 +13,8 @@
 \item{local_folder}{string with the name of the local folder where the file to be downloaded is stored}
 
 \item{local_file}{string with the name of the local file once downloaded}
+
+\item{faasr_config}{optional configuration to use instead of global .faasr}
 }
 \value{
 return nothing / delete the file in the bucket

@@ -4,6 +4,7 @@
 #' @param server_name string with name of the S3 bucket to use; must match a name declared in the faasr list
 #' @param remote_folder string with the name of the remote folder where the file is to be deleted from
 #' @param remote_file string with the name for the file to be deleted 
+#' @param faasr_config optional configuration to use instead of global .faasr
 #' @return return nothing / delete the file in the bucket
 #' @importFrom "paws.storage" "s3"
 #' @export
@@ -17,11 +18,23 @@ globalVariables(".faasr")
 
 # Default server_name is DefaultDataStore, default remote folder name is empty ("") and 
 # local folder name is current directory(".")
-faasr_delete_file <- function(server_name=.faasr$DefaultDataStore, remote_folder="", remote_file) { 
+faasr_delete_file <- function(server_name=.faasr$DefaultDataStore, remote_folder="", remote_file,faasr_config=NULL) {
+
+  if (!is.null(faasr_config)) {
+    # Use the provided config
+    config <- faasr_config
+    server_name <- config$DefaultDataStore
+    
+  } else {
+    # Use the original behavior with global .faasr
+    config <- .faasr
+    
+  }
+  
   # Check that an S3 server_name has been defined
   # If not, log an error and abort
   
-  if (server_name %in% names(.faasr$DataStores)) {
+  if (server_name %in% names(config$DataStores)) {
     NULL
    } else {
      err_msg <- paste0('{\"faasr_delete_file\":\"Invalid data server name: ',server_name,'\"}', "\n")
@@ -29,7 +42,7 @@ faasr_delete_file <- function(server_name=.faasr$DefaultDataStore, remote_folder
      stop()	
    }
 
-  target_s3 <- .faasr$DataStores[[server_name]]
+  target_s3 <- config$DataStores[[server_name]]
 
   # Remove "/" in the folder & file name to avoid situations:
   # 1: duplicated "/" ("/remote/folder/", "/file_name") 

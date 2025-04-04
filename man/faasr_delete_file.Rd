@@ -9,6 +9,8 @@
 \item{remote_folder}{string with the name of the remote folder where the file is to be deleted from}
 
 \item{remote_file}{string with the name for the file to be deleted}
+
+\item{faasr_config}{optional configuration to use instead of global .faasr}
 }
 \value{
 return nothing / delete the file in the bucket
