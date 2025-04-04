@@ -70,6 +70,66 @@ faasr_trigger <- function(faasr) {
         next_server_type <- faasr$ComputeServers[[next_server]]$FaaSType
 
         switch(next_server_type,
+          "GoogleCloud"={
+            #
+            # GoogleCloud API handling
+            #
+            # Set the env values for the google cloud action.
+            # GoogleCloud API handling
+            endpoint <- faasr$ComputeServers[[next_server]]$Endpoint
+            namespace <- faasr$ComputeServers[[next_server]]$Namespace
+            region <- faasr$ComputeServers[[next_server]]$Region
+            actionname <- invoke_next_function
+            endpoint <- paste0(endpoint, namespace, "/locations/", region, "/jobs/", actionname, ":run")
+
+            token <- faasr$ComputeServers[[next_server]]$AccessKey
+
+            if (is.null(faasr$ComputeServers[[next_server]]$SSL) || faasr$ComputeServers[[next_server]]$SSL == "") {
+              ssl <- TRUE
+            } else {
+              ssl <- as.logical(toupper(faasr$ComputeServers[[next_server]]$SSL))
+            }
+
+            headers <- c(
+              'accept' = 'application/json',
+              'Content-Type' = 'application/json',
+              'Authorization' = paste("Bearer", token)  # Set Authorization header directly
+            )
+
+            # Prepare the args from the faasr object
+            args <- toJSON(faasr, auto_unbox = TRUE)
+            # Build the body for the HTTP request without specifying the image
+            body <- list(
+              overrides = list(
+                containerOverrides = list(
+                  list(
+                    args = args
+                  )
+                )
+                # taskCount = 1, (Can be set if needed)
+                # timeout = paste0(service_timeout_seconds, "s")  # Set service timeout
+              )
+            )
+            # Send the REST request (POST/GET/PUT/PATCH)
+            response <- POST(
+              url = endpoint,
+              add_headers(.headers = headers),
+              body = body,
+              encode = "json",
+              httr::config(ssl_verifypeer = ssl, ssl_verifyhost = ssl),
+              accept_json()
+            )
+
+            if (response$status_code == 200 || response$status_code == 202) {
+              succ_msg <- paste0('{\"faasr_trigger\":\"GoogleCloud: Successfully invoked: ', faasr$FunctionInvoke, '\"}\n')
+              message(succ_msg)
+              faasr_log(succ_msg)
+            } else {
+              err_msg <- paste0('{\"faasr_trigger\":\"GoogleCloud: Error invoking: ', faasr$FunctionInvoke, '\"}\n')
+              message(response)
+              faasr_log(err_msg)
+            }
+          },
           # if OpenWhisk - use OpenWhisk API
           "OpenWhisk"={
             #
