@@ -1,3 +1,7 @@
+# FaaSr 1.4.4
+* Support optional argument to S3 functions instead of global .faasr
+* Workflow cycle detection function now covers the entire DAG
+
 # FaaSr 1.4.3
 * Support triggering of multiple parallel executions from an action
 * Added faasr_rank() method to determine the rank of a parallel invocation
