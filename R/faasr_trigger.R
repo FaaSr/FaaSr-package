@@ -6,6 +6,7 @@
 #' * Apache OpenWhisk
 #' * AWS Lambda
 #' * GitHub Actions
+#' * Google Cloud Platform
 #' @param faasr list with parsed and validated Payload
 #' @return return nothing / send requests to the FaaS servers.
 #' @import jsonlite
@@ -82,6 +83,7 @@ faasr_trigger <- function(faasr) {
             actionname <- invoke_next_function
             endpoint <- paste0(endpoint, namespace, "/locations/", region, "/jobs/", actionname, ":run")
 
+            faasr <- faasr_refresh_gcp_accesskey(faasr, next_server)
             token <- faasr$ComputeServers[[next_server]]$AccessKey
 
             if (is.null(faasr$ComputeServers[[next_server]]$SSL) || faasr$ComputeServers[[next_server]]$SSL == "") {
@@ -322,3 +324,82 @@ faasr_trigger <- function(faasr) {
 }
 
 
+#' @title faasr_refresh_gcp_accesskey
+#' @description 
+#' function to get a new access using the JWT token
+#' @param faasr a list form of the JSON file
+#' @param server a string for the target server
+#' @return response faasr object with updated access key for gcp
+#' @import httr
+#' @import cli
+#' @import jsonlite
+#' @import openssl
+#' @keywords internal
+
+faasr_refresh_gcp_accesskey <- function(faasr, server){
+
+  client_email <- faasr$ComputeServers[[server]]$ClientEmail
+  private_key  <- faasr$ComputeServers[[server]]$SecretKey
+  token_uri    <- faasr$ComputeServers[[server]]$TokenUri
+
+  # Create JWT
+  # Helper: Base64 URL-safe encoding
+  base64url_encode <- function(x) {
+    gsub("=+$", "", gsub("\\+", "-", gsub("/", "_", base64_enc(x))))
+  }
+
+  # JWT header and payload (claims)
+  header <- list(alg = "RS256", typ = "JWT")
+  issued_at <- as.integer(Sys.time())
+  expires_at <- issued_at + 600  # valid for 10 minutes
+
+  claims <- list(
+    iss = client_email,
+    scope = "https://www.googleapis.com/auth/cloud-platform",
+    aud = token_uri,
+    exp = expires_at,
+    iat = issued_at
+  )
+
+  # Encode header and claims
+  jwt_header <- base64url_encode(charToRaw(toJSON(header, auto_unbox = TRUE)))
+  jwt_claims <- base64url_encode(charToRaw(toJSON(claims, auto_unbox = TRUE)))
+
+  # JWT unsigned string
+  jwt_unsigned <- paste(jwt_header, jwt_claims, sep = ".")
+
+  # Sign the JWT using openssl
+  key <- read_key(private_key)
+  unsigned_raw <- charToRaw(jwt_unsigned)
+  signature_raw <- signature_create(unsigned_raw, key = key, hash = sha256)
+  signature <- base64url_encode(signature_raw)
+
+  # Final signed JWT
+  jwt <- paste(jwt_unsigned, signature, sep = ".")
+
+  # Exchange JWT for access token
+  res <- POST(
+    url = token_uri,
+    body = list(
+      grant_type = "urn:ietf:params:oauth:grant-type:jwt-bearer",
+      assertion = jwt
+    ),
+    encode = "form"
+  )
+
+  # Parse and use access token
+  token_data <- content(res)
+
+  if (!is.null(token_data$access_token)) {
+    faasr$ComputeServers[[server]]$AccessKey <- token_data$access_token
+    succ_msg <- paste0("Successfully updated access key")
+    message(succ_msg)
+    faasr_log(succ_msg)
+  } else {
+    err_msg <- paste0("Error in creating access key using JWT.")
+    message(err_msg)
+    faasr_log(err_msg)
+    stop()
+  }
+  return(faasr)
+}
