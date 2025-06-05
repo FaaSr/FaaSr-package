@@ -59,9 +59,10 @@ faasr_check_workflow_cycle <- function(faasr){
   # build the graph indicating adjacent nodes, e.g., "F1":["F2","F3"], so on.
   for (func in names(faasr$FunctionList)) {
     if (length(faasr$FunctionList[[func]]$InvokeNext) != 0){
-      for (invoke_next in faasr$FunctionList[[func]]$InvokeNext){
-        parts <- unlist(strsplit(invoke_next, "[()]"))
-        adj_graph[[func]] <- unique(c(adj_graph[[func]], parts[1]))
+      for (invoke_next_string in faasr$FunctionList[[func]]$InvokeNext){
+        # Parse string to extract just the function name, ignoring conditions and ranks
+        parsed <- faasr_parse_invoke_next_string(invoke_next_string)
+        adj_graph[[func]] <- unique(c(adj_graph[[func]], parsed$func_name))
       }
     }
   }
