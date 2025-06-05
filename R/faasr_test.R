@@ -109,7 +109,9 @@ faasr_test_start <- function(faasr, faasr_data_wd, docker_use, docker_image){
 
   # recursively run the code by calling another "faasr_test_start"
   for (next_func in next_funcs){
-    faasr$FunctionInvoke <- next_func
+    #faasr$FunctionInvoke <- next_func
+    parsed <- faasr_parse_invoke_next_string(next_func)
+    faasr$FunctionInvoke <- parsed$func_name
     faasr_wd <- getwd()
     on.exit(setwd(faasr_wd))
     cli_alert_info("Trigger Next functions")
