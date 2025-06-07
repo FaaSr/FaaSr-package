@@ -46,7 +46,8 @@ Imports:
     jsonvalidate,
     base64enc,
     sodium,
-    askpass
+    askpass,
+    stringr
 Suggests:
     arrow,
     glue,
