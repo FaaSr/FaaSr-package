@@ -60,34 +60,18 @@ faasr_parse_invoke_next_string <- function(invoke_string) {
 #' @keywords internal
 
 faasr_evaluate_condition <- function(condition, result) {
-  if (is.null(condition)) {
-    return(TRUE)  # No condition = always execute
-  }
-  
-  # RESTRICTION: Only handle boolean conditions
+
   if (!is.logical(condition)) {
     stop("Condition must be TRUE or FALSE")
   }
   
-  # Convert result to boolean if possible
-  if (is.logical(result)) {
-    return(condition == result)
-  } else {
-    # Try to interpret result as boolean
-    if (is.character(result)) {
-      if (toupper(result) == "TRUE") {
-        return(condition == TRUE)
-      } else if (toupper(result) == "FALSE") {
-        return(condition == FALSE)
-      }
-    } else if (is.numeric(result)) {
-      # Treat 0 as FALSE, everything else as TRUE
-      return(condition == (result != 0))
-    }
-    
-    # If we can't interpret as boolean, log warning and don't match
-    warn_msg <- paste0("Function result '", result, "' cannot be interpreted as TRUE/FALSE")
+  # STRICT: Only accept actual logical TRUE/FALSE results
+  if (!is.logical(result)) {
+    warn_msg <- paste0("Function result '", result, "' is not a boolean (TRUE/FALSE). Only exact boolean matches are allowed.")
     message(warn_msg)
     return(FALSE)
   }
+  
+  # Direct boolean comparison
+  return(condition == result)
 }
