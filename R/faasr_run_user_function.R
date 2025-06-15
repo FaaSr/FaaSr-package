@@ -41,13 +41,6 @@ faasr_run_user_function <- function(.faasr){
   
   .faasr$FunctionResult <- faasr_result
   
-  # Log the captured result for debugging
-  if (!is.null(faasr_result)) {
-    result_msg <- paste0('{\"faasr_run_user_function\":\"Function result captured: ',faasr_result,'\"}', "\n")
-    message(result_msg)
-    faasr_log(result_msg)
-  }
-
   # At this point, the Action has finished the invocation of the User Function
   # We flag this by uploading a file with name FunctionInvoke.done with contents TRUE to the S3 logs folder
   # Check if directory already exists. If not, create one

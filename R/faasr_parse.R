@@ -37,7 +37,6 @@ faasr_parse <- function(faasr_payload) {
   # Schema check - if it returns TRUE, return faasr
   if (faasr_schema_valid(faasr_payload)) {
     faasr <- faasr_validate_conditional_triggers(faasr)
-    message("Valid Schema")
     return(faasr)
   } else {
 	#err_msg <- paste0('{\"faasr_parse\":\"JSON Payload not compliant with FaaSr schema\"}', "\n")
@@ -54,7 +53,6 @@ faasr_parse <- function(faasr_payload) {
   }
 }
 
-# In faasr_parse.R, add this function
 faasr_validate_conditional_triggers <- function(faasr) {
   for (func_name in names(faasr$FunctionList)) {
     invoke_next <- faasr$FunctionList[[func_name]]$InvokeNext

@@ -61,7 +61,6 @@ faasr_check_workflow_cycle <- function(faasr){
     if (length(faasr$FunctionList[[func]]$InvokeNext) != 0){
       for (invoke_next_string in faasr$FunctionList[[func]]$InvokeNext){
         # Parse string to extract just the function name, ignoring conditions and ranks
-        message("About to call faasr_parse_invoke_next_string with: ", invoke_next_string)
         parsed <- faasr_parse_invoke_next_string(invoke_next_string)
         adj_graph[[func]] <- unique(c(adj_graph[[func]], parsed$func_name))
       }

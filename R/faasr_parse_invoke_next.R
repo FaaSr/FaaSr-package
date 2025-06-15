@@ -65,7 +65,7 @@ faasr_evaluate_condition <- function(condition, result) {
     stop("Condition must be TRUE or FALSE")
   }
   
-  # STRICT: Only accept actual logical TRUE/FALSE results
+  # Only accept actual logical TRUE/FALSE results
   if (!is.logical(result)) {
     warn_msg <- paste0("Function result '", result, "' is not a boolean (TRUE/FALSE). Only exact boolean matches are allowed.")
     message(warn_msg)
