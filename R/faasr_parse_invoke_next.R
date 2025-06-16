@@ -60,6 +60,10 @@ faasr_parse_invoke_next_string <- function(invoke_string) {
 #' @keywords internal
 
 faasr_evaluate_condition <- function(condition, result) {
+  
+  if (is.null(condition)) {
+    return(TRUE)
+  }
 
   if (!is.logical(condition)) {
     stop("Condition must be TRUE or FALSE")

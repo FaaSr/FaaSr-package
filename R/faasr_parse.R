@@ -59,8 +59,8 @@ faasr_validate_conditional_triggers <- function(faasr) {
     
     if (!is.null(invoke_next) && length(invoke_next) > 1) {
       # Check if any actions have predicates
-      has_predicates <- any(grepl("\\[(TRUE|FALSE)\\]", invoke_next))
-      has_non_predicates <- any(!grepl("\\[(TRUE|FALSE)\\]", invoke_next))
+      has_predicates <- any(grepl("\\[(TRUE|FALSE)\\]", invoke_next,ignore.case = TRUE))
+      has_non_predicates <- any(!grepl("\\[(TRUE|FALSE)\\]", invoke_next,ignore.case = TRUE))
       
       # If we have both predicates and non-predicates, that's an error
       if (has_predicates && has_non_predicates) {
@@ -73,9 +73,12 @@ faasr_validate_conditional_triggers <- function(faasr) {
       
       # If using predicates, ensure all possible outcomes are covered
       if (has_predicates) {
-        predicates <- stringr::str_extract_all(invoke_next, "\\[(TRUE|FALSE)\\]")
+        predicates <- regmatches(invoke_next, gregexpr("\\[(TRUE|FALSE)\\]", invoke_next, ignore.case = TRUE))
         predicates <- unlist(predicates)
         predicates <- gsub("[\\[\\]]", "", predicates)
+        
+        # Convert to uppercase for comparison
+        predicates <- toupper(predicates)
         
         # Check if both TRUE and FALSE are covered
         if (!("TRUE" %in% predicates && "FALSE" %in% predicates)) {
