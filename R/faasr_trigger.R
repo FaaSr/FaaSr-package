@@ -32,19 +32,34 @@ faasr_trigger <- function(faasr) {
     message(err_msg)
     faasr_log(err_msg)
   } else {
+    
+    function_result <- faasr$FunctionResult
+    
     # Iterate through invoke_next and use FaaS-specific mechanisms to send trigger
     # use "for" loop to iteratively check functions in invoke_next list
-    for (invoke_next_function in invoke_next) {
-
-      parts <- unlist(strsplit(invoke_next_function, "[()]"))
-
-      if (length(parts) > 1){
-        invoke_next_function <- parts[1]
-        rank_num <- parts[2]
-      } else {
-        rank_num <- 1
+    for (invoke_next_string in invoke_next) {
+      
+      # Parse the string to extract function, condition, and rank
+      parsed <- faasr_parse_invoke_next_string(invoke_next_string)
+      invoke_next_function <- parsed$func_name
+      condition <- parsed$condition
+      rank_num <- parsed$rank
+      
+      # Evaluate condition before proceeding
+      if (!faasr_evaluate_condition(condition, function_result)) {
+        skip_msg <- paste0('{\"faasr_trigger\":\"skipping ',invoke_next_function,' - condition [',condition,'] not met (result: ',function_result,')\"}', "\n")
+        message(skip_msg)
+        faasr_log(skip_msg)
+        next  # Skip this trigger
       }
-
+      
+      # Log successful condition match
+      if (!is.null(condition)) {
+        cond_msg <- paste0('{\"faasr_trigger\":\"condition [',condition,'] met for ',invoke_next_function,' - proceeding with trigger\"}', "\n")
+        message(cond_msg)
+        faasr_log(cond_msg)
+      }
+      
       # Change the FunctionInvoke to next function name
       faasr$FunctionInvoke <- invoke_next_function
 
