@@ -1,7 +1,7 @@
 Type: Package
 Package: FaaSr
 Title: FaaS (Function as a Service) Package
-Version: 1.4.4
+Version: 1.5.0
 Authors@R: c(person("Figueiredo", "Renato", role = c("aut", "cre", "ths", "cph"),
                     email = "renato.figueiredo@oregonstate.edu",
                     comment = c(ORCID = "0000-0001-9841-6060")),
