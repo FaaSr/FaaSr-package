@@ -61,11 +61,13 @@
             "FaaSType":{"enum":["OpenWhisk", "GitHubActions", "Lambda", "GoogleCloud"]},
             "Region":{"type":"string","minLength": 1},
             "Endpoint":{"type":"string","minLength": 1},
+            "SchedulerEndpoint":{"type":"string","minLength": 1},
             "Namespace":{"type":"string","minLength": 1},
             "API.key":{"type":"string","minLength": 1},
             "AccessKey":{"type":"string","minLength": 1},
             "SecretKey":{"type":"string","minLength": 1},
-            "ServiceAccount":{"type":"string","minLength": 1},
+            "ClientEmail":{"type":"string","minLength": 1},
+            "TokenUri":{"type":"string","minLength": 1},
             "UserName":{"type":"string","minLenght": 1},
             "ActionRepoName":{"type":"string","minLenght": 1},            
             "Token":{"type":"string","minLength": 1},
@@ -80,7 +82,7 @@
                 "required":["FaaSType"]
               },
               "then": {
-                "required":["Namespace", "AccessKey", "Region", "ServiceAccount"]
+                "required":["Namespace", "SecretKey", "ClientEmail", "TokenUri", "Region"]
               }
             },
             {

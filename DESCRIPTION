@@ -27,6 +27,7 @@ Description: Allows users to create and deploy the workflow with multiple functi
     Apache OpenWhisk <https://openwhisk.apache.org/>
     GitHub Actions <https://github.com/features/actions>
     Amazon Web Services (AWS) Lambda <https://aws.amazon.com/lambda/>
+    Google Cloud Platform (GCP) Cloud Run <https://cloud.google.com/run>
     Supported cloud data storage for persistent storage:
     Amazon Web Services (AWS) Simple Storage Service (S3) <https://aws.amazon.com/s3/>.
 License: MIT + file LICENSE

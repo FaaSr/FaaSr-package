@@ -42,6 +42,7 @@ faasr_register_workflow_google_cloud <- function(faasr, cred, ssl=TRUE, memory=1
     )
 
     faasr <- faasr_replace_values(faasr, cred)
+    faasr <- faasr_refresh_gcp_accesskey(faasr, server)
 
     response <- faasr_gcp_httr_request(faasr, server, "/jobs", type="GET", ssl=ssl)
 
@@ -64,6 +65,84 @@ faasr_register_workflow_google_cloud <- function(faasr, cred, ssl=TRUE, memory=1
     }
   }
   cli_text(col_cyan("{symbol$menu} {.strong Successfully registered all google cloud actions}"))
+}
+
+#' @title faasr_refresh_gcp_accesskey
+#' @description 
+#' function to get a new access using the JWT token
+#' @param faasr a list form of the JSON file
+#' @param server a string for the target server
+#' @return response faasr object with updated access key for gcp
+#' @import httr
+#' @import cli
+#' @import jsonlite
+#' @import openssl
+#' @keywords internal
+
+faasr_refresh_gcp_accesskey <- function(faasr, server){
+
+  client_email <- faasr$ComputeServers[[server]]$ClientEmail
+  private_key  <- faasr$ComputeServers[[server]]$SecretKey
+  token_uri    <- faasr$ComputeServers[[server]]$TokenUri
+
+  # Create JWT
+  # Helper: Base64 URL-safe encoding
+  base64url_encode <- function(x) {
+    gsub("=+$", "", gsub("\\+", "-", gsub("/", "_", base64_enc(x))))
+  }
+
+  # JWT header and payload (claims)
+  header <- list(alg = "RS256", typ = "JWT")
+  issued_at <- as.integer(Sys.time())
+  expires_at <- issued_at + 600  # valid for 10 minutes
+
+  claims <- list(
+    iss = client_email,
+    scope = "https://www.googleapis.com/auth/cloud-platform",
+    aud = token_uri,
+    exp = expires_at,
+    iat = issued_at
+  )
+
+  # Encode header and claims
+  jwt_header <- base64url_encode(charToRaw(toJSON(header, auto_unbox = TRUE)))
+  jwt_claims <- base64url_encode(charToRaw(toJSON(claims, auto_unbox = TRUE)))
+
+  # JWT unsigned string
+  jwt_unsigned <- paste(jwt_header, jwt_claims, sep = ".")
+
+  # Sign the JWT using openssl
+  key <- read_key(private_key)
+  unsigned_raw <- charToRaw(jwt_unsigned)
+  signature_raw <- signature_create(unsigned_raw, key = key, hash = sha256)
+  signature <- base64url_encode(signature_raw)
+
+  # Final signed JWT
+  jwt <- paste(jwt_unsigned, signature, sep = ".")
+
+  # Exchange JWT for access token
+  res <- POST(
+    url = token_uri,
+    body = list(
+      grant_type = "urn:ietf:params:oauth:grant-type:jwt-bearer",
+      assertion = jwt
+    ),
+    encode = "form"
+  )
+
+  # Parse and use access token
+  token_data <- content(res)
+
+  if (!is.null(token_data$access_token)) {
+    faasr$ComputeServers[[server]]$AccessKey <- token_data$access_token
+    succ_msg <- paste0("Successfully updated access key")
+    cli_alert_success(succ_msg)
+  } else {
+    err_msg <- paste0("Error in creating access key using JWT.")
+    cli_alert_danger(err_msg)
+    stop()
+  }
+  return(faasr)
 }
 
 
@@ -314,7 +393,7 @@ faasr_register_workflow_google_cloud_create_action <- function(ssl, actionname, 
 
   # actioncontainer can be either default or user-customized
   if (length(faasr$ActionContainers[[actionname]])==0 || faasr$ActionContainers[[actionname]] == "") {
-    actioncontainer <- "gcr.io/faasr/google-cloud-tidyverse:latest"
+    actioncontainer <- "gcr.io/faasr-project/gcloud-job-tidyverse" # change this with the default faasr container
   } else {
     actioncontainer <- faasr$ActionContainers[[actionname]]
   }
@@ -333,7 +412,8 @@ faasr_register_workflow_google_cloud_create_action <- function(ssl, actionname, 
             )
           )
         ),
-        timeout = paste0(timeout, "s") # Set service timeout (e.g., "24 * 60 * 60 s" for 24 hours)
+        timeout = paste0(timeout, "s"), # Set service timeout (e.g., "24 * 60 * 60 s" for 24 hours)
+        serviceAccount = faasr$ComputeServers[[server]]$ClientEmail # linked service account
       )
     )
   )
@@ -368,16 +448,19 @@ faasr_workflow_invoke_google_cloud <- function(faasr, cred, faas_name, actionnam
 
   action <- paste0("/jobs/", actionname, ":run")
   faasr <- faasr_replace_values(faasr, cred)
+  faasr <- faasr_refresh_gcp_accesskey(faasr, faas_name)
 
   # Prepare the args from the faasr object
   args <- jsonlite::toJSON(faasr, auto_unbox = TRUE)
+  library(base64enc)
+  encoded_args <- base64encode(charToRaw(args))
 
   # Build the body for the HTTP request without specifying the image
   body <- list(
     overrides = list(
       containerOverrides = list(
         list(
-          args = args
+          args = encoded_args
         )
       )
       # taskCount = 1, # Configures as per need while invoking the job
@@ -420,6 +503,7 @@ faasr_set_workflow_timer_gcp <- function(faasr, cred, target, cron, unset=FALSE,
   action <- "/jobs"
 
   faasr <- faasr_replace_values(faasr, cred)
+  faasr <- faasr_refresh_gcp_accesskey(faasr, server)
 
   response <- faasr_gcp_cloud_scheduler_httr_request(faasr, server, action, type="GET")
     if (response$status_code==200 || response$status_code==202){
@@ -457,7 +541,7 @@ faasr_set_workflow_timer_gcp <- function(faasr, cred, target, cron, unset=FALSE,
       overrides = list(
         containerOverrides = list(
           list(
-            args = toJSON(faasr, auto_unbox = TRUE)
+            args = base64encode(charToRaw(toJSON(faasr, auto_unbox = TRUE)))
           )
         )
         # taskCount = 1, # Configures as per need while invoking the job
@@ -479,7 +563,7 @@ faasr_set_workflow_timer_gcp <- function(faasr, cred, target, cron, unset=FALSE,
         uri = job_endpoint,
         body = encoded_body,  # Corrected encoding
         oauthToken = list(
-          serviceAccountEmail = faasr$ComputeServers[[server]]$ServiceAccount
+          serviceAccountEmail = faasr$ComputeServers[[server]]$ClientEmail
         )
       )
     )

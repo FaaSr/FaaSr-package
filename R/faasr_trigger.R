@@ -100,18 +100,27 @@ faasr_trigger <- function(faasr) {
 
             # Prepare the args from the faasr object
             args <- toJSON(faasr, auto_unbox = TRUE)
-            # Build the body for the HTTP request without specifying the image
+            
+            #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            # Base64 encode the JSON payload before sending
+            library(base64enc)
+            encoded_args <- base64encode(charToRaw(args))
+            #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+            # Build the body for the HTTP request, using the encoded payload
             body <- list(
               overrides = list(
                 containerOverrides = list(
                   list(
-                    args = args
+                    # Use the new encoded string here
+                    args = encoded_args
                   )
                 )
                 # taskCount = 1, (Can be set if needed)
                 # timeout = paste0(service_timeout_seconds, "s")  # Set service timeout
               )
             )
+
             # Send the REST request (POST/GET/PUT/PATCH)
             response <- POST(
               url = endpoint,
