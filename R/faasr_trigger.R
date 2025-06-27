@@ -340,7 +340,78 @@ faasr_trigger <- function(faasr) {
               message(err_msg)
               faasr_log(err_msg)
             }
+        },
+      
+      "SLURM"={
+        # SLURM REST API handling
+        server_info <- faasr$ComputeServers[[next_server]]
+        api_version <- server_info$APIVersion %||% "v0.0.37"
+        endpoint <- server_info$Endpoint
+        
+        if (!startsWith(endpoint, "http")) {
+          endpoint <- paste0("http://", endpoint)
         }
+        
+        # Create job script
+        job_script <- faasr_slurm_create_job_script(faasr, invoke_next_function)
+        
+        # Prepare job payload
+        job_payload <- list(
+          script = job_script,
+          job = list(
+            name = paste0("faasr-", invoke_next_function),
+            partition = server_info$Partition %||% "faasr",
+            minimum_nodes = as.integer(server_info$Nodes %||% 1),
+            tasks = as.integer(server_info$Tasks %||% 1),
+            cpus_per_task = as.integer(server_info$CPUsPerTask %||% 1),
+            memory_per_cpu = as.integer(server_info$Memory %||% 1024),
+            time_limit = as.integer(server_info$TimeLimit %||% 60),
+            current_working_directory = server_info$WorkingDirectory %||% "/tmp",
+            environment = list(
+              FAASR_PAYLOAD = jsonlite::toJSON(faasr, auto_unbox = TRUE),
+              PATH = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+              USER = "ubuntu",
+              HOME = "/home/ubuntu"
+            )
+          )
+        )
+        
+        # Submit job
+        submit_url <- paste0(endpoint, "/slurm/", api_version, "/job/submit")
+        
+        headers <- c(
+          'Accept' = 'application/json',
+          'Content-Type' = 'application/json'
+        )
+        
+        if (!is.null(server_info$Token) && server_info$Token != "") {
+          headers['X-SLURM-USER-TOKEN'] <- server_info$Token
+        }
+        
+        response <- faasr_slurm_httr_request(
+          endpoint = submit_url,
+          method = "POST", 
+          headers = headers,
+          body = job_payload
+        )
+        
+        if (response$status_code %in% c(200, 201, 202)) {
+          job_info <- content(response)
+          job_id <- job_info$job_id %||% "unknown"
+          succ_msg <- paste0('{\"faasr_trigger\":\"SLURM: Successfully submitted job: ', 
+                             faasr$FunctionInvoke, ' (Job ID: ', job_id, ')\"}', "\n")
+          message(succ_msg)
+          faasr_log(succ_msg)
+        } else {
+          error_content <- content(response, "text")
+          err_msg <- paste0('{\"faasr_trigger\":\"SLURM: Error submitting job: ', 
+                            faasr$FunctionInvoke, ' - HTTP ', response$status_code, 
+                            ': ', error_content, '\"}', "\n")
+          message(err_msg)
+          faasr_log(err_msg)
+        }
+      }
+      
         )
       }
     }

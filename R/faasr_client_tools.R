@@ -46,6 +46,7 @@ faasr_register_workflow <- function(...){
   check <- faasr_register_workflow_openwhisk(faasr,cred,...)
   check <- faasr_register_workflow_github_actions(faasr,cred)
   check <- faasr_register_workflow_aws_lambda(faasr,cred,...)
+  check <- faasr_register_workflow_slurm(faasr,cred,...)
   check <- faasr_register_workflow_google_cloud(faasr,cred,...)
 }
 .faasr_user$operations$register_workflow <- faasr_register_workflow
@@ -153,6 +154,28 @@ faasr_collect_sys_env <- function(faasr, cred){
           cred[[cred_name_sc]] <- real_cred
         }
       }
+    }
+    
+    
+    else if (faasr$ComputeServers[[faas_cred]]$FaaSType=="SLURM"){
+      # Handle SLURM JWT token
+      cred_name <- faasr$ComputeServers[[faas_cred]]$Token
+      if (is.null(cred_name)){
+        cred_name <- paste0(faas_cred, "_TOKEN")
+      }
+      if (is.null(cred[[cred_name]])){
+        real_cred <- Sys.getenv(cred_name)
+        if (real_cred == ""){
+          #ask_cred <- askpass::askpass(paste0("Enter SLURM JWT token for ", cred_name, " (use 'scontrol token' to generate)"))
+          #ask_cred_list <- list(ask_cred)
+          #names(ask_cred_list) <- cred_name
+          #do.call(Sys.setenv, ask_cred_list)
+          #cred[[cred_name]] <- ask_cred
+          cred[[cred_name]] <- ""
+        } else{
+          cred[[cred_name]] <- real_cred
+        }
+    }
 
     # if it is GoogleCloud, use key types for "SecretKey"
     # if given cred_name(servername + key type) is empty, set it up
@@ -333,6 +356,14 @@ faasr <- function(json_path=NULL, env_path=NULL){
                 }
               }
               svc$json$ComputeServers[[faas_js]]$SecretKey <- paste0(faas_js,"_SECRET_KEY")
+            },
+            "SLURM"={
+              if (!is.null(svc$json$ComputeServers[[faas_js]]$Token)){
+                if (svc$json$ComputeServers[[faas_js]]$Token != paste0(faas_js,"_TOKEN")){
+                  svc$cred[[paste0(faas_js,"_TOKEN")]] <- svc$json$ComputeServers[[faas_js]]$Token
+                }
+              }
+              svc$json$ComputeServers[[faas_js]]$Token <- paste0(faas_js,"_TOKEN")
             }
     )
   }
@@ -527,7 +558,11 @@ faasr_invoke_workflow <- function(FunctionInvoke=NULL, ...){
          # If first action is GoogleCloud, use GoogleCloud
          "GoogleCloud"={
            faasr_workflow_invoke_google_cloud(faasr, cred, faas_name, actionname, ...)
-         })
+         },
+         "SLURM"={
+           faasr_workflow_invoke_slurm(faasr, cred, faas_name, actionname)
+         }
+         )
 }
 .faasr_user$operations$invoke_workflow <- faasr_invoke_workflow
 
