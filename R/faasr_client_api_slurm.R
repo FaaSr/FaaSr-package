@@ -285,7 +285,7 @@ faasr_slurm_create_job_script <- function(faasr, actionname) {
     "echo \"Using container runtime: $CONTAINER_CMD\"",
     "",
     "# Execute FaaSr container with payload",
-    "$CONTAINER_CMD run --rm \\",
+    "$CONTAINER_CMD run --rm --network=host \\",
     "  -e FAASR_PAYLOAD=\"$FAASR_PAYLOAD\" \\",
     paste0("  ", container_image, " \\"),
     "  /bin/bash -c 'cd /action && Rscript faasr_start_invoke_slurm.R'",
