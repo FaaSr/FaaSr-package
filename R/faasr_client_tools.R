@@ -166,12 +166,11 @@ faasr_collect_sys_env <- function(faasr, cred){
       if (is.null(cred[[cred_name]])){
         real_cred <- Sys.getenv(cred_name)
         if (real_cred == ""){
-          #ask_cred <- askpass::askpass(paste0("Enter SLURM JWT token for ", cred_name, " (use 'scontrol token' to generate)"))
-          #ask_cred_list <- list(ask_cred)
-          #names(ask_cred_list) <- cred_name
-          #do.call(Sys.setenv, ask_cred_list)
-          #cred[[cred_name]] <- ask_cred
-          cred[[cred_name]] <- ""
+          ask_cred <- askpass::askpass(paste0("Enter SLURM JWT token for ", cred_name, " (use 'scontrol token' to generate)"))
+          ask_cred_list <- list(ask_cred)
+          names(ask_cred_list) <- cred_name
+          do.call(Sys.setenv, ask_cred_list)
+          cred[[cred_name]] <- ask_cred
         } else{
           cred[[cred_name]] <- real_cred
         }

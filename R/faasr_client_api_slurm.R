@@ -124,10 +124,13 @@ faasr_register_workflow_slurm_check_connectivity <- function(server, faasr) {
   # Prepare headers
   headers <- c('Accept' = 'application/json')
   
-  # Add JWT token if available
-  #if (!is.null(server_info$Token) && server_info$Token != "") {
-    #headers['X-SLURM-USER-TOKEN'] <- server_info$Token
-  #}
+  # Add JWT token and username if available
+  if (!is.null(server_info$Token) && server_info$Token != "") {
+    headers['X-SLURM-USER-TOKEN'] <- server_info$Token
+    # Add username header - use configured username or default to 'ubuntu'
+    username <- server_info$UserName %||% "ubuntu"
+    headers['X-SLURM-USER-NAME'] <- username
+  }
   
   tryCatch({
     response <- faasr_slurm_httr_request(
@@ -217,10 +220,13 @@ faasr_workflow_invoke_slurm <- function(faasr, cred, faas_name, actionname) {
     'Content-Type' = 'application/json'
   )
   
-  # Add JWT token
-  #if (!is.null(server_info$Token) && server_info$Token != "") {
-    #headers['X-SLURM-USER-TOKEN'] <- server_info$Token
-  #}
+  # Add JWT token and username
+  if (!is.null(server_info$Token) && server_info$Token != "") {
+    headers['X-SLURM-USER-TOKEN'] <- server_info$Token
+    # Add username header - use configured username or default to 'ubuntu'  
+    username <- server_info$UserName %||% "ubuntu"
+    headers['X-SLURM-USER-NAME'] <- username
+  }
   
   response <- faasr_slurm_httr_request(
     endpoint = submit_url,
