@@ -357,23 +357,20 @@ faasr_trigger <- function(faasr) {
         
         # Prepare job payload
         job_payload <- list(
-          script = job_script,
-          job = list(
-            name = paste0("faasr-", invoke_next_function),
-            partition = server_info$Partition %||% "faasr",
-            minimum_nodes = as.integer(server_info$Nodes %||% 1),
-            tasks = as.integer(server_info$Tasks %||% 1),
-            cpus_per_task = as.integer(server_info$CPUsPerTask %||% 1),
-            memory_per_cpu = as.integer(server_info$Memory %||% 1024),
-            time_limit = as.integer(server_info$TimeLimit %||% 60),
-            current_working_directory = server_info$WorkingDirectory %||% "/tmp",
-            environment = list(
-              FAASR_PAYLOAD = jsonlite::toJSON(faasr, auto_unbox = TRUE),
-              PATH = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
-              USER = "ubuntu",
-              HOME = "/home/ubuntu"
+          "job" = list(  # Add quotes around "job"
+            "name" = paste0("faasr-", invoke_next_function),
+            "partition" = server_info$Partition %||% "faasr",
+            "nodes" = as.character(as.integer(server_info$Nodes %||% 1)),           # Convert to string
+            "tasks" = as.character(as.integer(server_info$Tasks %||% 1)),           # Convert to string
+            "cpus_per_task" = as.character(as.integer(server_info$CPUsPerTask %||% 1)), # Convert to string
+            "memory_per_cpu" = as.character(as.integer(server_info$Memory %||% 1024)),  # Convert to string
+            "time_limit" = as.character(as.integer(server_info$TimeLimit %||% 60)),     # Convert to string
+            "current_working_directory" = server_info$WorkingDirectory %||% "/tmp",
+            "environment" = list(
+              "FAASR_PAYLOAD" = jsonlite::toJSON(faasr, auto_unbox = TRUE, pretty = FALSE)  # Add pretty=FALSE
             )
-          )
+          ),
+          "script" = job_script  # Move s to end and add quotescript
         )
         
         # Submit job
@@ -390,6 +387,13 @@ faasr_trigger <- function(faasr) {
           username <- server_info$UserName %||% "ubuntu"
           headers['X-SLURM-USER-NAME'] <- username
         }
+        else {
+          # CHANGE 3: Add error handling for missing token
+          err_msg <- paste0('{\"faasr_trigger\":\"SLURM: No authentication token available for server ', next_server, '\"}', "\n")
+          message(err_msg)
+          faasr_log(err_msg)
+          next  # Skip this trigger instead of failing
+        }
         
         response <- faasr_slurm_httr_request(
           endpoint = submit_url,
@@ -399,19 +403,30 @@ faasr_trigger <- function(faasr) {
         )
         
         if (response$status_code %in% c(200, 201, 202)) {
-          job_info <- content(response)
-          job_id <- job_info$job_id %||% "unknown"
+          job_info <- httr::content(response, "parsed")
+          job_id <- job_info$job_id %||% 
+            job_info$jobId %||% 
+            job_info$id %||% 
+            (if(!is.null(job_info$job)) job_info$job$job_id else NULL) %||%
+            "unknown"
+          
           succ_msg <- paste0('{\"faasr_trigger\":\"SLURM: Successfully submitted job: ', 
                              faasr$FunctionInvoke, ' (Job ID: ', job_id, ')\"}', "\n")
           message(succ_msg)
           faasr_log(succ_msg)
         } else {
-          error_content <- content(response, "text")
+          error_content <- httr::content(response, "text")
           err_msg <- paste0('{\"faasr_trigger\":\"SLURM: Error submitting job: ', 
                             faasr$FunctionInvoke, ' - HTTP ', response$status_code, 
                             ': ', error_content, '\"}', "\n")
           message(err_msg)
           faasr_log(err_msg)
+          
+          if (response$status_code == 401) {
+            debug_msg <- paste0('{\"faasr_trigger\":\"SLURM: Authentication failed - check token validity and username\"}', "\n")
+            message(debug_msg)
+            faasr_log(debug_msg)
+          }
         }
       }
       

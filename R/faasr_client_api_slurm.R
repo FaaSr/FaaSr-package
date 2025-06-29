@@ -144,6 +144,8 @@ faasr_register_workflow_slurm_check_connectivity <- function(server, faasr) {
       return(TRUE)
     } else {
       err_msg <- paste0("SLURM connectivity test failed: HTTP ", response$status_code)
+      response_content <- content(response, "text")
+      err_msg <- paste0(err_msg, " - ", response_content)
       cli_alert_danger(err_msg)
       return(FALSE)
     }
@@ -220,13 +222,18 @@ faasr_workflow_invoke_slurm <- function(faasr, cred, faas_name, actionname) {
     'Content-Type' = 'application/json'
   )
   
-  # Add JWT token and username
+  # Add JWT token and username - BOTH are required
   if (!is.null(server_info$Token) && server_info$Token != "") {
     headers['X-SLURM-USER-TOKEN'] <- server_info$Token
-    # Add username header - use configured username or default to 'ubuntu'  
     username <- server_info$UserName %||% "ubuntu"
     headers['X-SLURM-USER-NAME'] <- username
+  } else {
+    cli_alert_danger("No SLURM token provided - authentication will fail")
   }
+  
+  # Debug logging
+  cat("Submitting job to:", submit_url, "\n")
+  cat("Token present:", !is.null(server_info$Token) && server_info$Token != "", "\n")
   
   response <- faasr_slurm_httr_request(
     endpoint = submit_url,
@@ -235,15 +242,41 @@ faasr_workflow_invoke_slurm <- function(faasr, cred, faas_name, actionname) {
     body = job_payload
   )
   
+  # Enhanced response handling
   if (response$status_code %in% c(200, 201, 202)) {
     job_info <- content(response)
-    job_id <- job_info$job_id %||% "unknown"
+    
+    # Better job ID extraction with debugging
+    job_id <- NULL
+    if (!is.null(job_info$job_id)) {
+      job_id <- job_info$job_id
+    } else if (!is.null(job_info$jobId)) {  # Alternative field name
+      job_id <- job_info$jobId
+    } else if (!is.null(job_info$id)) {  # Another alternative
+      job_id <- job_info$id
+    }
+    
+    if (is.null(job_id)) {
+      # Debug: Print entire response to understand structure
+      cat("Job ID not found in response. Full response:\n")
+      cat(jsonlite::toJSON(job_info, pretty = TRUE), "\n")
+      job_id <- "unknown"
+    }
+    
     succ_msg <- paste0("Successfully submitted SLURM job: ", actionname, ", Job ID: ", job_id)
     cli_alert_success(succ_msg)
   } else {
     error_content <- content(response, "text")
     err_msg <- paste0("Error submitting SLURM job: ", actionname, " - HTTP ", response$status_code, ": ", error_content)
     cli_alert_danger(err_msg)
+    
+    # Additional debugging for authentication errors
+    if (response$status_code == 401) {
+      cli_alert_danger("Authentication failed - check token validity and expiration")
+    } else if (response$status_code == 403) {
+      cli_alert_danger("Authorization failed - check user permissions")
+    }
+    
     stop(err_msg)
   }
 }
