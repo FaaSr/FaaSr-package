@@ -175,6 +175,24 @@ faasr_workflow_invoke_slurm <- function(faasr, cred, faas_name, actionname) {
   faasr_with_creds <- faasr_replace_values(faasr, cred)
   server_info <- faasr_with_creds$ComputeServers[[faas_name]]
   
+  token_validation <- faasr_validate_jwt_token(server_info$Token)
+  if (!token_validation$valid) {
+    err_msg <- paste0("SLURM token validation failed: ", token_validation$error)
+    cli::cli_alert_danger(err_msg)
+    stop(err_msg)
+  }
+  
+  tryCatch({
+    parts <- strsplit(server_info$Token, "\\.")[[1]]
+    payload <- parts[2]
+    payload <- paste0(payload, paste0(rep("=", 4 - (nchar(payload) %% 4)), collapse = ""))
+    decoded <- jsonlite::fromJSON(rawToChar(base64enc::base64decode(payload)))
+    exp_time <- as.POSIXct(decoded$exp, origin = "1970-01-01", tz = "UTC")
+    cli::cli_alert_info(paste0("Token expires at: ", format(exp_time)))
+  }, error = function(e) {
+    # Ignore token parsing errors for logging
+  })
+  
   endpoint <- server_info$Endpoint
   api_version <- server_info$APIVersion %||% "v0.0.40"
   if (!startsWith(endpoint, "http")) {

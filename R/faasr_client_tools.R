@@ -285,6 +285,87 @@ faasr_collect_sys_env <- function(faasr, cred){
 #' test <- faasr(json_path="json_path.json", env_path="env_path")
 #' }
 
+#' @title faasr_validate_jwt_token
+#' @description 
+#' Validates JWT tokens for SLURM and other services
+#' Checks token format, decodes payload, and verifies expiration
+#' @param token JWT token string to validate
+#' @return list with 'valid' (logical) and 'error' (character) fields
+#' @import jsonlite
+#' @import base64enc
+#' @keywords internal
+
+faasr_validate_jwt_token <- function(token) {
+  if (is.null(token) || token == "" || !startsWith(token, "eyJ")) {
+    return(list(valid = FALSE, error = "Invalid token format"))
+  }
+  
+  tryCatch({
+    # Decode JWT payload (second part)
+    parts <- strsplit(token, "\\.")[[1]]
+    if (length(parts) < 2) {
+      return(list(valid = FALSE, error = "Malformed JWT token"))
+    }
+    
+    payload <- parts[2]
+    # Add padding if necessary
+    payload <- paste0(payload, paste0(rep("=", 4 - (nchar(payload) %% 4)), collapse = ""))
+    
+    # Decode base64
+    decoded_bytes <- base64enc::base64decode(payload)
+    decoded_json <- rawToChar(decoded_bytes)
+    payload_data <- jsonlite::fromJSON(decoded_json)
+    
+    # Check expiration
+    if (!is.null(payload_data$exp)) {
+      current_time <- as.numeric(Sys.time())
+      if (current_time >= payload_data$exp) {
+        exp_time <- as.POSIXct(payload_data$exp, origin = "1970-01-01", tz = "UTC")
+        return(list(valid = FALSE, error = paste0("Token expired at ", exp_time)))
+      }
+    }
+    
+    return(list(valid = TRUE, error = NULL))
+    
+  }, error = function(e) {
+    return(list(valid = FALSE, error = paste0("Token validation error: ", e$message)))
+  })
+}
+
+#' @title faasr_check_token_expiration
+#' @description 
+#' Helper function to get token expiration time for display purposes
+#' @param token JWT token string
+#' @return POSIXct expiration time or NULL if cannot be determined
+#' @keywords internal
+
+faasr_check_token_expiration <- function(token) {
+  if (is.null(token) || token == "" || !startsWith(token, "eyJ")) {
+    return(NULL)
+  }
+  
+  tryCatch({
+    parts <- strsplit(token, "\\.")[[1]]
+    if (length(parts) < 2) return(NULL)
+    
+    payload <- parts[2]
+    payload <- paste0(payload, paste0(rep("=", 4 - (nchar(payload) %% 4)), collapse = ""))
+    
+    decoded_bytes <- base64enc::base64decode(payload)
+    decoded_json <- rawToChar(decoded_bytes)
+    payload_data <- jsonlite::fromJSON(decoded_json)
+    
+    if (!is.null(payload_data$exp)) {
+      return(as.POSIXct(payload_data$exp, origin = "1970-01-01", tz = "UTC"))
+    }
+    
+    return(NULL)
+    
+  }, error = function(e) {
+    return(NULL)
+  })
+}
+
 # faasr main function
 faasr <- function(json_path=NULL, env_path=NULL){
 

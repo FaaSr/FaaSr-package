@@ -352,6 +352,27 @@ faasr_trigger <- function(faasr) {
           endpoint <- paste0("http://", endpoint)
         }
         
+        token_validation <- faasr_validate_jwt_token(server_info$Token)
+        if (!token_validation$valid) {
+          err_msg <- paste0('{\"faasr_trigger\":\"SLURM: Token validation failed for ', 
+                            next_server, ' - ', token_validation$error, '\"}', "\n")
+          message(err_msg)
+          faasr_log(err_msg)
+          
+          # Mark workflow as failed due to authentication
+          faasr$FunctionResult <- "FAILED_AUTH"
+          stop(paste0("SLURM authentication failed: ", token_validation$error))
+        }
+        
+        username <- server_info$UserName %||% "ubuntu"
+        if (is.null(username) || username == "") {
+          err_msg <- paste0('{\"faasr_trigger\":\"SLURM: Username not configured for server ', 
+                            next_server, '\"}', "\n")
+          message(err_msg)
+          faasr_log(err_msg)
+          stop("SLURM username not configured")
+        }
+        
         # Create job script
         job_script <- faasr_slurm_create_job_script(faasr, invoke_next_function)
         
@@ -388,7 +409,6 @@ faasr_trigger <- function(faasr) {
           headers['X-SLURM-USER-NAME'] <- username
         }
         else {
-          # CHANGE 3: Add error handling for missing token
           err_msg <- paste0('{\"faasr_trigger\":\"SLURM: No authentication token available for server ', next_server, '\"}', "\n")
           message(err_msg)
           faasr_log(err_msg)
