@@ -179,6 +179,16 @@ faasr_workflow_invoke_slurm <- function(faasr, cred, faas_name, actionname) {
     stop(err_msg)
   }
   
+  # Validate username configuration
+  username <- server_info$UserName %||% "ubuntu"
+  if (is.null(username) || username == "") {
+    err_msg <- paste0('{\"SLURM: Username not configured for server ', 
+                      faas_name, '\"}', "\n")
+    #err_msg <- paste0("SLURM token validation failed: ", token_validation$error)
+    cli::cli_alert_danger(err_msg)
+    stop(err_msg)
+  }
+  
   tryCatch({
     parts <- strsplit(server_info$Token, "\\.")[[1]]
     payload <- parts[2]
@@ -208,25 +218,21 @@ faasr_workflow_invoke_slurm <- function(faasr, cred, faas_name, actionname) {
   time_limit <- as.integer(server_info$TimeLimit %||% 60)
   working_dir <- server_info$WorkingDirectory %||% "/tmp"
   
-  # Prepare job submission payload following SLURM REST API format
   job_payload <- list(
-    script = job_script,
-    job = list(
-      name = paste0("faasr-", actionname),
-      partition = partition,
-      minimum_nodes = nodes,
-      tasks = tasks,
-      cpus_per_task = cpus_per_task,
-      memory_per_cpu = memory_mb,
-      time_limit = time_limit,
-      current_working_directory = working_dir,
-      environment = list(
-        FAASR_PAYLOAD = jsonlite::toJSON(faasr_with_creds, auto_unbox = TRUE),
-        PATH = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
-        USER = "ubuntu",
-        HOME = "/home/ubuntu"
+    "job" = list(  # Add quotes around "job" like trigger
+      "name" = paste0("faasr-", actionname),
+      "partition" = server_info$Partition %||% "faasr",
+      "nodes" = as.character(as.integer(server_info$Nodes %||% 1)),           # Convert to string like trigger
+      "tasks" = as.character(as.integer(server_info$Tasks %||% 1)),           # Convert to string like trigger
+      "cpus_per_task" = as.character(as.integer(server_info$CPUsPerTask %||% 1)), # Convert to string like trigger
+      "memory_per_cpu" = as.character(as.integer(server_info$Memory %||% 1024)),  # Convert to string like trigger
+      "time_limit" = as.character(as.integer(server_info$TimeLimit %||% 60)),     # Convert to string like trigger
+      "current_working_directory" = server_info$WorkingDirectory %||% "/tmp",
+      "environment" = list(
+        "FAASR_PAYLOAD" = jsonlite::toJSON(faasr_with_creds, auto_unbox = TRUE, pretty = FALSE)  # Add pretty=FALSE like trigger
       )
-    )
+    ),
+    "script" = job_script  # Move script to end like trigger
   )
   
   # Submit job via REST API
@@ -261,6 +267,29 @@ faasr_workflow_invoke_slurm <- function(faasr, cred, faas_name, actionname) {
   if (response$status_code %in% c(200, 201, 202)) {
     job_info <- content(response)
     
+    
+    if (!is.null(job_info$errors) && length(job_info$errors) > 0) {
+      # Extract error details
+      error_details <- job_info$errors[[1]]
+      error_code <- error_details$error_code
+      error_message <- error_details$error
+      
+      # Handle specific SLURM error codes
+      if (error_code == 5005) {
+        err_msg <- paste0("SLURM Authentication Error: Invalid or expired token - ", error_message)
+        cli_alert_danger(err_msg)
+        stop(err_msg)
+      } else if (error_code %in% c(5001, 5002, 5003, 5004)) {
+        err_msg <- paste0("SLURM Authentication/Authorization Error (Code: ", error_code, "): ", error_message)
+        cli_alert_danger(err_msg)
+        stop(err_msg)
+      } else {
+        err_msg <- paste0("SLURM Error (Code: ", error_code, "): ", error_message)
+        cli_alert_danger(err_msg)
+        stop(err_msg)
+      }
+    }
+    
     # Better job ID extraction with debugging
     job_id <- NULL
     if (!is.null(job_info$job_id)) {
@@ -287,9 +316,11 @@ faasr_workflow_invoke_slurm <- function(faasr, cred, faas_name, actionname) {
     
     # Additional debugging for authentication errors
     if (response$status_code == 401) {
-      cli_alert_danger("Authentication failed - check token validity and expiration")
+      cli_alert_danger("HTTP 401: Authentication failed - check token validity and expiration")
     } else if (response$status_code == 403) {
-      cli_alert_danger("Authorization failed - check user permissions")
+      cli_alert_danger("HTTP 403: Authorization failed - check user permissions")
+    } else if (response$status_code == 400) {
+      cli_alert_danger("HTTP 400: Bad Request - check job payload format")
     }
     
     stop(err_msg)
