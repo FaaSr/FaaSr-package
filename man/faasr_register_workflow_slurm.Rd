@@ -2,21 +2,14 @@
 % Please edit documentation in R/faasr_client_api_slurm.R
 \name{faasr_register_workflow_slurm}
 \alias{faasr_register_workflow_slurm}
-\alias{\%||\%}
 \title{faasr_register_workflow_slurm}
 \usage{
-x \%||\% y
+faasr_register_workflow_slurm(faasr, cred)
 }
 \arguments{
 \item{faasr}{a list form of the JSON file}
 
 \item{cred}{a list form of the credentials}
-
-\item{memory}{an integer for the max size of memory in MB}
-
-\item{timeout}{an integer for the max length of timeout in minutes}
-
-\item{cpus}{an integer for the number of CPUs per task}
 }
 \description{
 Register workflow for SLURM cluster.

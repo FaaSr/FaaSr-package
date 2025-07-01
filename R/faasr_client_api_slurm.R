@@ -1,3 +1,6 @@
+# Helper function for null coalescing
+`%||%` <- function(x, y) if (is.null(x)) y else x
+
 #' @name faasr_register_workflow_slurm
 #' @title faasr_register_workflow_slurm
 #' @description 
@@ -6,18 +9,12 @@
 #' Verify connectivity to SLURM REST API endpoints.
 #' @param faasr a list form of the JSON file
 #' @param cred a list form of the credentials
-#' @param memory an integer for the max size of memory in MB
-#' @param timeout an integer for the max length of timeout in minutes
-#' @param cpus an integer for the number of CPUs per task
 #' @import httr
 #' @import cli
 #' @keywords internal
 #' 
 
-# Helper function for null coalescing
-`%||%` <- function(x, y) if (is.null(x)) y else x
-
-faasr_register_workflow_slurm <- function(faasr, cred, memory=1024, timeout=60, cpus=1) {
+faasr_register_workflow_slurm <- function(faasr, cred) {
   
   options(cli.progress_clear = FALSE)
   options(cli.spinner = "line")
