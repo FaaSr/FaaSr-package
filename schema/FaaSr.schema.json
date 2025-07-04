@@ -42,13 +42,27 @@
             "FunctionName":{"type":"string","minLength": 1},
             "Arguments":{"type":"object"},
             "InvokeNext":{
-            "type": ["string", "array"],
-            "items": {
-            "type": "string",
-            "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*(?:\\[(?:TRUE|FALSE|true|false|True|False)\\])?(?:\\([0-9]+\\))?$"
+              "type": ["string", "array"],
+              "items": {
+                "type": "string",
+                "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*(?:\\[(?:TRUE|FALSE|true|false|True|False)\\])?(?:\\([0-9]+\\))?$"
               }
             },
-            "Rank":{"type":"string"}
+            "Rank":{"type":"string"},
+            "Resources": {
+              "type": "object",
+              "description": "Resource requirements for this function",
+              "properties": {
+                "Nodes": {"type": "integer", "minimum": 1},
+                "Tasks": {"type": "integer", "minimum": 1}, 
+                "CPUsPerTask": {"type": "integer", "minimum": 1},
+                "Memory": {"type": "integer", "minimum": 1},
+                "TimeLimit": {"type": "integer", "minimum": 1},
+                "Partition": {"type": "string"},
+                "WorkingDirectory": {"type": "string"}
+              },
+              "additionalProperties": false
+            }
           },
           "required":["FaaSServer", "FunctionName"],
           "additionalProperties": false

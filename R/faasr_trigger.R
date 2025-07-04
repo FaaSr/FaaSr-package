@@ -376,22 +376,25 @@ faasr_trigger <- function(faasr) {
         # Create job script
         job_script <- faasr_slurm_create_job_script(faasr, invoke_next_function)
         
-        # Prepare job payload
+        # Get resource requirements for the next function
+        resource_config <- faasr_get_resource_requirements(faasr, invoke_next_function, server_info)
+        
+        # Prepare job payload with resource requirements
         job_payload <- list(
-          "job" = list(  # Add quotes around "job"
+          "job" = list(
             "name" = paste0("faasr-", invoke_next_function),
-            "partition" = server_info$Partition %||% "faasr",
-            "nodes" = as.character(as.integer(server_info$Nodes %||% 1)),           # Convert to string
-            "tasks" = as.character(as.integer(server_info$Tasks %||% 1)),           # Convert to string
-            "cpus_per_task" = as.character(as.integer(server_info$CPUsPerTask %||% 1)), # Convert to string
-            "memory_per_cpu" = as.character(as.integer(server_info$Memory %||% 1024)),  # Convert to string
-            "time_limit" = as.character(as.integer(server_info$TimeLimit %||% 60)),     # Convert to string
-            "current_working_directory" = server_info$WorkingDirectory %||% "/tmp",
+            "partition" = resource_config$partition,
+            "nodes" = as.character(resource_config$nodes),
+            "tasks" = as.character(resource_config$tasks),
+            "cpus_per_task" = as.character(resource_config$cpus_per_task),
+            "memory_per_cpu" = as.character(resource_config$memory_mb),
+            "time_limit" = as.character(resource_config$time_limit),
+            "current_working_directory" = resource_config$working_dir,
             "environment" = list(
-              "FAASR_PAYLOAD" = jsonlite::toJSON(faasr, auto_unbox = TRUE, pretty = FALSE)  # Add pretty=FALSE
+              "FAASR_PAYLOAD" = jsonlite::toJSON(faasr, auto_unbox = TRUE, pretty = FALSE)
             )
           ),
-          "script" = job_script  # Move s to end and add quotescript
+          "script" = job_script
         )
         
         # Submit job
