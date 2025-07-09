@@ -12,6 +12,7 @@
 #' @import jsonlite
 #' @import httr
 #' @importFrom "paws.compute" "lambda"
+#' @importFrom "base64enc" "base64encode"
 #' @export
 #' @examples
 #' # This function can be run only in the container
@@ -118,7 +119,6 @@ faasr_trigger <- function(faasr) {
             
             #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             # Base64 encode the JSON payload before sending
-            library(base64enc)
             encoded_args <- base64encode(charToRaw(args))
             #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 

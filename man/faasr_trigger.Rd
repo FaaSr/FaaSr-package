@@ -18,6 +18,7 @@ Currently supports:
 * Apache OpenWhisk
 * AWS Lambda
 * GitHub Actions
+* Google Cloud Platform
 }
 \examples{
 # This function can be run only in the container
