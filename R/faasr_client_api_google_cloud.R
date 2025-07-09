@@ -442,6 +442,7 @@ faasr_register_workflow_google_cloud_create_action <- function(ssl, actionname, 
 #' @param ssl SSL CA check; for the SSL certificate: FALSE
 #' @import httr
 #' @import cli
+#' @importFrom "base64enc" "base64encode"
 #' @keywords internal
 
 faasr_workflow_invoke_google_cloud <- function(faasr, cred, faas_name, actionname, ssl=TRUE){
@@ -452,7 +453,6 @@ faasr_workflow_invoke_google_cloud <- function(faasr, cred, faas_name, actionnam
 
   # Prepare the args from the faasr object
   args <- jsonlite::toJSON(faasr, auto_unbox = TRUE)
-  library(base64enc)
   encoded_args <- base64encode(charToRaw(args))
 
   # Build the body for the HTTP request without specifying the image
