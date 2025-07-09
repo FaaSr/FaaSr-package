@@ -46,7 +46,7 @@ faasr_register_workflow <- function(...){
   check <- faasr_register_workflow_openwhisk(faasr,cred,...)
   check <- faasr_register_workflow_github_actions(faasr,cred)
   check <- faasr_register_workflow_aws_lambda(faasr,cred,...)
-  
+  check <- faasr_register_workflow_google_cloud(faasr,cred,...)
 }
 .faasr_user$operations$register_workflow <- faasr_register_workflow
 
@@ -151,6 +151,28 @@ faasr_collect_sys_env <- function(faasr, cred){
           cred[[cred_name_sc]] <- ask_cred
         } else{
           cred[[cred_name_sc]] <- real_cred
+        }
+      }
+
+    # if it is GoogleCloud, use key types for "SecretKey"
+    # if given cred_name(servername + key type) is empty, set it up
+    # if "cred" doesn't have a value, use "Sys.getenv" to get the real key.
+    # if "Sys.getenv" value is empty, return an error message
+    } else if (faasr$ComputeServers[[faas_cred]]$FaaSType=="GoogleCloud"){
+      cred_name_ac <- faasr$ComputeServers[[faas_cred]]$SecretKey
+      if (is.null(cred_name_ac)){
+        cred_name_ac <- paste0(faas_cred, "_SECRET_KEY")
+      }
+      if (is.null(cred[[cred_name_ac]])){
+        real_cred <- Sys.getenv(cred_name_ac)
+        if (real_cred == ""){
+          ask_cred <- askpass::askpass(paste0("Enter keys for ", cred_name_ac))
+          ask_cred_list <- list(ask_cred)
+          names(ask_cred_list) <- cred_name_ac
+          do.call(Sys.setenv, ask_cred_list)
+          cred[[cred_name_ac]] <- ask_cred
+        } else{
+          cred[[cred_name_ac]] <- real_cred
         }
       }
     }
@@ -301,6 +323,16 @@ faasr <- function(json_path=NULL, env_path=NULL){
                 }
               }
               svc$json$ComputeServers[[faas_js]]$API.key <- paste0(faas_js,"_API_KEY")
+            },
+            # If it is GoogleCloud and key is given by JSON file, replace it into representative(servername+token)
+            # Real key will be stored in the cred
+            "GoogleCloud"={
+              if (!is.null(svc$json$ComputeServers[[faas_js]]$SecretKey)){
+                if (svc$json$ComputeServers[[faas_js]]$SecretKey != paste0(faas_js,"_SECRET_KEY")){
+                  svc$cred[[paste0(faas_js,"_SECRET_KEY")]] <- svc$json$ComputeServers[[faas_js]]$SecretKey
+                }
+              }
+              svc$json$ComputeServers[[faas_js]]$SecretKey <- paste0(faas_js,"_SECRET_KEY")
             }
     )
   }
@@ -324,16 +356,38 @@ faasr <- function(json_path=NULL, env_path=NULL){
   }
   
   # if env_path is given, it would read the envrionment values from the path 
-  if (!is.null(env_path)){
-    envs <- readLines(env_path, warn=FALSE)
+  if (!is.null(env_path)) {
+    # Read all lines from the environment file
+    envs <- readLines(env_path, warn = FALSE)
     
-    for (env in envs){
-      # each key:value pair is divided by "=", so it should parse them.
-      # save the key:value as a list
-      env_parts <- strsplit(env, "=")
-      if (length(env_parts[[1]]) == 2) {
-        env_key <- trimws(gsub("[\"]", "", env_parts[[1]][1]))
-        env_value <- trimws(gsub("[\"\",]", "", env_parts[[1]][2]))
+    for (env in envs) {
+      # Skip empty lines or comments
+      if (grepl("^\\s*$", env) || grepl("^\\s*#", env)) next
+
+      # Find the position of the first '=' to split key and value
+      split_idx <- regexpr("=", env)
+      if (split_idx > 0) {
+        # Extract raw key and raw value substrings
+        raw_key <- substr(env, 1, split_idx - 1)
+        raw_val <- substr(env, split_idx + 1, nchar(env))
+
+        # Clean the key:
+        # - trim whitespace
+        # - remove surrounding quotes (single or double)
+        env_key <- gsub('^["\']|["\']$', '', trimws(raw_key))
+
+        # Clean the value:
+        env_value <- trimws(raw_val)
+
+        # Remove surrounding double quotes from value if present
+        if (startsWith(env_value, "\"") && endsWith(env_value, "\"")) {
+          env_value <- substr(env_value, 2, nchar(env_value) - 1)
+        }
+
+        # Convert escaped '\\n' sequences into real newline characters
+        env_value <- gsub("\\\\n", "\n", env_value)
+
+        # Store the parsed key-value pair into the credentials list
         svc$cred[[env_key]] <- env_value
       }
     }
@@ -469,6 +523,10 @@ faasr_invoke_workflow <- function(FunctionInvoke=NULL, ...){
          # If first action is openwhisk, use ibmcloud
          "OpenWhisk"={
            faasr_workflow_invoke_openwhisk(faasr, cred, faas_name, actionname, ...)
+         },
+         # If first action is GoogleCloud, use GoogleCloud
+         "GoogleCloud"={
+           faasr_workflow_invoke_google_cloud(faasr, cred, faas_name, actionname, ...)
          })
 }
 .faasr_user$operations$invoke_workflow <- faasr_invoke_workflow
@@ -524,6 +582,8 @@ faasr_set_workflow_timer <- function(cron, target=NULL, ...){
     faasr_set_workflow_timer_ld(faasr,cred,target,cron)
   } else if (type == "OpenWhisk"){
     faasr_set_workflow_timer_ow(faasr,cred,target,cron, ...)
+  } else if (type == "GoogleCloud"){
+    faasr_set_workflow_timer_gcp(faasr,cred,target,cron, ...)
   }
 }
 .faasr_user$operations$set_workflow_timer <- faasr_set_workflow_timer
@@ -573,6 +633,8 @@ faasr_unset_workflow_timer <- function(target=NULL,...){
     faasr_set_workflow_timer_ld(faasr,cred, target, cron=NULL, unset=TRUE)
   } else if (type == "OpenWhisk"){
     faasr_set_workflow_timer_ow(faasr,cred,target, cron=NULL, unset=TRUE,...)
+  } else if (type == "GoogleCloud"){
+    faasr_set_workflow_timer_gcp(faasr,cred,target, cron=NULL, unset=TRUE,...)
   }
 }
 .faasr_user$operations$unset_workflow_timer <- faasr_unset_workflow_timer

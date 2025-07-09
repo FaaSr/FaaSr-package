@@ -1,7 +1,7 @@
 Type: Package
 Package: FaaSr
 Title: FaaS (Function as a Service) Package
-Version: 1.4.4
+Version: 1.5.1
 Authors@R: c(person("Figueiredo", "Renato", role = c("aut", "cre", "ths", "cph"),
                     email = "renato.figueiredo@oregonstate.edu",
                     comment = c(ORCID = "0000-0001-9841-6060")),
@@ -27,6 +27,7 @@ Description: Allows users to create and deploy the workflow with multiple functi
     Apache OpenWhisk <https://openwhisk.apache.org/>
     GitHub Actions <https://github.com/features/actions>
     Amazon Web Services (AWS) Lambda <https://aws.amazon.com/lambda/>
+    Google Cloud Platform (GCP) Cloud Run <https://cloud.google.com/run>
     Supported cloud data storage for persistent storage:
     Amazon Web Services (AWS) Simple Storage Service (S3) <https://aws.amazon.com/s3/>.
 License: MIT + file LICENSE
