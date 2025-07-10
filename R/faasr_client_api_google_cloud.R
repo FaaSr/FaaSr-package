@@ -46,6 +46,9 @@ faasr_register_workflow_google_cloud <- function(faasr, cred, ssl=TRUE, memory=1
 
     response <- faasr_gcp_httr_request(faasr, server, "/jobs", type="GET", ssl=ssl)
 
+    message("response")
+    message(response)
+
     if (response$status_code==200 || response$status_code==202){
         all_gcloud_jobs <- content(response)$jobs
         succ_msg <- paste0("All exising gcloud jobs fetched: ", length(content(response)$jobs), " jobs")
