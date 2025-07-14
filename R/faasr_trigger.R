@@ -418,11 +418,11 @@ faasr_refresh_gcp_accesskey <- function(faasr, server){
     faasr$ComputeServers[[server]]$AccessKey <- token_data$access_token
     succ_msg <- paste0("Successfully updated access key")
     message(succ_msg)
-    faasr_log(succ_msg)
+    #faasr_log(succ_msg)
   } else {
     err_msg <- paste0("Error in creating access key using JWT.")
     message(err_msg)
-    faasr_log(err_msg)
+    #faasr_log(err_msg)
     stop()
   }
   return(faasr)
