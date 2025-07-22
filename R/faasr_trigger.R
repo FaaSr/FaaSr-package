@@ -340,7 +340,119 @@ faasr_trigger <- function(faasr) {
               message(err_msg)
               faasr_log(err_msg)
             }
+        },
+      
+      "SLURM"={
+        # SLURM REST API handling
+        server_info <- faasr$ComputeServers[[next_server]]
+        api_version <- server_info$APIVersion %||% "v0.0.37"
+        endpoint <- server_info$Endpoint
+        
+        if (!startsWith(endpoint, "http")) {
+          endpoint <- paste0("http://", endpoint)
         }
+        
+        token_validation <- faasr_validate_jwt_token(server_info$Token)
+        if (!token_validation$valid) {
+          err_msg <- paste0('{\"faasr_trigger\":\"SLURM: Token validation failed for ', 
+                            next_server, ' - ', token_validation$error, '\"}', "\n")
+          message(err_msg)
+          faasr_log(err_msg)
+          
+          # Mark workflow as failed due to authentication
+          faasr$FunctionResult <- "FAILED_AUTH"
+          stop(paste0("SLURM authentication failed: ", token_validation$error))
+        }
+        
+        username <- server_info$UserName %||% "ubuntu"
+        if (is.null(username) || username == "") {
+          err_msg <- paste0('{\"faasr_trigger\":\"SLURM: Username not configured for server ', 
+                            next_server, '\"}', "\n")
+          message(err_msg)
+          faasr_log(err_msg)
+          stop("SLURM username not configured")
+        }
+        
+        # Create job script
+        job_script <- faasr_slurm_create_job_script(faasr, invoke_next_function)
+        
+        # Get resource requirements for the next function
+        resource_config <- faasr_get_resource_requirements(faasr, invoke_next_function, server_info)
+        
+        # Prepare job payload with resource requirements
+        job_payload <- list(
+          "job" = list(
+            "name" = paste0("faasr-", invoke_next_function),
+            "partition" = resource_config$partition,
+            "nodes" = as.character(resource_config$nodes),
+            "tasks" = as.character(resource_config$tasks),
+            "cpus_per_task" = as.character(resource_config$cpus_per_task),
+            "memory_per_cpu" = as.character(resource_config$memory_mb),
+            "time_limit" = as.character(resource_config$time_limit),
+            "current_working_directory" = resource_config$working_dir,
+            "environment" = list(
+              "FAASR_PAYLOAD" = jsonlite::toJSON(faasr, auto_unbox = TRUE, pretty = FALSE)
+            )
+          ),
+          "script" = job_script
+        )
+        
+        # Submit job
+        submit_url <- paste0(endpoint, "/slurm/", api_version, "/job/submit")
+        
+        headers <- c(
+          'Accept' = 'application/json',
+          'Content-Type' = 'application/json'
+        )
+        
+        if (!is.null(server_info$Token) && server_info$Token != "") {
+          headers['X-SLURM-USER-TOKEN'] <- server_info$Token
+          # Add username header - use configured username or default to 'ubuntu'
+          username <- server_info$UserName %||% "ubuntu"
+          headers['X-SLURM-USER-NAME'] <- username
+        }
+        else {
+          err_msg <- paste0('{\"faasr_trigger\":\"SLURM: No authentication token available for server ', next_server, '\"}', "\n")
+          message(err_msg)
+          faasr_log(err_msg)
+          next  # Skip this trigger instead of failing
+        }
+        
+        response <- faasr_slurm_httr_request(
+          endpoint = submit_url,
+          method = "POST", 
+          headers = headers,
+          body = job_payload
+        )
+        
+        if (response$status_code %in% c(200, 201, 202)) {
+          job_info <- httr::content(response, "parsed")
+          job_id <- job_info$job_id %||% 
+            job_info$jobId %||% 
+            job_info$id %||% 
+            (if(!is.null(job_info$job)) job_info$job$job_id else NULL) %||%
+            "unknown"
+          
+          succ_msg <- paste0('{\"faasr_trigger\":\"SLURM: Successfully submitted job: ', 
+                             faasr$FunctionInvoke, ' (Job ID: ', job_id, ')\"}', "\n")
+          message(succ_msg)
+          faasr_log(succ_msg)
+        } else {
+          error_content <- httr::content(response, "text")
+          err_msg <- paste0('{\"faasr_trigger\":\"SLURM: Error submitting job: ', 
+                            faasr$FunctionInvoke, ' - HTTP ', response$status_code, 
+                            ': ', error_content, '\"}', "\n")
+          message(err_msg)
+          faasr_log(err_msg)
+          
+          if (response$status_code == 401) {
+            debug_msg <- paste0('{\"faasr_trigger\":\"SLURM: Authentication failed - check token validity and username\"}', "\n")
+            message(debug_msg)
+            faasr_log(debug_msg)
+          }
+        }
+      }
+      
         )
       }
     }
